@@ -1,0 +1,39 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# peppwR
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+The goal of peppwR is to carry out power analysis in phosphopeptide data
+
+## Installation
+
+You can install the development version of peppwR from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("TeamMacLean/peppwR")
+```
+
+
+```{r, eval=FALSE, example}
+library(peppwR)
+vignette("find-fits")
+```
+
+
