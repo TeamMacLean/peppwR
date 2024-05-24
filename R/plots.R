@@ -1,3 +1,14 @@
+
+#' Fill Scale for Distributions
+#'
+#' @description This generates a fill scale for distributions using the Set3 palette from RColorBrewer.
+#'
+#' @param name A character string specifying the name of the fill scale.
+#'
+#' @return A ggplot2 scale fill manual object.
+#'
+#'
+#' @export
 fill_scale <- function(name = "name"){
   cols <- RColorBrewer::brewer.pal(length(avail_dists()), "Set3")
   names(cols) <- d2n(avail_dists())
@@ -5,6 +16,17 @@ fill_scale <- function(name = "name"){
 }
 
 
+
+#' Plot Best Fitted Models
+#'
+#' @description This plots the best-fitted models based on Log-Likelihood and AIC from the fits data frame.
+#'
+#' @param fits_df A data frame containing the fit results.
+#' @param fit_col A character string specifying the column name that contains the nested fit results. Default is "fits".
+#'
+#' @return A ggplot object showing the best-fitted models.
+#'
+#' @export
 plot_best <- function(fits_df, fit_col="fits") {
   #TODO check and test df has fit_col 'fits'
 
@@ -49,6 +71,17 @@ plot_best <- function(fits_df, fit_col="fits") {
 }
 
 
+
+#' Plot Failed Models
+#'
+#' @description This plots the count of failed model fits from the fits data frame.
+#'
+#' @param fits_df A data frame containing the fit results.
+#' @param fit_col A character string specifying the column name that contains the nested fit results. Default is "fits".
+#'
+#' @return A ggplot object showing the count of failed models.
+#'
+#' @export
 plot_failed <- function(fits_df, fit_col = "fits"){
 
   if (! fit_col %in% colnames(fits_df)){
@@ -79,6 +112,17 @@ plot_failed <- function(fits_df, fit_col = "fits"){
 
 }
 
+
+
+#' Fake Legend
+#'
+#' @description This generates a fake legend for the distribution plots.
+#'
+#' @param name A character string specifying the name of the legend. Default is "Dist".
+#'
+#' @return A ggplot2 legend object.
+#'
+#' @export
 fake_leg <- function(name="Dist") {
   p <- data.frame(
     dist = d2n(avail_dists()),
@@ -93,6 +137,20 @@ fake_leg <- function(name="Dist") {
     cowplot::get_legend(p)
 }
 
+
+
+
+#' Evaluate Distributions
+#'
+#' @description This evaluates and plots the best-fitted and failed models from the fits data frame.
+#'
+#' @param fits_df A data frame containing the fit results.
+#'
+#' @param fit_col A character string specifying the column name that contains the nested fit results. Default is "fits".
+#'
+#' @return A ggplot object showing the evaluation of fitted models.
+#'
+#' @export
 evaldist <- function(fits_df, fit_col="fits"){
   a <- plot_best(fits_df, fit_col = fit_col)
   b <- plot_failed(fits_df, fit_col=fit_col)
