@@ -1,5 +1,11 @@
+^renv$
+^renv\.lock$
+^\.Rprofile$
 ^peppwR\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
 ^\.github$
+^CLAUDE\.md$
+^for_CLAUDE\.md$
+^semi-autonomous-feature-development\.md$

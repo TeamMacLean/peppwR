@@ -5,3 +5,8 @@
 .DS_Store
 .quarto
 inst/doc
+
+# renv - track lockfile and activate.R, ignore library
+renv/library/
+renv/staging/
+renv/sandbox/
