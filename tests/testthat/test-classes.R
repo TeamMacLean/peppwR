@@ -44,8 +44,6 @@ test_that("validate_peppwr_fits catches invalid objects", {
 })
 
 test_that("print.peppwr_fits outputs summary", {
-  skip("Implement after new_peppwr_fits works")
-
   # Create a valid peppwr_fits object
   fits <- new_peppwr_fits(
     data = tibble::tibble(id = "pep1", group = "A", data = list(tibble::tibble(value = 1:10))),
@@ -106,8 +104,6 @@ test_that("validate_peppwr_power catches invalid objects", {
 })
 
 test_that("print.peppwr_power shows clear answer for aggregate mode", {
-  skip("Implement after new_peppwr_power works")
-
   power_result <- new_peppwr_power(
     mode = "aggregate",
     question = "power",
@@ -128,8 +124,6 @@ test_that("print.peppwr_power shows clear answer for aggregate mode", {
 })
 
 test_that("print.peppwr_power shows clear answer for sample_size question", {
-  skip("Implement after new_peppwr_power works")
-
   power_result <- new_peppwr_power(
     mode = "aggregate",
     question = "sample_size",

@@ -99,8 +99,6 @@ test_that("fit_distributions stores original call", {
 })
 
 test_that("plot.peppwr_fits returns ggplot object", {
-  skip("Implement after fit_distributions works")
-
   test_data <- tibble::tibble(
     peptide = rep(c("pep1", "pep2", "pep3"), each = 20),
     condition = rep("control", 60),
@@ -124,8 +122,6 @@ test_that("plot.peppwr_fits returns ggplot object", {
 })
 
 test_that("plot.peppwr_fits shows distribution summary", {
-  skip("Implement after fit_distributions works")
-
   test_data <- tibble::tibble(
     peptide = rep(c("pep1", "pep2"), each = 20),
     condition = rep("control", 40),

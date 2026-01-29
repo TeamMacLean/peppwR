@@ -160,44 +160,48 @@ test_that("power_analysis works with lognormal distribution", {
 })
 
 test_that("power increases with sample size", {
+  set.seed(123)
   power_n5 <- power_analysis(
     distribution = "norm",
     params = list(mean = 100, sd = 10),
     effect_size = 1.5,
     n_per_group = 5,
     find = "power",
-    n_sim = 200
+    n_sim = 500
   )
 
+  set.seed(123)
   power_n20 <- power_analysis(
     distribution = "norm",
     params = list(mean = 100, sd = 10),
     effect_size = 1.5,
     n_per_group = 20,
     find = "power",
-    n_sim = 200
+    n_sim = 500
   )
 
   expect_true(power_n20$answer > power_n5$answer)
 })
 
 test_that("power increases with effect size", {
+  set.seed(456)
   power_small <- power_analysis(
     distribution = "norm",
     params = list(mean = 100, sd = 10),
     effect_size = 1.2,
     n_per_group = 10,
     find = "power",
-    n_sim = 200
+    n_sim = 500
   )
 
+  set.seed(456)
   power_large <- power_analysis(
     distribution = "norm",
     params = list(mean = 100, sd = 10),
     effect_size = 3,
     n_per_group = 10,
     find = "power",
-    n_sim = 200
+    n_sim = 500
   )
 
   expect_true(power_large$answer > power_small$answer)
