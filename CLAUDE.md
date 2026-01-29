@@ -215,14 +215,47 @@ Implementation order with dependencies:
 18. **`test_bayes_t()`** - Bayes factor t-test (via BayesFactor)
 19. **`test_rankprod()`** - Rank products implementation
 
-### Phase 8: Polish
+### Phase 8: Polish (COMPLETE)
 20. **`summary()` methods** - Detailed output for both classes
-21. **Vignette** - User guide with worked examples
-22. **pkgdown site** - Documentation website
+21. **Vignettes** - Three comprehensive vignettes (getting-started, power-analysis-workflow, benchmarking)
 
 ---
 
-Each item is a candidate for the TDD → Ralph Loop workflow. Items 1-16 are core v1, 17-22 are enhancements.
+## v2 Feature Phases
+
+See `feature_plan_v2.md` for detailed specifications.
+
+### Phase A: Diagnostic Plots
+- `plot_density_overlay()` - Observed histogram + fitted density curve
+- `plot_qq()` - QQ plots for goodness-of-fit
+- `plot_power_heatmap()` - N × effect size lookup grid
+- `plot_power_vs_effect()` - Sensitivity at fixed N
+- `plot_param_distribution()` - Fitted params across peptidome
+
+### Phase B: Empirical Bootstrap
+- `simulate_empirical()` - Bootstrap resample from observed data
+- `run_power_sim_empirical()` - Power sim using bootstrap
+- Implement `on_fit_failure = "empirical"` (currently stubbed)
+
+### Phase C: Missing Data Handling
+**Philosophy: Track and model missingness, never impute**
+
+- `compute_missingness()` - Calculate NA rate, MNAR score, MNAR p-value
+- Extend `peppwr_fits` with `missingness` slot
+- MNAR detection (Missing Not At Random - when low values systematically missing)
+- `simulate_with_missingness()` - Incorporate NA rates into simulations
+- `plot_missingness()` - NA rate and MNAR score distributions
+
+### Phase D: FDR-Aware Mode
+- `run_power_sim_fdr()` - Whole-peptidome simulation with BH correction
+- Add `apply_fdr`, `prop_null`, `fdr_threshold` params to `power_analysis.peppwr_fits()`
+- User-configurable `prop_null` (default 0.9 = 90% true nulls)
+
+**Dependencies**: Phase C should complete before Phase D
+
+---
+
+Each item is a candidate for the TDD → Ralph Loop workflow.
 
 ## Development
 
