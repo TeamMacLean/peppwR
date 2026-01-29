@@ -1,0 +1,195 @@
+---
+title: "Getting Started with peppwR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with peppwR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Introduction
+
+peppwR helps researchers answer power analysis questions for phosphoproteomics experiments:
+
+1. **Sample size**: "What sample size do I need for 80% power to detect a 2-fold change?"
+2. **Power**: "With N=6 per group, what's my power to detect a 2-fold change?"
+3. **Effect size**: "With N=6 and 80% power, what's the minimum detectable effect?"
+
+This vignette demonstrates a minimal workflow to get you from zero to power estimates.
+
+## Installation
+
+```{r eval=FALSE}
+# From GitHub
+devtools::install_github("danmaclean/peppwR")
+```
+
+## Setup
+
+```{r setup}
+library(peppwR)
+```
+
+## Generate Synthetic Pilot Data
+
+Let's create realistic phosphopeptide abundance data: 100 peptides, 2 conditions (control/treatment), 4 replicates each. We'll use gamma distributions typical of proteomics data.
+
+```{r generate-data}
+set.seed(42)
+
+# Generate peptide-level parameters
+n_peptides <- 100
+n_per_group <- 4
+
+peptide_params <- tibble::tibble(
+  peptide_id = paste0("pep_", sprintf("%04d", 1:n_peptides)),
+  # Shape parameter: 1.5-5 (lower = more skewed)
+  shape = runif(n_peptides, 1.5, 5),
+  # Rate parameter: scaled to give realistic abundances
+  rate = runif(n_peptides, 0.01, 0.1)
+)
+
+# Generate observations for each peptide
+pilot_data <- peptide_params |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    data = list(tibble::tibble(
+      condition = rep(c("control", "treatment"), each = n_per_group),
+      replicate = rep(1:n_per_group, 2),
+      abundance = rgamma(n_per_group * 2, shape = shape, rate = rate)
+    ))
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::select(peptide_id, data) |>
+  tidyr::unnest(data)
+
+# Preview the data
+head(pilot_data, 12)
+```
+
+## Fit Distributions
+
+Use `fit_distributions()` to determine which statistical distributions best describe your peptide abundance data:
+
+```{r fit-distributions}
+fits <- fit_distributions(
+  pilot_data,
+  id = "peptide_id",
+  group = "condition",
+  value = "abundance"
+)
+
+print(fits)
+```
+
+The output shows how many peptides are best fit by each distribution. This helps you understand the statistical properties of your data.
+
+### Visualize Distribution Fits
+
+```{r plot-fits, fig.height=6}
+plot(fits)
+```
+
+The plot shows the count of best-fit distributions by two metrics:
+- **AIC** (Akaike Information Criterion): Balances fit quality with model complexity
+- **LogLikelihood**: Pure goodness-of-fit measure
+
+When these metrics agree, you can be confident about the distribution choice.
+
+## Power Analysis - Aggregate Mode
+
+If you don't have pilot data, or want a quick ballpark estimate, use **aggregate mode**. You specify an assumed distribution and parameters.
+
+### Finding Required Sample Size
+
+"How many samples do I need per group to achieve 80% power for detecting a 2-fold change?"
+
+```{r aggregate-sample-size}
+result_n <- power_analysis(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 1000
+)
+
+print(result_n)
+```
+
+```{r plot-aggregate-sample-size, fig.height=4}
+plot(result_n)
+```
+
+The plot shows the power curve with your target power and the recommended sample size highlighted.
+
+### Finding Power at Fixed N
+
+"What's my power to detect a 2-fold change with N=6 per group?"
+
+```{r aggregate-power}
+result_power <- power_analysis(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 1000
+)
+
+print(result_power)
+```
+
+## Power Analysis - Per-Peptide Mode
+
+When you have pilot data, use **per-peptide mode** for more accurate, peptide-specific power estimates. This mode:
+1. Uses the fitted distribution for each peptide
+2. Simulates power individually
+3. Reports what proportion of your peptidome reaches target power
+
+```{r per-peptide-analysis}
+result_pp <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+print(result_pp)
+```
+
+```{r plot-per-peptide, fig.height=4}
+plot(result_pp)
+```
+
+This plot shows what percentage of peptides achieve your target power at each sample size. The 50% line indicates where the majority of peptides are well-powered.
+
+### Interpreting Per-Peptide Results
+
+Unlike aggregate mode, per-peptide mode acknowledges that **not all peptides behave the same**. Some peptides may require more samples due to higher variance, while others achieve target power with fewer samples.
+
+The "% of peptides at target power" metric helps you understand:
+- At what N do most peptides become well-powered?
+- What fraction of peptides will remain underpowered even with larger samples?
+
+## Summary
+
+| Mode | When to Use | Output |
+|------|-------------|--------|
+| Aggregate | No pilot data, quick estimate | Single power/N estimate |
+| Per-peptide | Have pilot data | Distribution of power across peptidome |
+
+## Next Steps
+
+- **Power Analysis Workflow**: See `vignette("power-analysis-workflow")` for detailed guidance on both modes, all three power questions, and statistical test options.
+- **Benchmarking**: See `vignette("benchmarking")` for performance characteristics with large datasets.

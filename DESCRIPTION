@@ -23,7 +23,8 @@ Imports:
     tibble,
     tidyr,
     univariateML
-Suggests: 
+Suggests:
+    bench,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)

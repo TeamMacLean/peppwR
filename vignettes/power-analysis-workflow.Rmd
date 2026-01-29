@@ -1,0 +1,492 @@
+---
+title: "Power Analysis Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Power Analysis Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup}
+library(peppwR)
+```
+
+## Introduction
+
+peppwR addresses three fundamental power analysis questions:
+
+1. **Sample size**: "What sample size do I need to achieve target power?"
+2. **Power**: "What power do I have at a given sample size?"
+3. **Effect size**: "What's the minimum detectable effect at given power and sample size?"
+
+The package offers two modes of analysis:
+
+| Mode | Input | Use Case |
+|------|-------|----------|
+| **Aggregate** | Distribution + parameters | No pilot data; quick estimates |
+| **Per-peptide** | Pilot data via `peppwr_fits` | Realistic, peptide-specific estimates |
+
+## Aggregate Mode Deep Dive
+
+### When to Use Aggregate Mode
+
+- Planning a new experiment without pilot data
+- Quick ballpark estimates needed
+- Comparing different experimental scenarios
+- Teaching or demonstration purposes
+
+### Choosing Distribution Parameters
+
+For phosphoproteomics, gamma distributions are common. Typical parameters:
+
+| Scenario | Shape | Rate | Mean Abundance |
+|----------|-------|------|----------------|
+| Low abundance | 1.5-2 | 0.05-0.1 | 15-40 |
+| Medium abundance | 2-3 | 0.02-0.05 | 40-150 |
+| High abundance | 3-5 | 0.01-0.02 | 150-500 |
+
+**Conservative estimates** use lower shape (more skewed, higher variance), while **optimistic estimates** use higher shape (more symmetric, lower variance).
+
+### Finding Sample Size
+
+"How many samples per group do I need for 80% power to detect a 2-fold change?"
+
+```{r aggregate-sample-size}
+set.seed(123)
+
+result <- power_analysis(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 1000
+)
+
+print(result)
+```
+
+```{r plot-sample-size, fig.height=4}
+plot(result)
+```
+
+The power curve shows how power increases with sample size. The recommended N is the smallest value achieving your target.
+
+### Finding Power
+
+"With N=6 per group, what's my power to detect a 2-fold change?"
+
+```{r aggregate-power}
+set.seed(123)
+
+result <- power_analysis(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 1000
+)
+
+print(result)
+```
+
+### Finding Minimum Detectable Effect
+
+"With N=6 and 80% target power, what's the smallest effect I can reliably detect?"
+
+```{r aggregate-effect}
+set.seed(123)
+
+result <- power_analysis(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  n_per_group = 6,
+  target_power = 0.8,
+  find = "effect_size",
+  n_sim = 1000
+)
+
+print(result)
+```
+
+```{r plot-effect, fig.height=4}
+plot(result)
+```
+
+### Sensitivity to Parameter Choices
+
+Let's see how results change with different distribution assumptions:
+
+```{r sensitivity}
+set.seed(123)
+
+# Conservative (high variance)
+conservative <- power_analysis(
+  "gamma",
+  params = list(shape = 1.5, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+# Moderate
+moderate <- power_analysis(
+  "gamma",
+  params = list(shape = 2.5, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+# Optimistic (low variance)
+optimistic <- power_analysis(
+  "gamma",
+  params = list(shape = 4, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+cat("Conservative (shape=1.5): N =", conservative$answer, "per group\n")
+cat("Moderate (shape=2.5):     N =", moderate$answer, "per group\n")
+cat("Optimistic (shape=4):     N =", optimistic$answer, "per group\n")
+```
+
+When unsure, use conservative estimates to avoid underpowered experiments.
+
+## Per-Peptide Mode Deep Dive
+
+### When to Use Per-Peptide Mode
+
+- You have pilot data from similar experiments
+- Peptide heterogeneity is expected
+- You want realistic power estimates across your peptidome
+- Planning follow-up studies
+
+### Step 1: Distribution Fitting
+
+First, fit distributions to your pilot data:
+
+```{r generate-pilot-data}
+set.seed(42)
+
+# Generate heterogeneous pilot data
+n_peptides <- 100
+n_per_group <- 4
+
+peptide_params <- tibble::tibble(
+  peptide_id = paste0("pep_", sprintf("%04d", 1:n_peptides)),
+  shape = runif(n_peptides, 1.5, 5),
+  rate = runif(n_peptides, 0.01, 0.1)
+)
+
+pilot_data <- peptide_params |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    data = list(tibble::tibble(
+      condition = rep(c("control", "treatment"), each = n_per_group),
+      replicate = rep(1:n_per_group, 2),
+      abundance = rgamma(n_per_group * 2, shape = shape, rate = rate)
+    ))
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::select(peptide_id, data) |>
+  tidyr::unnest(data)
+```
+
+```{r fit-distributions}
+fits <- fit_distributions(
+  pilot_data,
+  id = "peptide_id",
+  group = "condition",
+  value = "abundance"
+)
+
+print(fits)
+```
+
+### Understanding Fit Results
+
+The print output shows:
+- Total peptides fitted
+- Distribution of best-fit models
+- Any fit failures
+
+```{r summary-fits}
+summary(fits)
+```
+
+The summary provides detailed statistics including AIC ranges and median values.
+
+### Step 2: Per-Peptide Power Analysis
+
+Now use the fits for power analysis:
+
+```{r per-peptide-power}
+set.seed(123)
+
+result_pp <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 500
+)
+
+print(result_pp)
+```
+
+```{r plot-pp-power, fig.height=4}
+plot(result_pp)
+```
+
+The histogram shows the distribution of power across peptides. Note that power varies substantially - some peptides achieve near 100% power while others remain underpowered.
+
+### Finding Sample Size (Per-Peptide)
+
+"What sample size gives 80% power for most peptides?"
+
+```{r per-peptide-sample-size}
+set.seed(123)
+
+result_n <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+print(result_n)
+```
+
+```{r plot-pp-sample-size, fig.height=4}
+plot(result_n)
+```
+
+This "peptide threshold curve" shows what proportion of peptides achieve target power at each sample size. The 50% line indicates where the majority of peptides become well-powered.
+
+### Interpreting Per-Peptide Results
+
+Key insights from per-peptide analysis:
+
+1. **Heterogeneity**: Power varies across peptides due to different underlying distributions
+2. **Majority rule**: The recommended N aims to power the majority (50%+) of peptides
+3. **Underpowered fraction**: Some peptides may never achieve target power at practical sample sizes
+
+## Comparing the Two Modes
+
+Let's run both modes on the same data:
+
+```{r compare-modes}
+set.seed(123)
+
+# Aggregate mode with "typical" parameters
+agg_result <- power_analysis(
+  "gamma",
+  params = list(shape = 2.5, rate = 0.05),
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+# Per-peptide mode
+pp_result <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+cat("Aggregate mode:   N =", agg_result$answer, "per group\n")
+cat("Per-peptide mode: N =", pp_result$answer, "per group\n")
+```
+
+### When Results Disagree
+
+- **Per-peptide > Aggregate**: Your peptidome is more heterogeneous than assumed
+- **Aggregate > Per-peptide**: Your assumed parameters were conservative
+- **Large disagreement**: Reconsider your aggregate assumptions
+
+**Recommendation**: When pilot data is available, trust per-peptide results.
+
+## Statistical Test Options
+
+peppwR supports multiple statistical tests:
+
+| Test | ID | Best For |
+|------|----|----------|
+| Wilcoxon rank-sum | `"wilcoxon"` | General purpose, robust to non-normality |
+| Bootstrap-t | `"bootstrap_t"` | Non-normal data, small samples |
+| Bayes factor | `"bayes_t"` | Evidence quantification |
+| Rank products | `"rankprod"` | Omics data, designed for small samples |
+
+### Default: Wilcoxon Test
+
+The Wilcoxon rank-sum test is the default because it:
+- Makes no distributional assumptions
+- Is robust to outliers
+- Works well with small samples typical of proteomics
+
+```{r wilcoxon}
+set.seed(123)
+
+result_wilcox <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  test = "wilcoxon",
+  n_sim = 500
+)
+
+print(result_wilcox)
+```
+
+### Bootstrap-t Test
+
+For small samples with non-normal data:
+
+```{r bootstrap}
+set.seed(123)
+
+result_boot <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  test = "bootstrap_t",
+  n_sim = 500
+)
+
+print(result_boot)
+```
+
+### Bayes Factor Test
+
+The Bayes factor test provides evidence strength rather than a p-value. A result is considered "significant" when BF > 3 (substantial evidence).
+
+```{r bayes}
+set.seed(123)
+
+result_bayes <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  test = "bayes_t",
+  n_sim = 500
+)
+
+print(result_bayes)
+```
+
+### Rank Products Test
+
+Designed specifically for omics experiments:
+
+```{r rankprod}
+set.seed(123)
+
+result_rp <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  test = "rankprod",
+  n_sim = 500
+)
+
+print(result_rp)
+```
+
+## Handling Edge Cases
+
+### Fit Failures
+
+When distributions fail to fit some peptides, you have three options:
+
+```{r fit-failures, eval=FALSE}
+# Option 1: Exclude failed fits (default)
+result <- power_analysis(fits, effect_size = 2, n_per_group = 6,
+                         find = "power", on_fit_failure = "exclude")
+
+# Option 2: Use lognormal fallback
+result <- power_analysis(fits, effect_size = 2, n_per_group = 6,
+                         find = "power", on_fit_failure = "lognormal")
+
+# Option 3: Bootstrap from empirical data (not yet implemented)
+# result <- power_analysis(fits, ..., on_fit_failure = "empirical")
+```
+
+**Recommendation**: Start with `"exclude"` to see how many peptides fail. If the failure rate is high (>10%), consider `"lognormal"` fallback.
+
+### Very Small Pilot Datasets
+
+With <3 replicates per group:
+- Distribution fitting may be unreliable
+- Consider aggregate mode with conservative parameters
+- Increase n_sim for more stable estimates
+
+### Extreme Effect Sizes
+
+Very large effects (>5-fold) typically achieve high power with minimal samples. Very small effects (<1.2-fold) may require impractically large samples.
+
+```{r extreme-effects}
+set.seed(123)
+
+# Large effect
+large <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 5,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+# Small effect
+small <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 1.2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+cat("5-fold change:   N =", large$answer, "per group\n")
+cat("1.2-fold change: N =", small$answer, "per group\n")
+```
+
+## Summary
+
+1. **Start with aggregate mode** for quick estimates and planning
+2. **Use per-peptide mode** when pilot data is available for accurate estimates
+3. **Consider heterogeneity** - not all peptides behave the same
+4. **Choose appropriate tests** - Wilcoxon is a safe default
+5. **Be conservative** - underpowered experiments waste resources
+
+## Next Steps
+
+- **Getting Started**: See `vignette("getting-started")` for a minimal workflow
+- **Benchmarking**: See `vignette("benchmarking")` for performance with large datasets

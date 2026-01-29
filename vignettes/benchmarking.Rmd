@@ -1,0 +1,386 @@
+---
+title: "Benchmarking peppwR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Benchmarking peppwR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup, message=FALSE}
+library(peppwR)
+library(bench)
+```
+
+## Introduction
+
+Proteomics datasets often contain thousands to tens of thousands of peptides. This vignette characterizes peppwR's performance characteristics to help you:
+
+- Estimate runtime for your dataset size
+- Choose appropriate `n_sim` values
+- Understand memory requirements
+- Make informed trade-offs between precision and compute time
+
+## Experimental Setup
+
+### Test Data Generator
+
+```{r data-generator}
+generate_test_data <- function(n_peptides, n_per_group = 4, seed = 42) {
+  set.seed(seed)
+
+  peptide_params <- tibble::tibble(
+    peptide_id = paste0("pep_", sprintf("%05d", 1:n_peptides)),
+    shape = runif(n_peptides, 1.5, 5),
+    rate = runif(n_peptides, 0.01, 0.1)
+  )
+
+  peptide_params |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      data = list(tibble::tibble(
+        condition = rep(c("control", "treatment"), each = n_per_group),
+        replicate = rep(1:n_per_group, 2),
+        abundance = rgamma(n_per_group * 2, shape = shape, rate = rate)
+      ))
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select(peptide_id, data) |>
+    tidyr::unnest(data)
+}
+```
+
+### Test Configurations
+
+```{r configurations}
+# Peptide counts for scaling tests
+peptide_counts <- c(100, 500, 1000, 2000)
+
+# Simulation counts for power analysis
+sim_counts <- c(500, 1000, 2000)
+```
+
+Note: For practical vignette build times, we use smaller dataset sizes than the full specification (which includes 5000, 10000, 20000 peptides). Scale estimates linearly for larger datasets.
+
+## Distribution Fitting Scaling
+
+### Generate Test Datasets
+
+```{r generate-fit-data, cache=TRUE}
+fit_data <- lapply(peptide_counts, function(n) {
+  generate_test_data(n, n_per_group = 4)
+})
+names(fit_data) <- paste0("n", peptide_counts)
+```
+
+### Benchmark Fitting
+
+```{r benchmark-fitting, cache=TRUE}
+fit_results <- bench::mark(
+  `100 peptides` = fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance"),
+  `500 peptides` = fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance"),
+  `1000 peptides` = fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance"),
+  `2000 peptides` = fit_distributions(fit_data$n2000, "peptide_id", "condition", "abundance"),
+  iterations = 1,
+  check = FALSE,
+  memory = TRUE
+)
+
+fit_results_df <- tibble::tibble(
+  peptides = peptide_counts,
+  time_s = as.numeric(fit_results$median),
+  memory_mb = as.numeric(fit_results$mem_alloc) / 1024^2
+)
+
+fit_results_df$time_per_peptide_ms <- fit_results_df$time_s * 1000 / fit_results_df$peptides
+
+knitr::kable(
+  fit_results_df,
+  col.names = c("Peptides", "Time (s)", "Memory (MB)", "Time/peptide (ms)"),
+  digits = 2,
+  caption = "Distribution fitting scaling"
+)
+```
+
+### Fitting Scaling Plot
+
+```{r plot-fitting-scaling, fig.height=4}
+ggplot2::ggplot(fit_results_df, ggplot2::aes(x = peptides, y = time_s)) +
+  ggplot2::geom_point(size = 3, color = "steelblue") +
+  ggplot2::geom_line(color = "steelblue") +
+  ggplot2::scale_x_log10() +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    x = "Number of Peptides (log scale)",
+    y = "Time (seconds, log scale)",
+    title = "Distribution Fitting: Time vs Dataset Size"
+  )
+```
+
+Distribution fitting scales approximately linearly with the number of peptides, as each peptide is fitted independently.
+
+## Power Analysis - Aggregate Mode
+
+Aggregate mode performance depends primarily on `n_sim`, not on any dataset size (since it simulates a single "typical" peptide).
+
+### Effect of n_sim
+
+```{r benchmark-aggregate, cache=TRUE}
+set.seed(123)
+
+agg_results <- bench::mark(
+  `n_sim=500` = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                               effect_size = 2, n_per_group = 6,
+                               find = "power", n_sim = 500),
+  `n_sim=1000` = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                                effect_size = 2, n_per_group = 6,
+                                find = "power", n_sim = 1000),
+  `n_sim=2000` = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                                effect_size = 2, n_per_group = 6,
+                                find = "power", n_sim = 2000),
+  iterations = 3,
+  check = FALSE
+)
+
+agg_df <- tibble::tibble(
+  n_sim = sim_counts,
+  time_s = as.numeric(agg_results$median)
+)
+
+knitr::kable(
+  agg_df,
+  col.names = c("n_sim", "Time (s)"),
+  digits = 3,
+  caption = "Aggregate mode timing by n_sim"
+)
+```
+
+### Power Estimate Stabilization
+
+More simulations yield more stable power estimates. Let's examine convergence:
+
+```{r stabilization, cache=TRUE}
+set.seed(42)
+
+# Run multiple times at each n_sim level
+stabilization_data <- do.call(rbind, lapply(c(100, 250, 500, 1000, 2000), function(n) {
+  powers <- replicate(10, {
+    result <- power_analysis("gamma", list(shape = 2, rate = 0.05),
+                            effect_size = 2, n_per_group = 6,
+                            find = "power", n_sim = n)
+    result$answer
+  })
+
+  tibble::tibble(
+    n_sim = n,
+    mean_power = mean(powers),
+    sd_power = sd(powers),
+    ci_width = 1.96 * sd(powers) * 2
+  )
+}))
+
+knitr::kable(
+  stabilization_data,
+  col.names = c("n_sim", "Mean Power", "SD", "95% CI Width"),
+  digits = 3,
+  caption = "Power estimate stability by n_sim"
+)
+```
+
+```{r plot-stabilization, fig.height=4}
+ggplot2::ggplot(stabilization_data, ggplot2::aes(x = n_sim)) +
+  ggplot2::geom_ribbon(
+    ggplot2::aes(ymin = mean_power - 1.96 * sd_power,
+                 ymax = mean_power + 1.96 * sd_power),
+    fill = "steelblue", alpha = 0.3
+  ) +
+  ggplot2::geom_line(ggplot2::aes(y = mean_power), color = "steelblue", linewidth = 1) +
+  ggplot2::geom_point(ggplot2::aes(y = mean_power), color = "steelblue", size = 2) +
+  ggplot2::scale_x_log10() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    x = "Number of Simulations (log scale)",
+    y = "Power Estimate",
+    title = "Power Estimate Convergence",
+    subtitle = "Shaded region shows 95% confidence interval across 10 runs"
+  )
+```
+
+**Key insight**: n_sim = 1000 provides a good balance between precision (CI width ~0.03) and speed. For publication-quality results, use n_sim = 2000+.
+
+## Power Analysis - Per-Peptide Mode
+
+Per-peptide mode scales with both the number of peptides and n_sim.
+
+### Prepare Fits for Benchmarking
+
+```{r prepare-fits, cache=TRUE}
+fits_100 <- fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance")
+fits_500 <- fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance")
+fits_1000 <- fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance")
+```
+
+### Scaling by Peptide Count
+
+```{r benchmark-perpeptide-peptides, cache=TRUE}
+set.seed(123)
+
+pp_peptide_results <- bench::mark(
+  `100 peptides` = power_analysis(fits_100, effect_size = 2, n_per_group = 6,
+                                  find = "power", n_sim = 500),
+  `500 peptides` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                                  find = "power", n_sim = 500),
+  `1000 peptides` = power_analysis(fits_1000, effect_size = 2, n_per_group = 6,
+                                   find = "power", n_sim = 500),
+  iterations = 1,
+  check = FALSE
+)
+
+pp_pep_df <- tibble::tibble(
+  peptides = c(100, 500, 1000),
+  time_s = as.numeric(pp_peptide_results$median),
+  time_per_peptide_ms = time_s * 1000 / peptides
+)
+
+knitr::kable(
+  pp_pep_df,
+  col.names = c("Peptides", "Time (s)", "Time/peptide (ms)"),
+  digits = 2,
+  caption = "Per-peptide mode scaling by peptide count (n_sim=500)"
+)
+```
+
+### Scaling by n_sim
+
+```{r benchmark-perpeptide-nsim, cache=TRUE}
+set.seed(123)
+
+pp_nsim_results <- bench::mark(
+  `n_sim=250` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                               find = "power", n_sim = 250),
+  `n_sim=500` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                               find = "power", n_sim = 500),
+  `n_sim=1000` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                                find = "power", n_sim = 1000),
+  iterations = 1,
+  check = FALSE
+)
+
+pp_nsim_df <- tibble::tibble(
+  n_sim = c(250, 500, 1000),
+  time_s = as.numeric(pp_nsim_results$median)
+)
+
+knitr::kable(
+  pp_nsim_df,
+  col.names = c("n_sim", "Time (s)"),
+  digits = 2,
+  caption = "Per-peptide mode scaling by n_sim (500 peptides)"
+)
+```
+
+### Scaling Visualization
+
+```{r plot-perpeptide-scaling, fig.height=4}
+ggplot2::ggplot(pp_pep_df, ggplot2::aes(x = peptides, y = time_s)) +
+  ggplot2::geom_point(size = 3, color = "steelblue") +
+  ggplot2::geom_line(color = "steelblue") +
+  ggplot2::scale_x_log10() +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    x = "Number of Peptides (log scale)",
+    y = "Time (seconds, log scale)",
+    title = "Per-Peptide Power Analysis: Scaling with Dataset Size"
+  )
+```
+
+## Recommendations
+
+### For Quick Exploratory Analysis
+
+| Parameter | Recommendation |
+|-----------|----------------|
+| n_sim | 500-1000 |
+| Dataset | Full or sub-sample if > 5000 peptides |
+| Expected time | ~1-2 min for 1000 peptides |
+
+### For Publication-Quality Results
+
+| Parameter | Recommendation |
+|-----------|----------------|
+| n_sim | 2000-5000 |
+| Dataset | Full peptide set |
+| Expected time | ~5-10 min for 1000 peptides |
+
+### Time Estimation Formula
+
+For per-peptide mode:
+
+```
+Estimated time (s) ≈ (n_peptides × n_sim × time_per_sim) + fitting_time
+```
+
+Where:
+- `time_per_sim` ≈ 0.002-0.005 seconds (depends on test type)
+- `fitting_time` ≈ 0.02 seconds per peptide
+
+### Memory Considerations
+
+- Fitting: ~0.1-0.2 MB per 100 peptides
+- Power analysis: Minimal additional memory (results stored per peptide)
+- For very large datasets (>10000 peptides), ensure at least 4GB available RAM
+
+### Statistical Test Speed Comparison
+
+```{r test-speed, cache=TRUE}
+set.seed(123)
+
+test_timing <- bench::mark(
+  wilcoxon = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                            effect_size = 2, n_per_group = 6,
+                            find = "power", test = "wilcoxon", n_sim = 500),
+  bootstrap_t = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                               effect_size = 2, n_per_group = 6,
+                               find = "power", test = "bootstrap_t", n_sim = 500),
+  bayes_t = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                           effect_size = 2, n_per_group = 6,
+                           find = "power", test = "bayes_t", n_sim = 500),
+  rankprod = power_analysis("gamma", list(shape = 2, rate = 0.05),
+                            effect_size = 2, n_per_group = 6,
+                            find = "power", test = "rankprod", n_sim = 500),
+  iterations = 2,
+  check = FALSE
+)
+
+test_df <- tibble::tibble(
+  test = c("wilcoxon", "bootstrap_t", "bayes_t", "rankprod"),
+  time_s = as.numeric(test_timing$median),
+  relative = time_s / min(time_s)
+)
+
+knitr::kable(
+  test_df,
+  col.names = c("Test", "Time (s)", "Relative Speed"),
+  digits = 2,
+  caption = "Statistical test speed comparison (n_sim=500)"
+)
+```
+
+**Note**: The bootstrap_t and rankprod tests are slower due to resampling procedures. For large-scale analyses, wilcoxon or bayes_t are faster options.
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```

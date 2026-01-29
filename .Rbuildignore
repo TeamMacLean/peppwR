@@ -9,3 +9,13 @@
 ^CLAUDE\.md$
 ^for_CLAUDE\.md$
 ^semi-autonomous-feature-development\.md$
+^doc$
+^Meta$
+^vignettes/.*_cache$
+^next_prompt\.md$
+^proto_CLAUDE\.md$
+^sample_data$
+^vignette_build_prompt\.md$
+^vignette_spec\.md$
+^\.claude$
+^\.idea$
