@@ -4,7 +4,7 @@
 \alias{new_peppwr_fits}
 \title{Create a new peppwr_fits object}
 \usage{
-new_peppwr_fits(data, fits, best, call)
+new_peppwr_fits(data, fits, best, call, missingness = NULL)
 }
 \arguments{
 \item{data}{Original data (nested tibble)}
@@ -14,6 +14,8 @@ new_peppwr_fits(data, fits, best, call)
 \item{best}{Best-fitting distribution per peptide (character vector)}
 
 \item{call}{Original function call}
+
+\item{missingness}{Tibble with missingness statistics per peptide (optional)}
 }
 \value{
 A peppwr_fits object

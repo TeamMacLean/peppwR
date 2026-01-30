@@ -8,16 +8,18 @@
 #' @param fits Fit results per peptide (list of tibbles with dist, loglik, aic)
 #' @param best Best-fitting distribution per peptide (character vector)
 #' @param call Original function call
+#' @param missingness Tibble with missingness statistics per peptide (optional)
 #'
 #' @return A peppwr_fits object
 #' @export
-new_peppwr_fits <- function(data, fits, best, call) {
+new_peppwr_fits <- function(data, fits, best, call, missingness = NULL) {
   structure(
     list(
       data = data,
       fits = fits,
       best = best,
-      call = call
+      call = call,
+      missingness = missingness
     ),
     class = "peppwr_fits"
   )
@@ -76,6 +78,28 @@ print.peppwr_fits <- function(x, ...) {
   n_failed <- sum(is.na(x$best))
   if (n_failed > 0) {
     cat(sprintf("\nFailed fits: %d (%.1f%%)\n", n_failed, 100 * n_failed / n_peptides))
+  }
+
+  # Missingness summary
+  if (!is.null(x$missingness) && nrow(x$missingness) > 0) {
+    total_na <- sum(x$missingness$n_missing)
+    total_obs <- sum(x$missingness$n_total)
+    peps_with_na <- sum(x$missingness$na_rate > 0)
+
+    if (total_na > 0) {
+      cat(sprintf("\nMissingness: %d/%d values NA (%.1f%%)\n",
+                  total_na, total_obs, 100 * total_na / total_obs))
+      cat(sprintf("Peptides with missing data: %d\n", peps_with_na))
+
+      # MNAR summary
+      mnar_scores <- x$missingness$mnar_score[!is.na(x$missingness$mnar_score)]
+      if (length(mnar_scores) > 0) {
+        n_mnar <- sum(mnar_scores > 2)  # MNAR score > 2 suggests MNAR
+        if (n_mnar > 0) {
+          cat(sprintf("Potential MNAR pattern: %d peptides\n", n_mnar))
+        }
+      }
+    }
   }
 
   invisible(x)
@@ -200,6 +224,17 @@ print.peppwr_power <- function(x, ...) {
     cat(sprintf("Statistical test: %s\n", x$params$test))
   }
 
+  # FDR information
+  if (isTRUE(x$params$apply_fdr) || isTRUE(x$simulations$fdr_adjusted)) {
+    cat("\nFDR-adjusted analysis (Benjamini-Hochberg)\n")
+    if (!is.null(x$params$prop_null)) {
+      cat(sprintf("Proportion true nulls: %.0f%%\n", x$params$prop_null * 100))
+    }
+    if (!is.null(x$params$fdr_threshold)) {
+      cat(sprintf("FDR threshold: %.0f%%\n", x$params$fdr_threshold * 100))
+    }
+  }
+
   invisible(x)
 }
 
@@ -244,6 +279,23 @@ summary.peppwr_fits <- function(object, ...) {
     best_dist_counts = best_dist_counts,
     fit_summary = fit_summary
   )
+
+  # Missingness summary
+  if (!is.null(object$missingness) && nrow(object$missingness) > 0) {
+    na_rates <- object$missingness$na_rate
+    mnar_scores <- object$missingness$mnar_score
+
+    result$missingness <- list(
+      total_missing = sum(object$missingness$n_missing),
+      total_values = sum(object$missingness$n_total),
+      mean_na_rate = mean(na_rates, na.rm = TRUE),
+      median_na_rate = stats::median(na_rates, na.rm = TRUE),
+      max_na_rate = max(na_rates, na.rm = TRUE),
+      n_peptides_with_na = sum(na_rates > 0),
+      mean_mnar_score = mean(mnar_scores, na.rm = TRUE),
+      n_potential_mnar = sum(mnar_scores > 2, na.rm = TRUE)
+    )
+  }
 
   class(result) <- "summary.peppwr_fits"
   result

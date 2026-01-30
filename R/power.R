@@ -127,6 +127,10 @@ power_analysis.default <- function(distribution, ...) {
 #' @param find What to solve for: "power" or "sample_size"
 #' @param n_sim Number of simulations per peptide (default 1000)
 #' @param on_fit_failure How to handle failed fits: "exclude", "empirical", or "lognormal"
+#' @param include_missingness If TRUE, incorporate peptide-specific NA rates into simulations
+#' @param apply_fdr If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction
+#' @param prop_null Proportion of true null peptides (default 0.9 = 90% unchanged)
+#' @param fdr_threshold FDR threshold for calling discoveries (default 0.05)
 #' @param ... Additional arguments (ignored)
 #'
 #' @return A peppwr_power object
@@ -135,9 +139,57 @@ power_analysis.default <- function(distribution, ...) {
 power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_group = NULL,
                                        target_power = NULL, alpha = 0.05, test = "wilcoxon",
                                        find = "power", n_sim = 1000,
-                                       on_fit_failure = "exclude", ...) {
+                                       on_fit_failure = "exclude",
+                                       include_missingness = FALSE,
+                                       apply_fdr = FALSE, prop_null = 0.9,
+                                       fdr_threshold = 0.05, ...) {
   the_call <- match.call()
   fits <- distribution
+
+  # Extract missingness info if needed
+  missingness_data <- if (include_missingness && !is.null(fits$missingness)) {
+    fits$missingness
+  } else {
+    NULL
+  }
+
+  # FDR mode - use whole-peptidome simulation
+  if (apply_fdr && find == "power") {
+    if (is.null(n_per_group)) {
+      stop("n_per_group is required when find='power'")
+    }
+    if (is.null(effect_size)) {
+      stop("effect_size is required when find='power'")
+    }
+
+    fdr_power <- run_power_sim_fdr(
+      fits, effect_size, n_per_group,
+      prop_null = prop_null, fdr_threshold = fdr_threshold,
+      alpha = alpha, test = test, n_sim = n_sim
+    )
+
+    return(new_peppwr_power(
+      mode = "per_peptide",
+      question = "power",
+      answer = fdr_power,
+      simulations = list(
+        n_sim = n_sim,
+        fdr_adjusted = TRUE,
+        prop_null = prop_null,
+        fdr_threshold = fdr_threshold
+      ),
+      params = list(
+        effect_size = effect_size,
+        n_per_group = n_per_group,
+        alpha = alpha,
+        test = test,
+        apply_fdr = TRUE,
+        prop_null = prop_null,
+        fdr_threshold = fdr_threshold
+      ),
+      call = the_call
+    ))
+  }
 
   # Validate on_fit_failure
   valid_failures <- c("exclude", "empirical", "lognormal")
@@ -200,9 +252,18 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
         sdlog <- sqrt(log(1 + s^2 / m^2))
         params <- list(meanlog = meanlog, sdlog = sdlog)
       } else if (on_fit_failure == "empirical") {
-        # Bootstrap from empirical data - not implemented in this version
-        peptide_power[i] <- NA
-        n_excluded <- n_excluded + 1
+        # Bootstrap from empirical data
+        if (length(raw_data) >= 2) {
+          if (find == "power") {
+            peptide_power[i] <- run_power_sim_empirical(
+              raw_data, n_per_group, effect_size, alpha, test, n_sim
+            )
+          }
+          n_analyzed <- n_analyzed + 1
+        } else {
+          peptide_power[i] <- NA
+          n_excluded <- n_excluded + 1
+        }
         next
       }
     } else {
@@ -223,10 +284,23 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
 
     # Run power simulation for this peptide
     if (find == "power") {
-      peptide_power[i] <- run_power_sim(dist_rfunc, params, n_per_group, effect_size,
-                                        alpha, test, n_sim)
+      if (!is.null(missingness_data) && missingness_data$na_rate[i] > 0) {
+        # Use missingness-aware simulation
+        peptide_power[i] <- run_power_sim_with_missingness(
+          dist_rfunc, params, n_per_group, effect_size,
+          na_rate = missingness_data$na_rate[i],
+          mnar_score = missingness_data$mnar_score[i] %||% 0,
+          alpha = alpha, test = test, n_sim = n_sim
+        )
+      } else {
+        peptide_power[i] <- run_power_sim(dist_rfunc, params, n_per_group, effect_size,
+                                          alpha, test, n_sim)
+      }
     }
   }
+
+  # Helper for null coalescing
+  `%||%` <- function(x, y) if (is.null(x) || is.na(x)) y else x
 
   # For find = "sample_size", search over N values
   if (find == "sample_size") {

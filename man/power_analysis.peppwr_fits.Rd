@@ -14,6 +14,10 @@
   find = "power",
   n_sim = 1000,
   on_fit_failure = "exclude",
+  include_missingness = FALSE,
+  apply_fdr = FALSE,
+  prop_null = 0.9,
+  fdr_threshold = 0.05,
   ...
 )
 }
@@ -35,6 +39,14 @@
 \item{n_sim}{Number of simulations per peptide (default 1000)}
 
 \item{on_fit_failure}{How to handle failed fits: "exclude", "empirical", or "lognormal"}
+
+\item{include_missingness}{If TRUE, incorporate peptide-specific NA rates into simulations}
+
+\item{apply_fdr}{If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction}
+
+\item{prop_null}{Proportion of true null peptides (default 0.9 = 90\% unchanged)}
+
+\item{fdr_threshold}{FDR threshold for calling discoveries (default 0.05)}
 
 \item{...}{Additional arguments (ignored)}
 }
