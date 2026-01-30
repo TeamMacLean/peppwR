@@ -76,11 +76,13 @@ Power analysis results.
 ### Distribution Fitting
 
 ```r
-fit_distributions(data, id, group, value, distributions = "all")
+fit_distributions(data, id, group, value, distributions = "continuous")
 ```
 - Fits candidate distributions to each peptide's values
 - Returns `peppwr_fits` object
-- Default distributions: gamma, normal, lognormal, inverse gaussian, etc.
+- `distributions` parameter: `"continuous"` (default), `"counts"`, `"all"`, or explicit vector
+- Continuous distributions: gamma, normal, lognormal, inverse gaussian, etc.
+- Count distributions: negative binomial (for spectral count data)
 
 ### Power Analysis
 
@@ -221,41 +223,49 @@ Implementation order with dependencies:
 
 ---
 
-## v2 Feature Phases
+## v2 Feature Phases (COMPLETE)
 
 See `feature_plan_v2.md` for detailed specifications.
 
-### Phase A: Diagnostic Plots
+### Phase A: Diagnostic Plots ✓
 - `plot_density_overlay()` - Observed histogram + fitted density curve
 - `plot_qq()` - QQ plots for goodness-of-fit
 - `plot_power_heatmap()` - N × effect size lookup grid
 - `plot_power_vs_effect()` - Sensitivity at fixed N
 - `plot_param_distribution()` - Fitted params across peptidome
 
-### Phase B: Empirical Bootstrap
+### Phase B: Empirical Bootstrap ✓
 - `simulate_empirical()` - Bootstrap resample from observed data
 - `run_power_sim_empirical()` - Power sim using bootstrap
-- Implement `on_fit_failure = "empirical"` (currently stubbed)
+- `on_fit_failure = "empirical"` implemented
 
-### Phase C: Missing Data Handling
+### Phase C: Missing Data Handling ✓
 **Philosophy: Track and model missingness, never impute**
 
-- `compute_missingness()` - Calculate NA rate, MNAR score, MNAR p-value
-- Extend `peppwr_fits` with `missingness` slot
+- `compute_missingness()` - Calculate NA rate and MNAR score (z-statistic)
+- `peppwr_fits` includes `missingness` slot
 - MNAR detection (Missing Not At Random - when low values systematically missing)
 - `simulate_with_missingness()` - Incorporate NA rates into simulations
 - `plot_missingness()` - NA rate and MNAR score distributions
 
-### Phase D: FDR-Aware Mode
+### Phase D: FDR-Aware Mode ✓
 - `run_power_sim_fdr()` - Whole-peptidome simulation with BH correction
-- Add `apply_fdr`, `prop_null`, `fdr_threshold` params to `power_analysis.peppwr_fits()`
+- `apply_fdr`, `prop_null`, `fdr_threshold` params in `power_analysis.peppwr_fits()`
 - User-configurable `prop_null` (default 0.9 = 90% true nulls)
-
-**Dependencies**: Phase C should complete before Phase D
 
 ---
 
-Each item is a candidate for the TDD → Ralph Loop workflow.
+## v2.1 Planned Enhancements
+
+See `mnar_visualization_plan.md` for detailed specifications.
+
+### Enhanced MNAR Visualization
+- Add `mean_abundance` to missingness slot
+- `get_mnar_peptides(fits, threshold)` - Return peptides with MNAR evidence
+- Enhance `plot_missingness()` with abundance vs NA rate scatter panel
+- MNAR summary in `print.peppwr_fits()` output
+
+---
 
 ## Development
 
@@ -288,9 +298,10 @@ Configurable via `on_fit_failure` parameter:
 - `"lognormal"` - Fallback to lognormal with moment-matched parameters
 
 ### Multiple testing / FDR
-**v1: Single-test power only.** Document clearly that reported power is per-peptide at nominal alpha, not FDR-adjusted.
-
-**Future enhancement:** FDR-aware mode that simulates full peptidome (null + changed) and applies correction.
+**v2: FDR-aware mode implemented.** Use `apply_fdr = TRUE` in `power_analysis.peppwr_fits()` to simulate whole-peptidome experiments with Benjamini-Hochberg correction. Configure `prop_null` (default 0.9) for expected proportion of true nulls.
 
 ### Performance
-**v1: Single-threaded.** Rely on R's vectorization. Add parallelization (via `future`/`furrr`) only if benchmarks show it's needed.
+**v1: Single-threaded.** Rely on R's vectorization. Parallelization (via `future`/`furrr`) deferred - benchmarks show acceptable performance for typical datasets.
+
+### Distribution presets
+**v2:** Default changed from `distributions = "all"` to `"continuous"` to avoid nbinom warnings on abundance data. Use `"counts"` for spectral count data.
