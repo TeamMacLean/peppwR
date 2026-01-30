@@ -357,9 +357,13 @@ plot_density_overlay <- function(fits, peptide_id = NULL, n_overlay = 6) {
       if (length(raw_vals) < 3) return(NULL)
 
       fit_df <- data_df$fits[[i]]
-      best_dist <- fits$best[which(fits$data[[id_col]] == pep_id)]
+      best_dist_idx <- which(fits$data[[id_col]] == pep_id)
+      if (length(best_dist_idx) == 0) {
+        return(NULL)
+      }
+      best_dist <- fits$best[best_dist_idx[1]]  # Take first match
 
-      if (is.na(best_dist) || length(best_dist) == 0) {
+      if (length(best_dist) == 0 || is.na(best_dist)) {
         return(NULL)
       }
 
@@ -493,9 +497,13 @@ plot_qq <- function(fits, peptide_id = NULL, n_plots = 6) {
     function(i, pep_id) {
       raw_vals <- data_df$data[[i]][[1]]
       raw_vals <- raw_vals[!is.na(raw_vals)]
-      best_dist <- fits$best[which(fits$data[[id_col]] == pep_id)]
+      best_dist_idx <- which(fits$data[[id_col]] == pep_id)
+      if (length(best_dist_idx) == 0) {
+        return(NULL)
+      }
+      best_dist <- fits$best[best_dist_idx[1]]  # Take first match
 
-      if (is.na(best_dist) || length(raw_vals) < 3) {
+      if (length(best_dist) == 0 || is.na(best_dist) || length(raw_vals) < 3) {
         return(NULL)
       }
 
