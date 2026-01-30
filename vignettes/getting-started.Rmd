@@ -78,14 +78,20 @@ head(pilot_data, 12)
 
 ## Fit Distributions
 
-Use `fit_distributions()` to determine which statistical distributions best describe your peptide abundance data:
+Use `fit_distributions()` to determine which statistical distributions best describe your peptide abundance data.
+
+The `distributions` parameter controls which distributions are fitted:
+- `"continuous"` (default) - gamma, normal, lognormal, etc. for abundance data
+- `"counts"` - includes negative binomial for count-based quantification
+- `"all"` - tries all distributions with auto-detection
 
 ```{r fit-distributions}
 fits <- fit_distributions(
   pilot_data,
   id = "peptide_id",
   group = "condition",
-  value = "abundance"
+  value = "abundance",
+  distributions = "continuous"
 )
 
 print(fits)
@@ -104,6 +110,72 @@ The plot shows the count of best-fit distributions by two metrics:
 - **LogLikelihood**: Pure goodness-of-fit measure
 
 When these metrics agree, you can be confident about the distribution choice.
+
+## Assess Fit Quality
+
+Before running power analysis, check that the fitted distributions reasonably match your data:
+
+```{r density-overlay, fig.height=6, warning=FALSE}
+set.seed(42)  # For reproducible peptide selection
+
+# Visual check: does the fitted distribution match the data?
+plot_density_overlay(fits, n_overlay = 4)
+```
+
+The density overlay shows observed histograms (blue) with fitted density curves (red). Good fits show the curve closely tracking the histogram shape.
+
+```{r qq-plots, fig.height=6, warning=FALSE}
+# Goodness-of-fit assessment via QQ plots
+plot_qq(fits, n_plots = 4)
+```
+
+In QQ plots, points should fall along the diagonal red line. Deviations indicate the fitted distribution doesn't fully capture the data's characteristics:
+- Points curving above the line at the right indicate heavier right tails in the data
+- S-shaped patterns suggest the wrong distribution family
+
+If fits look poor, consider:
+- Using different candidate distributions
+- Checking for outliers or data quality issues
+- Using `on_fit_failure = "empirical"` in power analysis to bootstrap from raw data
+
+## A Note on Sample Size and Distribution Detection
+
+With small pilot datasets (n=4 per group = 8 observations per peptide), the
+"best" distribution may not match the true underlying distribution. Our
+synthetic data was generated from Gamma distributions, but with small samples
+you may see Pareto or Skew Normal selected as "best."
+
+Let's verify that with larger samples, the correct distribution is identified:
+
+```{r sample-size-sanity-check}
+set.seed(42)
+
+# Generate data with larger sample size - 30 per group
+large_n_data <- tibble::tibble(
+  peptide_id = "test_peptide",
+  condition = rep(c("control", "treatment"), each = 30),
+  replicate = rep(1:30, 2),
+  abundance = rgamma(60, shape = 3, rate = 0.05)  # True distribution: Gamma
+)
+
+large_fits <- fit_distributions(
+  large_n_data,
+  id = "peptide_id",
+  group = "condition",
+  value = "abundance",
+  distributions = "continuous"
+)
+
+print(large_fits)
+```
+
+With 30 samples per group, the Gamma distribution is correctly identified as
+best fit.
+
+**Takeaway:** For small pilot studies, interpret the "best fit" as "best among
+candidates given limited data" rather than definitive truth. The fitted
+parameters are still useful for power simulation regardless of which
+distribution family is selected.
 
 ## Power Analysis - Aggregate Mode
 

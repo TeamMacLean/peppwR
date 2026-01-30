@@ -207,16 +207,27 @@ pilot_data <- peptide_params |>
   tidyr::unnest(data)
 ```
 
+We use `distributions = "continuous"` for abundance data. Use `"counts"` if you
+have count-based quantification (e.g., spectral counts).
+
 ```{r fit-distributions}
 fits <- fit_distributions(
   pilot_data,
   id = "peptide_id",
   group = "condition",
-  value = "abundance"
+  value = "abundance",
+  distributions = "continuous"
 )
 
 print(fits)
 ```
+
+**Note on distribution detection:** With n=4 per group (8 observations total),
+distribution selection has uncertainty. You may see distributions like Pareto
+or Skew Normal selected even when the true underlying distribution is Gamma.
+This is normal - the fitted parameters are still useful for power simulation.
+With larger samples (n≥15 per group), the correct distribution family is more
+reliably identified.
 
 ### Understanding Fit Results
 
@@ -249,7 +260,7 @@ result_pp <- power_analysis(
 print(result_pp)
 ```
 
-```{r plot-pp-power, fig.height=4}
+```{r plot-pp-power, fig.height=4, warning=FALSE}
 plot(result_pp)
 ```
 
@@ -419,26 +430,264 @@ result_rp <- power_analysis(
 print(result_rp)
 ```
 
+## Diagnostic Plots
+
+peppwR provides several diagnostic plots to assess fit quality and explore power landscapes.
+
+### Assessing Fit Quality
+
+After fitting distributions, verify that the fits are reasonable:
+
+```{r density-overlay, fig.height=6, warning=FALSE}
+set.seed(42)  # For reproducible peptide selection
+
+# Histogram with fitted density overlay
+plot_density_overlay(fits, n_overlay = 6)
+```
+
+The density overlay shows the observed histogram (blue) with the fitted distribution curve (red). Good fits show the curve closely following the histogram shape.
+
+```{r qq-plots, fig.height=6, warning=FALSE}
+# QQ plots for goodness-of-fit
+plot_qq(fits, n_plots = 6)
+```
+
+In a QQ plot, points should fall along the diagonal line. Systematic deviations indicate poor fit:
+- S-shaped curve: Distribution has wrong tail behavior
+- Points above line at right: Heavy right tail in data
+- Points below line at left: Heavy left tail in data
+
+### Distribution of Fit Statistics
+
+```{r param-distribution, fig.height=5}
+# AIC distribution across the peptidome by best-fit distribution
+plot_param_distribution(fits)
+```
+
+This shows how AIC values are distributed across peptides, grouped by their best-fitting distribution.
+
+### Exploring Power Landscapes
+
+For planning purposes, you can visualize how power varies across sample sizes and effect sizes:
+
+```{r power-heatmap, fig.height=5, cache=TRUE}
+# Power heatmap: sample size vs effect size grid
+plot_power_heatmap(
+  distribution = "gamma",
+  params = list(shape = 2, rate = 0.05),
+  n_range = c(3, 12),
+  effect_range = c(1.5, 3),
+  n_steps = 5,
+  n_sim = 200
+)
+```
+
+The heatmap provides a quick lookup table for power at different experimental designs.
+
+```{r power-vs-effect, fig.height=4, cache=TRUE}
+set.seed(123)
+
+# First create a result to use
+result_for_plot <- power_analysis(
+  "gamma",
+  params = list(shape = 2, rate = 0.05),
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 500
+)
+
+# Power sensitivity at fixed sample size
+plot_power_vs_effect(result_for_plot, effect_range = c(1.2, 4), n_sim = 200)
+```
+
+## Handling Missing Data
+
+Proteomics data often contains missing values, particularly for low-abundance peptides near the detection limit. peppwR tracks and models missingness to provide more realistic power estimates.
+
+### Understanding Missingness
+
+The `fit_distributions()` function automatically computes missingness statistics for each peptide:
+
+```{r missingness-stats, warning=FALSE}
+# Fits object includes missingness statistics
+print(fits)
+
+# Detailed missingness summary
+summary(fits)$missingness
+```
+
+### Visualizing Missingness Patterns
+
+```{r generate-na-data, echo=FALSE, warning=FALSE}
+# Generate data with realistic missingness for demonstration
+set.seed(42)
+n_peptides_na <- 100
+n_per_group_na <- 4
+
+peptide_params_na <- tibble::tibble(
+  peptide_id = paste0("pep_", sprintf("%04d", 1:n_peptides_na)),
+  shape = runif(n_peptides_na, 1.5, 5),
+  rate = runif(n_peptides_na, 0.01, 0.1)
+)
+
+pilot_data_na <- peptide_params_na |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    data = list(tibble::tibble(
+      condition = rep(c("control", "treatment"), each = n_per_group_na),
+      replicate = rep(1:n_per_group_na, 2),
+      abundance = rgamma(n_per_group_na * 2, shape = shape, rate = rate)
+    ))
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::select(peptide_id, data) |>
+  tidyr::unnest(data)
+
+# Introduce MNAR pattern: low values more likely missing
+threshold <- quantile(pilot_data_na$abundance, 0.3)
+pilot_data_na$abundance <- ifelse(
+  pilot_data_na$abundance < threshold & runif(nrow(pilot_data_na)) < 0.3,
+  NA,
+  pilot_data_na$abundance
+)
+
+# Also some random MCAR missingness
+pilot_data_na$abundance <- ifelse(
+  runif(nrow(pilot_data_na)) < 0.05,
+  NA,
+  pilot_data_na$abundance
+)
+
+fits_na <- fit_distributions(pilot_data_na, "peptide_id", "condition", "abundance")
+```
+
+```{r plot-missingness, fig.height=6, warning=FALSE}
+# Visualize NA rate and MNAR score distributions
+plot_missingness(fits_na)
+```
+
+The top panel shows the distribution of NA rates across peptides. The bottom panel shows MNAR (Missing Not At Random) scores - values above 2 (red line) suggest that low-abundance values are systematically missing, which is common in proteomics.
+
+### MNAR Detection
+
+MNAR (Missing Not At Random) occurs when the probability of a value being missing depends on the value itself. In proteomics, this typically happens when low-abundance peptides fall below the detection limit.
+
+peppwR detects MNAR patterns by comparing the mean rank of observed values to what would be expected under random (MCAR) missingness. A positive MNAR score indicates that observed values tend to be higher than expected - suggesting low values are preferentially missing.
+
+### Incorporating Missingness into Simulations
+
+For more realistic power estimates, you can incorporate peptide-specific NA rates:
+
+```{r power-with-missingness, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+# Power analysis accounting for expected NA rates
+result_na <- power_analysis(
+  fits_na,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 500,
+  include_missingness = TRUE
+)
+
+print(result_na)
+```
+
+When `include_missingness = TRUE`, simulations incorporate each peptide's observed NA rate and MNAR pattern, providing power estimates that reflect what you'd actually observe in your experiment.
+
+## FDR-Aware Power Analysis
+
+Standard power analysis computes per-peptide power at nominal alpha (e.g., 0.05). However, with thousands of peptides, you'll apply multiple testing correction - which affects your effective power.
+
+### The Multiple Testing Problem
+
+When testing thousands of peptides:
+- At α = 0.05, you expect 50 false positives per 1000 true nulls
+- FDR correction (e.g., Benjamini-Hochberg) controls false discovery rate
+- This makes it harder to detect true effects
+
+### Running FDR-Adjusted Analysis
+
+```{r fdr-power, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+result_fdr <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  apply_fdr = TRUE,
+  prop_null = 0.9,       # 90% of peptides are true nulls
+  fdr_threshold = 0.05,  # Target 5% FDR
+  n_sim = 200
+)
+
+print(result_fdr)
+```
+
+The `apply_fdr` mode simulates entire experiments with a mixture of null and alternative peptides, then applies Benjamini-Hochberg correction before computing power.
+
+### Understanding prop_null
+
+The `prop_null` parameter specifies what proportion of peptides you expect to have no effect:
+- `prop_null = 0.9`: 10% of peptides show differential abundance
+- `prop_null = 0.95`: Only 5% change (more conservative)
+- `prop_null = 0.8`: 20% change (more liberal)
+
+Higher `prop_null` makes FDR correction more stringent, reducing power.
+
+### FDR vs Uncorrected Power
+
+```{r fdr-comparison, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+# Uncorrected (per-peptide) power
+result_uncorr <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 200
+)
+
+cat("Uncorrected power: ", round(result_uncorr$answer * 100), "%\n", sep = "")
+cat("FDR-adjusted power:", round(result_fdr$answer * 100), "%\n", sep = "")
+```
+
+FDR-adjusted power is typically lower because BH correction requires stronger evidence to call discoveries. Use FDR mode when you want to know how many true positives you'll actually detect after correction.
+
 ## Handling Edge Cases
 
 ### Fit Failures
 
 When distributions fail to fit some peptides, you have three options:
 
-```{r fit-failures, eval=FALSE}
+```{r fit-failures, warning=FALSE}
+set.seed(123)
+
 # Option 1: Exclude failed fits (default)
-result <- power_analysis(fits, effect_size = 2, n_per_group = 6,
-                         find = "power", on_fit_failure = "exclude")
+result_exclude <- power_analysis(fits, effect_size = 2, n_per_group = 6,
+                                 find = "power", on_fit_failure = "exclude", n_sim = 200)
 
 # Option 2: Use lognormal fallback
-result <- power_analysis(fits, effect_size = 2, n_per_group = 6,
-                         find = "power", on_fit_failure = "lognormal")
+result_lognorm <- power_analysis(fits, effect_size = 2, n_per_group = 6,
+                                 find = "power", on_fit_failure = "lognormal", n_sim = 200)
 
-# Option 3: Bootstrap from empirical data (not yet implemented)
-# result <- power_analysis(fits, ..., on_fit_failure = "empirical")
+# Option 3: Bootstrap from empirical data
+result_empirical <- power_analysis(fits, effect_size = 2, n_per_group = 6,
+                                   find = "power", on_fit_failure = "empirical", n_sim = 200)
+
+cat("Exclude failures:    ", round(result_exclude$answer * 100), "% power\n", sep = "")
+cat("Lognormal fallback:  ", round(result_lognorm$answer * 100), "% power\n", sep = "")
+cat("Empirical bootstrap: ", round(result_empirical$answer * 100), "% power\n", sep = "")
 ```
 
-**Recommendation**: Start with `"exclude"` to see how many peptides fail. If the failure rate is high (>10%), consider `"lognormal"` fallback.
+**Recommendations**:
+- Start with `"exclude"` to see how many peptides fail
+- Use `"lognormal"` when fit failures are common but you have enough data points
+- Use `"empirical"` when you want purely data-driven simulation without distribution assumptions
 
 ### Very Small Pilot Datasets
 
@@ -451,7 +700,7 @@ With <3 replicates per group:
 
 Very large effects (>5-fold) typically achieve high power with minimal samples. Very small effects (<1.2-fold) may require impractically large samples.
 
-```{r extreme-effects}
+```{r extreme-effects, warning=FALSE}
 set.seed(123)
 
 # Large effect

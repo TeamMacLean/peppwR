@@ -4,7 +4,7 @@
 \alias{fit_distributions}
 \title{Fit distributions to peptide abundance data}
 \usage{
-fit_distributions(data, id, group, value, distributions = "all")
+fit_distributions(data, id, group, value, distributions = "continuous")
 }
 \arguments{
 \item{data}{A data frame containing peptide abundance data}
@@ -15,7 +15,8 @@ fit_distributions(data, id, group, value, distributions = "all")
 
 \item{value}{Column name for abundance values}
 
-\item{distributions}{Which distributions to fit: "all" or a character vector}
+\item{distributions}{Which distributions to fit: "continuous" (default),
+"counts", "all", or a character vector of distribution names}
 }
 \value{
 A peppwr_fits object

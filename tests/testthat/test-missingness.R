@@ -8,7 +8,13 @@ test_that("compute_missingness returns expected structure", {
   result <- compute_missingness(values)
 
   expect_type(result, "list")
-  expect_named(result, c("n_total", "n_missing", "na_rate", "mnar_score", "mnar_pvalue"))
+  expect_named(result, c("n_total", "n_missing", "na_rate", "mnar_score"))
+})
+
+test_that("compute_missingness does not produce wilcox.test warnings", {
+  # Values with ties
+  values <- c(1, 1, 2, 2, NA, NA)
+  expect_no_warning(compute_missingness(values))
 })
 
 test_that("compute_missingness calculates correct NA rate", {

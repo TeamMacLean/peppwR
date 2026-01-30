@@ -10,3 +10,5 @@ inst/doc
 renv/library/
 renv/staging/
 renv/sandbox/
+/doc/
+/Meta/

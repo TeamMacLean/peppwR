@@ -84,12 +84,19 @@ names(fit_data) <- paste0("n", peptide_counts)
 
 ### Benchmark Fitting
 
-```{r benchmark-fitting, cache=TRUE}
+All benchmarks use `distributions = "continuous"` which fits distributions
+appropriate for continuous abundance data (gamma, lognormal, normal, etc.).
+
+```{r benchmark-fitting, cache=TRUE, warning=FALSE}
 fit_results <- bench::mark(
-  `100 peptides` = fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance"),
-  `500 peptides` = fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance"),
-  `1000 peptides` = fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance"),
-  `2000 peptides` = fit_distributions(fit_data$n2000, "peptide_id", "condition", "abundance"),
+  `100 peptides` = fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance",
+                                      distributions = "continuous"),
+  `500 peptides` = fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance",
+                                      distributions = "continuous"),
+  `1000 peptides` = fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance",
+                                       distributions = "continuous"),
+  `2000 peptides` = fit_distributions(fit_data$n2000, "peptide_id", "condition", "abundance",
+                                       distributions = "continuous"),
   iterations = 1,
   check = FALSE,
   memory = TRUE
@@ -135,7 +142,7 @@ Aggregate mode performance depends primarily on `n_sim`, not on any dataset size
 
 ### Effect of n_sim
 
-```{r benchmark-aggregate, cache=TRUE}
+```{r benchmark-aggregate, cache=TRUE, warning=FALSE}
 set.seed(123)
 
 agg_results <- bench::mark(
@@ -224,15 +231,18 @@ Per-peptide mode scales with both the number of peptides and n_sim.
 
 ### Prepare Fits for Benchmarking
 
-```{r prepare-fits, cache=TRUE}
-fits_100 <- fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance")
-fits_500 <- fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance")
-fits_1000 <- fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance")
+```{r prepare-fits, cache=TRUE, warning=FALSE}
+fits_100 <- fit_distributions(fit_data$n100, "peptide_id", "condition", "abundance",
+                               distributions = "continuous")
+fits_500 <- fit_distributions(fit_data$n500, "peptide_id", "condition", "abundance",
+                               distributions = "continuous")
+fits_1000 <- fit_distributions(fit_data$n1000, "peptide_id", "condition", "abundance",
+                                distributions = "continuous")
 ```
 
 ### Scaling by Peptide Count
 
-```{r benchmark-perpeptide-peptides, cache=TRUE}
+```{r benchmark-perpeptide-peptides, cache=TRUE, warning=FALSE}
 set.seed(123)
 
 pp_peptide_results <- bench::mark(
@@ -262,7 +272,7 @@ knitr::kable(
 
 ### Scaling by n_sim
 
-```{r benchmark-perpeptide-nsim, cache=TRUE}
+```{r benchmark-perpeptide-nsim, cache=TRUE, warning=FALSE}
 set.seed(123)
 
 pp_nsim_results <- bench::mark(
@@ -343,7 +353,7 @@ Where:
 
 ### Statistical Test Speed Comparison
 
-```{r test-speed, cache=TRUE}
+```{r test-speed, cache=TRUE, warning=FALSE}
 set.seed(123)
 
 test_timing <- bench::mark(
@@ -378,6 +388,185 @@ knitr::kable(
 ```
 
 **Note**: The bootstrap_t and rankprod tests are slower due to resampling procedures. For large-scale analyses, wilcoxon or bayes_t are faster options.
+
+## Missingness-Aware Simulation Performance
+
+When `include_missingness = TRUE`, peppwR incorporates peptide-specific NA rates into simulations. Let's measure the overhead:
+
+```{r data-with-na, warning=FALSE}
+# Generate data with realistic missingness
+generate_test_data_with_na <- function(n_peptides, n_per_group = 4, na_rate = 0.15, seed = 42) {
+  set.seed(seed)
+
+  data <- generate_test_data(n_peptides, n_per_group, seed)
+
+  # Introduce MNAR pattern: low values more likely to be missing
+  threshold <- quantile(data$abundance, 0.3)
+  data$abundance <- ifelse(
+    data$abundance < threshold & runif(nrow(data)) < na_rate * 2,
+    NA,
+    data$abundance
+  )
+
+  # Also some random MCAR missingness
+  data$abundance <- ifelse(
+    runif(nrow(data)) < na_rate / 3,
+    NA,
+    data$abundance
+  )
+
+  data
+}
+
+data_with_na <- generate_test_data_with_na(500, n_per_group = 4, na_rate = 0.15)
+fits_with_na <- fit_distributions(data_with_na, "peptide_id", "condition", "abundance",
+                                   distributions = "continuous")
+```
+
+```{r benchmark-missingness, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+miss_results <- bench::mark(
+  `Without missingness` = power_analysis(fits_with_na, effect_size = 2, n_per_group = 6,
+                                         find = "power", n_sim = 200,
+                                         include_missingness = FALSE),
+  `With missingness` = power_analysis(fits_with_na, effect_size = 2, n_per_group = 6,
+                                      find = "power", n_sim = 200,
+                                      include_missingness = TRUE),
+  iterations = 2,
+  check = FALSE
+)
+
+miss_df <- tibble::tibble(
+  mode = c("Without missingness", "With missingness"),
+  time_s = as.numeric(miss_results$median)
+)
+
+knitr::kable(
+  miss_df,
+  col.names = c("Mode", "Time (s)"),
+  digits = 2,
+  caption = "Missingness-aware simulation overhead"
+)
+```
+
+The overhead of `include_missingness = TRUE` is minimal - it's primarily the NA handling within the simulation loop, which is fast.
+
+## FDR Mode Performance
+
+FDR-aware mode simulates entire peptidome experiments with mixed null and alternative peptides, then applies BH correction. This is more computationally intensive than per-peptide mode.
+
+```{r benchmark-fdr, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+fdr_results <- bench::mark(
+  `Per-peptide (no FDR)` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                                          find = "power", n_sim = 100),
+  `FDR-adjusted` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                                  find = "power", apply_fdr = TRUE,
+                                  prop_null = 0.9, n_sim = 100),
+  iterations = 2,
+  check = FALSE
+)
+
+fdr_df <- tibble::tibble(
+  mode = c("Per-peptide (no FDR)", "FDR-adjusted"),
+  time_s = as.numeric(fdr_results$median)
+)
+
+knitr::kable(
+  fdr_df,
+  col.names = c("Mode", "Time (s)"),
+  digits = 2,
+  caption = "FDR mode vs per-peptide mode timing"
+)
+```
+
+FDR mode is more expensive because each simulation iteration requires:
+1. Assigning peptides to null/alternative
+2. Simulating all peptides together
+3. Applying BH correction across all p-values
+
+### FDR Scaling with Peptide Count
+
+```{r benchmark-fdr-scaling, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+fdr_scaling_results <- bench::mark(
+  `100 peptides` = power_analysis(fits_100, effect_size = 2, n_per_group = 6,
+                                  find = "power", apply_fdr = TRUE, n_sim = 50),
+  `500 peptides` = power_analysis(fits_500, effect_size = 2, n_per_group = 6,
+                                  find = "power", apply_fdr = TRUE, n_sim = 50),
+  `1000 peptides` = power_analysis(fits_1000, effect_size = 2, n_per_group = 6,
+                                   find = "power", apply_fdr = TRUE, n_sim = 50),
+  iterations = 1,
+  check = FALSE
+)
+
+fdr_scale_df <- tibble::tibble(
+  peptides = c(100, 500, 1000),
+  time_s = as.numeric(fdr_scaling_results$median)
+)
+
+knitr::kable(
+  fdr_scale_df,
+  col.names = c("Peptides", "Time (s)"),
+  digits = 2,
+  caption = "FDR mode scaling by peptide count (n_sim=50)"
+)
+```
+
+## Diagnostic Plot Generation Times
+
+```{r benchmark-plots, cache=TRUE, warning=FALSE}
+set.seed(42)
+
+plot_results <- bench::mark(
+  `Density overlay` = plot_density_overlay(fits_500, n_overlay = 6),
+  `QQ plots` = plot_qq(fits_500, n_plots = 6),
+  `Param distribution` = plot_param_distribution(fits_500),
+  iterations = 2,
+  check = FALSE
+)
+
+plot_df <- tibble::tibble(
+  plot = c("Density overlay", "QQ plots", "Param distribution"),
+  time_s = as.numeric(plot_results$median)
+)
+
+knitr::kable(
+  plot_df,
+  col.names = c("Plot Type", "Time (s)"),
+  digits = 3,
+  caption = "Diagnostic plot generation times"
+)
+```
+
+```{r benchmark-heatmap, cache=TRUE, warning=FALSE}
+set.seed(123)
+
+heatmap_results <- bench::mark(
+  `Power heatmap (5x5)` = plot_power_heatmap(
+    "gamma", list(shape = 2, rate = 0.05),
+    n_range = c(3, 12), effect_range = c(1.5, 3),
+    n_steps = 5, n_sim = 50
+  ),
+  iterations = 1,
+  check = FALSE
+)
+
+knitr::kable(
+  tibble::tibble(
+    plot = "Power heatmap (5x5 grid, n_sim=50)",
+    time_s = as.numeric(heatmap_results$median)
+  ),
+  col.names = c("Plot Type", "Time (s)"),
+  digits = 2,
+  caption = "Power heatmap generation time"
+)
+```
+
+**Note**: The power heatmap is expensive because it runs `n_steps^2 × n_sim` simulations. Use smaller grids and fewer simulations for exploratory work.
 
 ## Session Info
 

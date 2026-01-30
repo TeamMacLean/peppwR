@@ -15,9 +15,8 @@ List with:
 \item n_total: Total number of values
 \item n_missing: Number of NA values
 \item na_rate: Proportion missing (0-1)
-\item mnar_score: Normalized deviation from expected mean rank
-(positive = low values more likely missing)
-\item mnar_pvalue: P-value for MNAR pattern (Wilcoxon one-sample test)
+\item mnar_score: Z-score measuring MNAR pattern. Positive values indicate
+low values are more likely to be missing. Values > 2 suggest MNAR.
 }
 }
 \description{

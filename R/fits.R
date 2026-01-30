@@ -1,17 +1,65 @@
 # Distribution fitting functions for peppwR
 
+#' Get distributions for a preset
+#'
+#' @param preset One of "continuous" (default), "counts", or "all"
+#' @return Character vector of distribution names
+#' @export
+get_distribution_preset <- function(preset = "continuous") {
+  continuous_dists <- c("gamma", "norm", "snorm", "invgamma",
+                        "invgauss", "lnorm", "lgamma", "pareto")
+  count_dists <- c("nbinom")
+
+  switch(preset,
+    "continuous" = continuous_dists,
+    "counts" = c(continuous_dists, count_dists),
+    "all" = c(continuous_dists, count_dists),
+    stop("Unknown preset: ", preset, ". Use 'continuous', 'counts', or 'all'")
+  )
+}
+
+#' Check if data appears to be count data (non-negative integers)
+#'
+#' @param x Numeric vector
+#' @return TRUE if data looks like counts, FALSE otherwise
+#' @export
+is_count_data <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(FALSE)
+  all(x >= 0) && all(x == floor(x))
+}
+
 #' Fit distributions to peptide abundance data
 #'
 #' @param data A data frame containing peptide abundance data
 #' @param id Column name for peptide identifier
 #' @param group Column name for group/condition
 #' @param value Column name for abundance values
-#' @param distributions Which distributions to fit: "all" or a character vector
+#' @param distributions Which distributions to fit: "continuous" (default),
+#'   "counts", "all", or a character vector of distribution names
 #'
 #' @return A peppwr_fits object
 #' @export
-fit_distributions <- function(data, id, group, value, distributions = "all") {
+fit_distributions <- function(data, id, group, value, distributions = "continuous") {
   the_call <- match.call()
+
+  # Handle distributions parameter
+  if (length(distributions) == 1 && distributions %in% c("continuous", "counts", "all")) {
+    dist_list <- get_distribution_preset(distributions)
+
+    # Auto-detection messaging for "all"
+    if (distributions == "all") {
+      # Sample some values to check data type
+      sample_values <- data[[value]][1:min(100, nrow(data))]
+      if (!is_count_data(sample_values)) {
+        message("i Skipping nbinom: data appears continuous (non-integer values detected)")
+        dist_list <- setdiff(dist_list, "nbinom")
+      }
+    }
+  } else {
+    # User provided explicit list
+    dist_list <- distributions
+  }
 
   # Nest data by peptide and group
   nested <- tidyr::nest(data, .by = tidyr::all_of(c(id, group)), data = tidyr::all_of(value))
@@ -19,7 +67,7 @@ fit_distributions <- function(data, id, group, value, distributions = "all") {
   # Fit distributions to each peptide
   nested <- dplyr::mutate(
     nested,
-    fits = purrr::map(.data$data, do_fits)
+    fits = purrr::map(.data$data, \(df) do_fits(df, dists = dist_list))
   )
 
   # Extract best fit for each peptide (by AIC)
@@ -39,8 +87,7 @@ fit_distributions <- function(data, id, group, value, distributions = "all") {
       n_total = miss_stats$n_total,
       n_missing = miss_stats$n_missing,
       na_rate = miss_stats$na_rate,
-      mnar_score = miss_stats$mnar_score,
-      mnar_pvalue = miss_stats$mnar_pvalue
+      mnar_score = miss_stats$mnar_score
     )
   })
 
@@ -80,23 +127,28 @@ single_fit <- function(df, dist){
 }
 
 
-avail_dists <- function() {
-  c("gamma", "norm",
-    "snorm", "invgamma",
-    "invgauss", "lnorm",
-    "lgamma", "pareto",
-    "nbinom")
+avail_dists <- function(include_counts = FALSE) {
+  if (include_counts) {
+    get_distribution_preset("all")
+  } else {
+    get_distribution_preset("continuous")
+  }
 }
 
 d2n <- function(tag){
+  # Full name mapping for all distributions (including counts)
+  all_dists <- c("gamma", "norm", "snorm", "invgamma",
+                 "invgauss", "lnorm", "lgamma", "pareto", "nbinom")
   v <- c("Gamma", "Normal", "Skew Normal", "InvGamma", "Inverse Gaussian",
            "Lognormal", "Log Gamma", "Pareto", "Negative Binomial")
-  names(v) <- avail_dists()
+  names(v) <- all_dists
   v[tag]
 }
 
-do_fits <- function(df) {
-  dists <- avail_dists()
+do_fits <- function(df, dists = NULL) {
+  if (is.null(dists)) {
+    dists <- get_distribution_preset("continuous")
+  }
 
   fits <- lapply(dists, \(d) single_fit(df, d))
   names(fits) <- dists
@@ -123,7 +175,7 @@ squash_fits <- function(fit){
 
 parse_fitdist <- function(fit){
   tibble::tibble(
-    dist = fit$distname,
+    dist = d2n(fit$distname),
     loglik = fit$loglik,
     aic = fit$aic
   )
@@ -154,9 +206,8 @@ parse_univariateML <- function(fit){
 #'   - n_total: Total number of values
 #'   - n_missing: Number of NA values
 #'   - na_rate: Proportion missing (0-1)
-#'   - mnar_score: Normalized deviation from expected mean rank
-#'     (positive = low values more likely missing)
-#'   - mnar_pvalue: P-value for MNAR pattern (Wilcoxon one-sample test)
+#'   - mnar_score: Z-score measuring MNAR pattern. Positive values indicate
+#'     low values are more likely to be missing. Values > 2 suggest MNAR.
 #'
 #' @export
 compute_missingness <- function(values) {
@@ -171,7 +222,6 @@ compute_missingness <- function(values) {
   if (n_obs < 2 || n_missing == 0) {
     # Can't compute MNAR score without both observed and missing
     mnar_score <- NA_real_
-    mnar_pvalue <- NA_real_
   } else {
     # Under MCAR, the expected mean rank of observed values is (n_total + 1) / 2
     # Under MNAR (low missing), observed values will have higher ranks
@@ -185,23 +235,12 @@ compute_missingness <- function(values) {
     se_rank <- sqrt(n_total * (n_total + 1) / (12 * n_obs))
 
     mnar_score <- (observed_mean_rank - expected_mean_rank) / se_rank
-
-    # P-value using Wilcoxon signed-rank test (one-sample)
-    mnar_pvalue <- tryCatch({
-      test <- stats::wilcox.test(
-        observed_ranks,
-        mu = expected_mean_rank,
-        alternative = "greater"
-      )
-      test$p.value
-    }, error = function(e) NA_real_)
   }
 
   list(
     n_total = n_total,
     n_missing = n_missing,
     na_rate = na_rate,
-    mnar_score = mnar_score,
-    mnar_pvalue = mnar_pvalue
+    mnar_score = mnar_score
   )
 }
