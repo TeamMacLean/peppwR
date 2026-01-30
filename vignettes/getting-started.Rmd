@@ -113,25 +113,23 @@ When these metrics agree, you can be confident about the distribution choice.
 
 ## Assess Fit Quality
 
-Before running power analysis, check that the fitted distributions reasonably match your data:
+With larger pilot datasets (n≥15 per group), you can visually assess fit quality using diagnostic plots. peppwR provides two options:
 
-```{r density-overlay, fig.height=6, warning=FALSE}
-set.seed(42)  # For reproducible peptide selection
+**Density overlay** - overlays fitted density curves on observed histograms:
 
+```{r density-overlay, eval=FALSE}
 # Visual check: does the fitted distribution match the data?
 plot_density_overlay(fits, n_overlay = 4)
 ```
 
-The density overlay shows observed histograms (blue) with fitted density curves (red). Good fits show the curve closely tracking the histogram shape.
+**QQ plots** - compare observed vs theoretical quantiles:
 
-```{r qq-plots, fig.height=6, warning=FALSE}
+```{r qq-plots, eval=FALSE}
 # Goodness-of-fit assessment via QQ plots
 plot_qq(fits, n_plots = 4)
 ```
 
-In QQ plots, points should fall along the diagonal red line. Deviations indicate the fitted distribution doesn't fully capture the data's characteristics:
-- Points curving above the line at the right indicate heavier right tails in the data
-- S-shaped patterns suggest the wrong distribution family
+With our small pilot data (n=4 per group), these plots are not very informative - there are simply too few points per peptide for meaningful visual assessment. See `vignette("power-analysis-workflow")` for examples with larger datasets.
 
 If fits look poor, consider:
 - Using different candidate distributions
