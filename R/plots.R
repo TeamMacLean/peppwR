@@ -844,15 +844,16 @@ plot_param_distribution <- function(fits) {
 
 # Declare global variables to avoid R CMD check notes
 utils::globalVariables(c("value", "density", "theoretical", "best_dist",
-                         "na_rate", "mnar_score"))
+                         "na_rate", "mnar_score", "mean_abundance"))
 
 #' Plot missingness statistics
 #'
-#' Shows distribution of NA rates and MNAR scores across peptides.
+#' Shows distribution of NA rates, MNAR scores, and relationship between
+#' abundance and missingness across peptides.
 #'
 #' @param fits A peppwr_fits object
 #'
-#' @return A ggplot object
+#' @return A ggplot object or gtable (combined panels)
 #' @export
 plot_missingness <- function(fits) {
   validate_peppwr_fits(fits)
@@ -861,9 +862,10 @@ plot_missingness <- function(fits) {
     stop("Fits object does not contain missingness data")
   }
 
+
   miss_data <- fits$missingness
 
-  # Create two-panel plot: NA rate distribution and MNAR score
+  # Panel 1: NA rate distribution
   p1 <- ggplot2::ggplot(miss_data, ggplot2::aes(x = na_rate)) +
     ggplot2::geom_histogram(
       bins = 20,
@@ -886,6 +888,7 @@ plot_missingness <- function(fits) {
   mnar_scores <- miss_data$mnar_score[!is.na(miss_data$mnar_score)]
 
   if (length(mnar_scores) > 1 && stats::var(mnar_scores) > 0.01) {
+    # Panel 2: MNAR score histogram
     p2 <- ggplot2::ggplot(miss_data[!is.na(miss_data$mnar_score), ],
                           ggplot2::aes(x = mnar_score)) +
       ggplot2::geom_histogram(
@@ -912,8 +915,43 @@ plot_missingness <- function(fits) {
         size = 3
       )
 
-    # Combine plots
-    cowplot::plot_grid(p1, p2, nrow = 2, rel_heights = c(1, 1))
+    # Panel 3: Abundance vs NA rate scatter (only peptides with missing data)
+    miss_subset <- miss_data[miss_data$na_rate > 0 & !is.na(miss_data$mean_abundance), ]
+
+    if (nrow(miss_subset) > 0) {
+      p3 <- ggplot2::ggplot(miss_subset,
+                            ggplot2::aes(x = mean_abundance, y = na_rate)) +
+        ggplot2::geom_point(ggplot2::aes(color = mnar_score), alpha = 0.6, size = 2) +
+        ggplot2::scale_color_gradient2(
+          low = "steelblue", mid = "gray", high = "red",
+          midpoint = 0, name = "MNAR\nScore"
+        ) +
+        ggplot2::scale_x_log10() +
+        ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+        ggplot2::theme_minimal() +
+        ggplot2::labs(
+          x = "Mean Abundance (log scale)",
+          y = "NA Rate",
+          subtitle = "Negative trend suggests MNAR pattern"
+        )
+
+      # Add trend line if enough points
+      if (nrow(miss_subset) >= 5) {
+        p3 <- p3 + ggplot2::geom_smooth(
+          method = "loess",
+          se = FALSE,
+          color = "black",
+          linetype = "dashed",
+          formula = y ~ x
+        )
+      }
+
+      # Combine 3 panels
+      cowplot::plot_grid(p1, p2, p3, nrow = 3, rel_heights = c(1, 1, 1.2))
+    } else {
+      # No peptides with missing data - just show 2 panels
+      cowplot::plot_grid(p1, p2, nrow = 2, rel_heights = c(1, 1))
+    }
   } else {
     # Just show NA rate plot
     p1 +

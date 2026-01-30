@@ -10,8 +10,9 @@ plot_missingness(fits)
 \item{fits}{A peppwr_fits object}
 }
 \value{
-A ggplot object
+A ggplot object or gtable (combined panels)
 }
 \description{
-Shows distribution of NA rates and MNAR scores across peptides.
+Shows distribution of NA rates, MNAR scores, and relationship between
+abundance and missingness across peptides.
 }

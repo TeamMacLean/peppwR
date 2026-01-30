@@ -87,7 +87,8 @@ fit_distributions <- function(data, id, group, value, distributions = "continuou
       n_total = miss_stats$n_total,
       n_missing = miss_stats$n_missing,
       na_rate = miss_stats$na_rate,
-      mnar_score = miss_stats$mnar_score
+      mnar_score = miss_stats$mnar_score,
+      mean_abundance = mean(values, na.rm = TRUE)
     )
   })
 
@@ -192,6 +193,51 @@ parse_univariateML <- function(fit){
 # ============================================================================
 # Phase C: Missing Data Handling
 # ============================================================================
+
+#' Get peptides showing MNAR pattern
+#'
+#' Returns peptides where the MNAR score exceeds a threshold, indicating
+#' that low values are systematically missing (Missing Not At Random).
+#'
+#' @param fits A peppwr_fits object
+#' @param threshold MNAR score threshold (default 2, corresponds to ~95% confidence)
+#'
+#' @return A tibble with columns:
+#'   - peptide_id: Peptide identifier
+#'   - condition: Group/condition
+#'   - na_rate: Proportion of missing values
+#'   - mnar_score: Z-score for MNAR pattern
+#'   - mean_abundance: Mean of observed values
+#'   Sorted by mnar_score descending. Returns empty tibble if no peptides
+#'   exceed threshold.
+#'
+#' @export
+get_mnar_peptides <- function(fits, threshold = 2) {
+  validate_peppwr_fits(fits)
+
+  if (is.null(fits$missingness)) {
+    stop("Fits object does not contain missingness data")
+  }
+
+  # Get peptide IDs from fits$data
+  id_col <- names(fits$data)[1]
+  group_col <- names(fits$data)[2]
+
+  # Build result tibble
+  result <- tibble::tibble(
+    peptide_id = fits$data[[id_col]],
+    condition = fits$data[[group_col]],
+    na_rate = fits$missingness$na_rate,
+    mnar_score = fits$missingness$mnar_score,
+    mean_abundance = fits$missingness$mean_abundance
+  )
+
+  # Filter to threshold and sort
+  result <- result[!is.na(result$mnar_score) & result$mnar_score > threshold, ]
+  result <- result[order(-result$mnar_score), ]
+
+  result
+}
 
 #' Compute missingness statistics for a vector of values
 #'

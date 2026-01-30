@@ -93,11 +93,10 @@ print.peppwr_fits <- function(x, ...) {
 
       # MNAR summary
       mnar_scores <- x$missingness$mnar_score[!is.na(x$missingness$mnar_score)]
-      if (length(mnar_scores) > 0) {
-        n_mnar <- sum(mnar_scores > 2)  # MNAR score > 2 suggests MNAR
-        if (n_mnar > 0) {
-          cat(sprintf("Potential MNAR pattern: %d peptides\n", n_mnar))
-        }
+      if (length(mnar_scores) > 0 && peps_with_na > 0) {
+        n_mnar <- sum(mnar_scores > 2, na.rm = TRUE)  # MNAR score > 2 suggests MNAR
+        cat(sprintf("  MNAR pattern: %d of %d peptides with missing data (score > 2)\n",
+                    n_mnar, peps_with_na))
       }
     }
   }

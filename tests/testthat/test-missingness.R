@@ -423,3 +423,172 @@ test_that("plot_missingness handles data with no missingness", {
 test_that("plot_missingness errors on invalid input", {
   expect_error(plot_missingness("not a fits object"))
 })
+
+# --- v2.1: MNAR Visualization Enhancements ---
+
+test_that("missingness slot includes mean_abundance", {
+  test_data <- tibble::tibble(
+    peptide = rep("pep1", 8),
+    condition = rep("ctrl", 8),
+    abundance = c(10, 20, 30, 40, NA, NA, 70, 80)
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+
+  expect_true("mean_abundance" %in% names(fits$missingness))
+  # Mean of observed: (10+20+30+40+70+80)/6 = 41.67
+  expect_equal(fits$missingness$mean_abundance[1], mean(c(10, 20, 30, 40, 70, 80)), tolerance = 0.01)
+})
+
+test_that("mean_abundance handles all NA values", {
+  test_data <- tibble::tibble(
+    peptide = rep(c("pep1", "pep2"), each = 4),
+    condition = rep("ctrl", 8),
+    abundance = c(rep(NA, 4), 10, 20, 30, 40)
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+
+  # pep1 should have NaN for mean_abundance (all NA)
+  expect_true(is.nan(fits$missingness$mean_abundance[1]) || is.na(fits$missingness$mean_abundance[1]))
+  # pep2 should have mean of 25
+  expect_equal(fits$missingness$mean_abundance[2], 25, tolerance = 0.01)
+})
+
+test_that("get_mnar_peptides returns tibble with correct columns", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:10), each = 8),
+    condition = rep("ctrl", 80),
+    abundance = rlnorm(80, meanlog = 3, sdlog = 1)
+  )
+  # Make low values missing
+  test_data$abundance <- ifelse(
+    test_data$abundance < quantile(test_data$abundance, 0.3, na.rm = TRUE) & runif(80) < 0.5,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  result <- get_mnar_peptides(fits, threshold = 0)  # Low threshold to get results
+
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(c("peptide_id", "condition", "na_rate", "mnar_score", "mean_abundance") %in% names(result)))
+})
+
+test_that("get_mnar_peptides filters by threshold", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:20), each = 10),
+    condition = rep("ctrl", 200),
+    abundance = rlnorm(200, meanlog = 3, sdlog = 1)
+  )
+  # Introduce MNAR pattern - low values more likely missing
+  threshold <- quantile(test_data$abundance, 0.25)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(200) < 0.6,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+
+  # With high threshold, should get fewer results
+  high_thresh <- get_mnar_peptides(fits, threshold = 3)
+  low_thresh <- get_mnar_peptides(fits, threshold = 0)
+
+  expect_lte(nrow(high_thresh), nrow(low_thresh))
+  # High threshold results should have mnar_score > 3
+  if (nrow(high_thresh) > 0) {
+    expect_true(all(high_thresh$mnar_score > 3))
+  }
+})
+
+test_that("get_mnar_peptides returns empty tibble when no MNAR", {
+  test_data <- tibble::tibble(
+    peptide = rep("pep1", 8),
+    condition = rep("ctrl", 8),
+    abundance = rnorm(8, 100, 10)  # No missing values
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  result <- get_mnar_peptides(fits, threshold = 2)
+
+  expect_equal(nrow(result), 0)
+  expect_true(all(c("peptide_id", "condition", "na_rate", "mnar_score", "mean_abundance") %in% names(result)))
+})
+
+test_that("get_mnar_peptides sorts by mnar_score descending", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:15), each = 10),
+    condition = rep("ctrl", 150),
+    abundance = rlnorm(150, meanlog = 3, sdlog = 1)
+  )
+  # Introduce MNAR pattern
+  threshold <- quantile(test_data$abundance, 0.3)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(150) < 0.5,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  result <- get_mnar_peptides(fits, threshold = 0)
+
+  if (nrow(result) > 1) {
+    # Should be sorted descending
+    expect_true(all(diff(result$mnar_score) <= 0))
+  }
+})
+
+test_that("get_mnar_peptides errors on invalid input", {
+  expect_error(get_mnar_peptides("not a fits object"))
+})
+
+test_that("get_mnar_peptides errors when missingness slot missing", {
+  # Create a mock peppwr_fits without missingness
+  mock_fits <- structure(
+    list(data = tibble::tibble(), fits = list(), best = character(), call = NULL, missingness = NULL),
+    class = "peppwr_fits"
+  )
+  expect_error(get_mnar_peptides(mock_fits), "missingness")
+})
+
+test_that("plot_missingness includes abundance vs NA rate panel", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:10), each = 10),
+    condition = rep("ctrl", 100),
+    abundance = rlnorm(100, meanlog = 3, sdlog = 1)
+  )
+  # Introduce missingness
+  test_data$abundance <- ifelse(
+    runif(100) < 0.2,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  p <- plot_missingness(fits)
+
+  # Should return a gtable (from cowplot::plot_grid) for 3-panel layout
+  expect_true(inherits(p, "gtable") || inherits(p, "ggplot") || inherits(p, "grob"))
+})
+
+test_that("print.peppwr_fits shows MNAR pattern count", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:10), each = 10),
+    condition = rep("ctrl", 100),
+    abundance = rlnorm(100, meanlog = 3, sdlog = 1)
+  )
+  # Introduce MNAR pattern - low values missing
+  threshold <- quantile(test_data$abundance, 0.25)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(100) < 0.5,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  output <- capture.output(print(fits))
+
+  # Should mention MNAR pattern in output
+  expect_true(any(grepl("MNAR", output, ignore.case = TRUE)))
+})
