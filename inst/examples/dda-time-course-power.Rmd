@@ -1,0 +1,198 @@
+---
+title: "Power Analysis for Time-Course Phosphoproteomics (DDA)"
+author: "peppwR"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6
+)
+set.seed(42)
+```
+
+## Introduction
+
+This analysis demonstrates peppwR's power analysis capabilities using real Arabidopsis phosphoproteomics data from a time-course experiment. The data comes from a DDA (Data-Dependent Acquisition) mass spectrometry experiment comparing phosphopeptide abundances across different timepoints.
+
+**Key question:** What statistical power do we have to detect changes in phosphopeptide abundance between early and late timepoints?
+
+## Data Preparation
+
+```{r load-packages}
+library(peppwR)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load-data}
+# Load the DDA experiment data
+dda <- read.csv("../../sample_data/dda_data.csv")
+
+# Examine the structure
+glimpse(dda)
+```
+
+```{r filter-data}
+# Filter to early (0) vs late (600) timepoints and format for peppwR
+pilot <- dda |>
+  filter(timepoints %in% c(0, 600)) |>
+  transmute(
+    peptide_id = new_annotation,
+    condition = paste0("t", timepoints),
+    abundance = timepoints_values
+  )
+
+# Summary statistics
+cat("Unique peptides:", n_distinct(pilot$peptide_id), "\n")
+cat("Observations per condition:\n")
+pilot |> count(condition)
+```
+
+```{r eda-plot, fig.cap="Distribution of log2 abundance values across conditions."}
+# Exploratory visualization
+ggplot(pilot, aes(x = log2(abundance), fill = condition)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    x = "Log2 Abundance",
+    y = "Density",
+    title = "Phosphopeptide Abundance Distribution"
+  ) +
+  theme_minimal()
+```
+
+The abundance values span several orders of magnitude, typical for phosphoproteomics data. The distributions appear similar between timepoints, though individual peptides may show significant changes.
+
+## Distribution Fitting
+
+peppwR fits multiple candidate distributions to each peptide's abundance values to find the best parametric model for simulation.
+
+```{r fit-distributions}
+# Fit distributions to each peptide
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+
+# Summary of fitting results
+print(fits)
+```
+
+```{r plot-fits, fig.cap="Best-fit distribution counts across the peptidome."}
+# Visualize which distributions fit best
+plot(fits)
+```
+
+The fitting results show which parametric distributions best describe phosphopeptide abundance data. Lognormal and gamma distributions typically fit well, reflecting the positive, right-skewed nature of mass spectrometry intensities.
+
+## Diagnostic Plots
+
+### Density Overlay
+
+Let's examine how well the fitted distributions match the observed data for a sample of peptides.
+
+```{r density-overlay, fig.cap="Fitted density curves overlaid on observed histograms for selected peptides."}
+plot_density_overlay(fits, n_overlay = 6)
+```
+
+### QQ Plots
+
+QQ plots provide another view of goodness-of-fit, comparing observed quantiles to theoretical quantiles from the fitted distribution.
+
+```{r qq-plots, fig.cap="QQ plots comparing observed vs theoretical quantiles."}
+plot_qq(fits, n_plots = 6)
+```
+
+### Parameter Distribution
+
+Understanding how fitted parameters vary across the peptidome helps assess whether simulation assumptions are reasonable.
+
+```{r param-dist, fig.cap="Distribution of AIC values across peptides for each fitted distribution."}
+plot_param_distribution(fits)
+```
+
+## Power Analysis
+
+Now we address the core questions about statistical power.
+
+### Question 1: Current Power
+
+With N=3 biological replicates per group (as in this experiment), what power do we have to detect a 2-fold change?
+
+```{r power-q1}
+power_n3 <- power_analysis(fits, effect_size = 2, n_per_group = 3, find = "power")
+print(power_n3)
+```
+
+```{r plot-power-n3, fig.cap="Distribution of power across peptides with N=3 and 2-fold effect."}
+plot(power_n3)
+```
+
+### Question 2: Sample Size for Target Power
+
+What sample size would we need to achieve 80% power to detect a 1.5-fold change?
+
+```{r power-q2}
+sample_size <- power_analysis(fits, effect_size = 1.5, target_power = 0.8, find = "sample_size")
+print(sample_size)
+```
+
+```{r plot-sample-size, fig.cap="Percentage of peptides reaching 80% power at each sample size."}
+plot(sample_size)
+```
+
+### Question 3: Minimum Detectable Effect
+
+With N=3 replicates and wanting 80% power, what's the minimum effect size we can reliably detect?
+
+```{r power-q3}
+min_effect <- power_analysis(fits, n_per_group = 3, target_power = 0.8, find = "effect_size")
+print(min_effect)
+```
+
+```{r plot-min-effect, fig.cap="Minimum detectable effect size distribution across peptides."}
+plot(min_effect)
+```
+
+## Power Heatmap
+
+A power heatmap shows how power varies across combinations of sample size and effect size, useful for planning future experiments.
+
+```{r power-heatmap, fig.cap="Power as a function of sample size and effect size (aggregate simulation)."}
+# Use typical lognormal parameters for aggregate simulation
+plot_power_heatmap(
+  distribution = "lnorm",
+  params = list(meanlog = 12, sdlog = 1.5),
+  n_range = c(3, 12),
+  effect_range = c(1.2, 3)
+)
+```
+
+## Recommendations
+
+Based on this analysis:
+
+1. **Current experiment (N=3):** Power to detect a 2-fold change is moderate. Many peptides will be underpowered for detecting smaller effects.
+
+2. **For 80% power at 1.5-fold change:** A larger sample size is needed than the current N=3. The exact number depends on the peptide, but the power curves provide guidance.
+
+3. **Minimum detectable effect:** At N=3 with 80% power target, we can reliably detect only relatively large fold changes. Smaller effects will require larger sample sizes.
+
+### Caveats
+
+- This analysis uses a single genotype (Col-0) and specific timepoint comparison (0 vs 600)
+- Power estimates assume the fitted distributions accurately represent the underlying biology
+- Technical variability (not modeled here) may further reduce effective power
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```

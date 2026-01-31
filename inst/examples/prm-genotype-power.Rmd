@@ -1,0 +1,276 @@
+---
+title: "Power Analysis for Targeted Proteomics with Missing Data (PRM)"
+author: "peppwR"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6
+)
+set.seed(42)
+```
+
+## Introduction
+
+This analysis demonstrates peppwR's capabilities for handling real-world missing data patterns using a PRM (Parallel Reaction Monitoring) targeted phosphoproteomics dataset. The data comes from a fungal (rice blast) phosphoproteomics experiment.
+
+**Key features demonstrated:**
+
+- Missingness analysis and MNAR detection
+- Power analysis accounting for missing data
+- FDR-aware power analysis for multiple testing
+
+## Data Preparation
+
+```{r load-packages}
+library(peppwR)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load-data}
+# Load the PRM experiment data
+prm <- read.csv("../../sample_data/prm_data.csv")
+
+# Examine the structure
+glimpse(prm)
+```
+
+```{r summarize-data}
+# Check for missing values
+cat("Total observations:", nrow(prm), "\n")
+cat("Missing values:", sum(is.na(prm$total_area)), "\n")
+cat("Missing rate:", round(mean(is.na(prm$total_area)) * 100, 1), "%\n")
+```
+
+```{r filter-data}
+# Filter to early (0) vs late (6) timepoints
+# Average technical replicates within each biological replicate
+pilot <- prm |>
+  filter(timepoint %in% c(0, 6)) |>
+  group_by(peptide_modified_sequence, genotype, timepoint, bio_rep) |>
+  summarise(abundance = mean(total_area, na.rm = TRUE), .groups = "drop") |>
+  transmute(
+    peptide_id = peptide_modified_sequence,
+    condition = paste0("t", timepoint),
+    abundance = abundance
+  )
+
+# Summary statistics
+cat("Unique peptides:", n_distinct(pilot$peptide_id), "\n")
+cat("Observations per condition:\n")
+pilot |> count(condition)
+```
+
+```{r missing-summary}
+# Check missingness in the prepared data
+cat("Missing after averaging tech reps:", sum(is.na(pilot$abundance)), "\n")
+cat("Missing rate:", round(mean(is.na(pilot$abundance)) * 100, 1), "%\n")
+```
+
+## Missingness Analysis
+
+### Fitting with Missingness Tracking
+
+peppwR automatically tracks missingness patterns during distribution fitting.
+
+```{r fit-distributions}
+# Fit distributions - missingness is tracked automatically
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+
+# Summary includes missingness information
+print(fits)
+```
+
+### Missingness Visualization
+
+The `plot_missingness()` function provides a comprehensive view of missing data patterns:
+
+1. **NA Rate Distribution:** How missingness varies across peptides
+2. **MNAR Score Distribution:** Evidence for Missing Not At Random patterns
+3. **Abundance vs NA Rate:** Relationship between expression level and missingness
+
+```{r plot-missingness, fig.cap="Missingness patterns across the PRM peptidome.", fig.height=8}
+plot_missingness(fits)
+```
+
+### MNAR Detection
+
+MNAR (Missing Not At Random) occurs when low-abundance peptides are systematically missing - a common pattern in mass spectrometry due to detection limits. peppwR calculates an MNAR score (z-statistic comparing abundance of missing vs non-missing observations).
+
+```{r mnar-peptides}
+# Identify peptides with strong MNAR evidence
+mnar_peptides <- get_mnar_peptides(fits, threshold = 2)
+
+cat("Peptides with MNAR evidence (z > 2):", nrow(mnar_peptides), "\n")
+if (nrow(mnar_peptides) > 0) {
+  print(head(mnar_peptides, 10))
+}
+```
+
+Peptides with high MNAR scores may have biased abundance estimates and reduced power due to informative missingness.
+
+## Distribution Fitting Results
+
+```{r plot-fits, fig.cap="Best-fit distribution counts for PRM data."}
+plot(fits)
+```
+
+### Diagnostic Plots
+
+```{r density-overlay, fig.cap="Fitted density curves overlaid on observed histograms."}
+plot_density_overlay(fits, n_overlay = 6)
+```
+
+```{r qq-plots, fig.cap="QQ plots comparing observed vs theoretical quantiles."}
+plot_qq(fits, n_plots = 6)
+```
+
+## Power Analysis
+
+### Standard Power Analysis
+
+First, let's estimate power without accounting for missingness.
+
+```{r power-standard}
+power_standard <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 3,
+  find = "power",
+  include_missingness = FALSE
+)
+print(power_standard)
+```
+
+### Power with Missingness
+
+Now let's see how missingness affects power estimates.
+
+```{r power-with-na}
+power_with_na <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 3,
+  find = "power",
+  include_missingness = TRUE
+)
+print(power_with_na)
+```
+
+```{r compare-power, fig.cap="Comparison of power estimates with and without missingness."}
+# Visual comparison
+par(mfrow = c(1, 2))
+plot(power_standard)
+plot(power_with_na)
+```
+
+Accounting for missingness typically reduces power estimates, as some simulated observations will be missing by design.
+
+### Sample Size Recommendations
+
+What sample size would we need to achieve 80% power for a 2-fold change?
+
+```{r sample-size}
+sample_size <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size"
+)
+print(sample_size)
+```
+
+```{r plot-sample-size, fig.cap="Percentage of peptides achieving 80% power at each sample size."}
+plot(sample_size)
+```
+
+## FDR-Aware Power Analysis
+
+With 285 peptides tested, multiple testing correction is important. FDR-aware power analysis simulates the entire peptidome and applies Benjamini-Hochberg correction.
+
+```{r power-fdr}
+# Standard power (nominal alpha = 0.05)
+power_nominal <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 3,
+  find = "power",
+  apply_fdr = FALSE
+)
+
+# FDR-aware power (BH correction, 80% true nulls assumed)
+power_fdr <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 3,
+  find = "power",
+  apply_fdr = TRUE,
+  prop_null = 0.8,
+  fdr_threshold = 0.05
+)
+```
+
+```{r compare-fdr}
+cat("Nominal power (no FDR correction):\n")
+print(power_nominal)
+
+cat("\nFDR-aware power (BH correction, 80% true nulls):\n")
+print(power_fdr)
+```
+
+FDR correction reduces effective power because more evidence is required to reject the null hypothesis after adjusting for multiple comparisons. The impact depends on:
+
+- **Number of tests:** More peptides = more stringent correction
+- **Proportion of true nulls:** More true effects = less stringent correction
+
+## Recommendations
+
+### Sample Size
+
+Based on this PRM dataset:
+
+1. **Current power (N=3, 2-fold change):** Power is limited for many peptides, especially after accounting for missingness and FDR correction.
+
+2. **For 80% power:** Consider increasing biological replicates beyond N=3, particularly if detecting modest effect sizes (< 2-fold).
+
+### Handling Missingness
+
+1. **MNAR awareness:** Peptides identified with MNAR patterns may have biased abundance estimates. Consider:
+   - Using robust statistical tests
+   - Excluding high-MNAR peptides from primary analysis
+   - Reporting MNAR peptides separately
+
+2. **Design considerations:** Higher missing rates reduce effective sample size. Plan for adequate replication to maintain power despite missingness.
+
+### Targeted vs Discovery Tradeoffs
+
+This PRM dataset (285 peptides) represents a targeted panel with:
+
+- **Advantages:** Lower multiple testing burden than DDA, focused statistical power
+- **Disadvantages:** Cannot discover unexpected changes, limited to pre-selected targets
+
+For power planning, the smaller number of tests means less severe FDR correction compared to discovery-based proteomics.
+
+### Caveats
+
+- This analysis combines both genotypes; genotype-specific analyses may differ
+- Technical replicate averaging reduces noise but may mask technical variability
+- MNAR models are approximations; true missing data mechanisms may be more complex
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```
