@@ -127,6 +127,7 @@ power_analysis.default <- function(distribution, ...) {
 #' @param find What to solve for: "power" or "sample_size"
 #' @param n_sim Number of simulations per peptide (default 1000)
 #' @param on_fit_failure How to handle failed fits: "exclude", "empirical", or "lognormal"
+#' @param proportion_threshold Proportion of peptides that must reach target_power (default 0.5)
 #' @param include_missingness If TRUE, incorporate peptide-specific NA rates into simulations
 #' @param apply_fdr If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction
 #' @param prop_null Proportion of true null peptides (default 0.9 = 90% unchanged)
@@ -140,6 +141,7 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
                                        target_power = NULL, alpha = 0.05, test = "wilcoxon",
                                        find = "power", n_sim = 1000,
                                        on_fit_failure = "exclude",
+                                       proportion_threshold = 0.5,
                                        include_missingness = FALSE,
                                        apply_fdr = FALSE, prop_null = 0.9,
                                        fdr_threshold = 0.05, ...) {
@@ -217,6 +219,13 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
     }
     if (is.null(effect_size)) {
       stop("effect_size is required when find='sample_size'")
+    }
+  } else if (find == "effect_size") {
+    if (is.null(n_per_group)) {
+      stop("n_per_group is required when find='effect_size'")
+    }
+    if (is.null(target_power)) {
+      stop("target_power is required when find='effect_size'")
     }
   }
 
@@ -336,8 +345,8 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
 
     power_curve <- data.frame(n_per_group = n_values, proportion_powered = proportion_powered)
 
-    # Find N where majority of peptides reach target power
-    above_target <- proportion_powered >= 0.5
+    # Find N where proportion of peptides reaches threshold
+    above_target <- proportion_powered >= proportion_threshold
     if (any(above_target)) {
       answer <- n_values[which(above_target)[1]]
     } else {
@@ -350,6 +359,54 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
       proportion_powered = proportion_powered,
       n_analyzed = n_analyzed,
       n_excluded = n_excluded
+    )
+  } else if (find == "effect_size") {
+    effect_values <- c(1.5, 2, 3, 5, 10)
+    proportion_powered <- sapply(effect_values, function(es) {
+      peps <- sapply(seq_len(n_peptides), function(i) {
+        best_dist <- fits$best[i]
+        fit_df <- fits$fits[[i]]
+        raw_data <- fits$data$data[[i]][[1]]
+
+        if (is.na(best_dist)) {
+          if (on_fit_failure == "lognormal") {
+            raw_data <- raw_data[raw_data > 0]
+            if (length(raw_data) < 2) return(NA)
+            m <- mean(raw_data)
+            s <- stats::sd(raw_data)
+            meanlog <- log(m^2 / sqrt(s^2 + m^2))
+            sdlog <- sqrt(log(1 + s^2 / m^2))
+            params <- list(meanlog = meanlog, sdlog = sdlog)
+            dist_rfunc <- "lnorm"
+          } else {
+            return(NA)
+          }
+        } else {
+          params <- get_dist_params(best_dist, fit_df, raw_data)
+          dist_rfunc <- map_dist_name(best_dist)
+          if (is.null(dist_rfunc) || is.null(params)) return(NA)
+        }
+        run_power_sim(dist_rfunc, params, n_per_group, es, alpha, test, n_sim)
+      })
+      mean(peps >= target_power, na.rm = TRUE)
+    })
+
+    effect_curve <- data.frame(effect_size = effect_values, proportion_powered = proportion_powered)
+
+    # Find minimum effect where proportion reaches threshold
+    above_target <- proportion_powered >= proportion_threshold
+    if (any(above_target)) {
+      answer <- effect_values[which(above_target)[1]]
+    } else {
+      answer <- max(effect_values)
+    }
+
+    simulations <- list(
+      n_sim = n_sim,
+      effect_curve = effect_curve,
+      proportion_powered = proportion_powered,
+      n_analyzed = sum(!is.na(fits$best)),
+      n_excluded = sum(is.na(fits$best))
     )
   } else {
     # find = "power"
@@ -368,7 +425,8 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
     n_per_group = n_per_group,
     target_power = target_power,
     alpha = alpha,
-    test = test
+    test = test,
+    proportion_threshold = proportion_threshold
   )
 
   new_peppwr_power(

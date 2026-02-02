@@ -215,3 +215,231 @@ test_that("per-peptide mode works with find='sample_size'", {
   expect_s3_class(result, "peppwr_power")
   expect_equal(result$question, "sample_size")
 })
+
+# --- find='effect_size' tests ---
+
+test_that("find='effect_size' requires n_per_group", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:3), each = 25),
+    condition = rep("control", 75),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  expect_error(
+    power_analysis(fits, target_power = 0.8, find = "effect_size"),
+    "n_per_group"
+  )
+})
+
+test_that("find='effect_size' requires target_power", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:3), each = 25),
+    condition = rep("control", 75),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  expect_error(
+    power_analysis(fits, n_per_group = 6, find = "effect_size"),
+    "target_power"
+  )
+})
+
+test_that("per-peptide mode works with find='effect_size'", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:3), each = 25),
+    condition = rep("control", 75),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  result <- power_analysis(
+    fits,
+    n_per_group = 6,
+    target_power = 0.8,
+    find = "effect_size",
+    n_sim = 50
+  )
+
+  expect_s3_class(result, "peppwr_power")
+  expect_equal(result$mode, "per_peptide")
+  expect_equal(result$question, "effect_size")
+})
+
+test_that("find='effect_size' returns effect_curve in simulations", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:3), each = 25),
+    condition = rep("control", 75),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  result <- power_analysis(
+    fits,
+    n_per_group = 6,
+    target_power = 0.8,
+    find = "effect_size",
+    n_sim = 50
+  )
+
+  expect_true("effect_curve" %in% names(result$simulations))
+  expect_true("effect_size" %in% names(result$simulations$effect_curve))
+  expect_true("proportion_powered" %in% names(result$simulations$effect_curve))
+})
+
+test_that("find='effect_size' answer is minimum effect achieving threshold", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:3), each = 25),
+    condition = rep("control", 75),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  result <- power_analysis(
+    fits,
+    n_per_group = 6,
+    target_power = 0.8,
+    find = "effect_size",
+    n_sim = 50
+  )
+
+  # Answer should be one of the searched effect values
+  expect_true(result$answer %in% c(1.5, 2, 3, 5, 10))
+})
+
+test_that("proportion_threshold works for find='effect_size'", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:5), each = 25),
+    condition = rep("control", 125),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5),
+      rgamma(25, shape = 3, rate = 0.15),
+      rnorm(25, mean = 80, sd = 12)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  # Lower threshold should need same or smaller effect
+  result_50 <- power_analysis(
+    fits,
+    n_per_group = 6,
+    target_power = 0.8,
+    find = "effect_size",
+    proportion_threshold = 0.5,
+    n_sim = 50
+  )
+
+  result_80 <- power_analysis(
+    fits,
+    n_per_group = 6,
+    target_power = 0.8,
+    find = "effect_size",
+    proportion_threshold = 0.8,
+    n_sim = 50
+  )
+
+  # Higher threshold needs same or larger effect
+  expect_true(result_80$answer >= result_50$answer)
+})
+
+test_that("proportion_threshold works for find='sample_size'", {
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:5), each = 25),
+    condition = rep("control", 125),
+    abundance = c(
+      rgamma(25, shape = 2, rate = 0.1),
+      rnorm(25, mean = 50, sd = 10),
+      rlnorm(25, meanlog = 3, sdlog = 0.5),
+      rgamma(25, shape = 3, rate = 0.15),
+      rnorm(25, mean = 80, sd = 12)
+    )
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  # Lower threshold should need same or smaller N
+  result_50 <- power_analysis(
+    fits,
+    effect_size = 2,
+    target_power = 0.8,
+    find = "sample_size",
+    proportion_threshold = 0.5,
+    n_sim = 50
+  )
+
+  result_80 <- power_analysis(
+    fits,
+    effect_size = 2,
+    target_power = 0.8,
+    find = "sample_size",
+    proportion_threshold = 0.8,
+    n_sim = 50
+  )
+
+  # Higher threshold needs same or larger N
+  expect_true(result_80$answer >= result_50$answer)
+})

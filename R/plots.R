@@ -146,7 +146,38 @@ plot_power_aggregate <- function(x) {
 #' @return A ggplot object
 #' @keywords internal
 plot_power_perpeptide <- function(x) {
-  if (x$question == "sample_size" && "power_curve" %in% names(x$simulations)) {
+  if (x$question == "effect_size" && "effect_curve" %in% names(x$simulations)) {
+    plot_data <- x$simulations$effect_curve
+    target_power <- x$params$target_power
+    min_effect <- x$answer
+    proportion_threshold <- x$params$proportion_threshold %||% 0.5
+
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = effect_size, y = proportion_powered * 100)) +
+      ggplot2::geom_line(linewidth = 1, color = "steelblue") +
+      ggplot2::geom_point(size = 2, color = "steelblue") +
+      ggplot2::geom_hline(yintercept = proportion_threshold * 100, linetype = "dashed", color = "red") +
+      ggplot2::geom_vline(xintercept = min_effect, linetype = "dotted", color = "darkgreen") +
+      ggplot2::geom_point(
+        data = data.frame(effect_size = min_effect, proportion_powered = proportion_threshold),
+        ggplot2::aes(x = effect_size, y = proportion_powered * 100),
+        size = 4, color = "darkgreen"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(
+        x = "Effect Size (fold change)",
+        y = paste0("% Peptides at ", target_power * 100, "% Power"),
+        title = paste0("Minimum detectable effect: ", min_effect, "-fold"),
+        subtitle = paste0("N=", x$params$n_per_group, " per group, Alpha: ", x$params$alpha)
+      ) +
+      ggplot2::scale_y_continuous(limits = c(0, 100)) +
+      ggplot2::annotate(
+        "text",
+        x = min_effect,
+        y = proportion_threshold * 100 + 5,
+        label = paste0(min_effect, "-fold"),
+        color = "darkgreen"
+      )
+  } else if (x$question == "sample_size" && "power_curve" %in% names(x$simulations)) {
     plot_data <- x$simulations$power_curve
     target_power <- x$params$target_power
 

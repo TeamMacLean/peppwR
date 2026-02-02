@@ -14,6 +14,7 @@
   find = "power",
   n_sim = 1000,
   on_fit_failure = "exclude",
+  proportion_threshold = 0.5,
   include_missingness = FALSE,
   apply_fdr = FALSE,
   prop_null = 0.9,
@@ -39,6 +40,8 @@
 \item{n_sim}{Number of simulations per peptide (default 1000)}
 
 \item{on_fit_failure}{How to handle failed fits: "exclude", "empirical", or "lognormal"}
+
+\item{proportion_threshold}{Proportion of peptides that must reach target_power (default 0.5)}
 
 \item{include_missingness}{If TRUE, incorporate peptide-specific NA rates into simulations}
 
