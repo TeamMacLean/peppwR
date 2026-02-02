@@ -255,74 +255,42 @@ See `feature_plan_v2.md` for detailed specifications.
 
 ---
 
-## v2.1 Planned Enhancements
+## Project Status: ALL FEATURES COMPLETE
 
-See `mnar_visualization_plan.md` for detailed specifications.
+All planned features from v1, v2, v2.1, and v2.2 have been implemented:
 
-### Enhanced MNAR Visualization
-- Add `mean_abundance` to missingness slot
-- `get_mnar_peptides(fits, threshold)` - Return peptides with MNAR evidence
-- Enhance `plot_missingness()` with abundance vs NA rate scatter panel
-- MNAR summary in `print.peppwr_fits()` output
-
----
-
-## Known Issues
-
-### `find = "effect_size"` not implemented for per-peptide mode
-
-**Problem:** The `power_analysis.peppwr_fits()` method accepts `find = "effect_size"` without error, but does not actually implement it. The code path falls through to `find = "power"` handling, returning incorrect/empty results.
-
-**Location:** `R/power.R` lines 200-363 (`power_analysis.peppwr_fits`)
-
-**Current state:**
-- `find = "power"` - IMPLEMENTED (lines 286-298)
-- `find = "sample_size"` - IMPLEMENTED (lines 306-353)
-- `find = "effect_size"` - NOT IMPLEMENTED (accepted but ignored)
-
-**Impact:** Examples using `power_analysis(fits, find = "effect_size", ...)` produce blank or misleading plots. The vignette works because it uses aggregate mode with explicit distribution parameters.
-
-**Fix outline:**
-
-1. Add validation to reject `find = "effect_size"` in per-peptide mode until implemented:
-   ```r
-   if (find == "effect_size") {
-     stop("find='effect_size' is not yet implemented for per-peptide mode. ",
-          "Use aggregate mode with explicit distribution parameters instead.")
-   }
-   ```
-
-2. Implement per-peptide MDE search (similar pattern to `find = "sample_size"`):
-   ```r
-   if (find == "effect_size") {
-     effect_values <- c(1.1, 1.2, 1.3, 1.5, 1.75, 2, 2.5, 3, 4, 5)
-     proportion_powered <- sapply(effect_values, function(es) {
-       peps <- sapply(seq_len(n_peptides), function(i) {
-         # ... get dist params for peptide i ...
-         run_power_sim(dist_rfunc, params, n_per_group, es, alpha, test, n_sim)
-       })
-       mean(peps >= target_power, na.rm = TRUE)
-     })
-     # Return curve and find minimum effect where majority reach target
-   }
-   ```
-
-3. Add corresponding `plot.peppwr_power` handling for `question = "effect_size"` in per-peptide mode
-
-4. Add tests in `test-power.R`
+- ✓ Core power analysis (aggregate and per-peptide modes)
+- ✓ All three questions: find = "power", "sample_size", "effect_size"
+- ✓ Distribution fitting with multiple candidates
+- ✓ Statistical tests: wilcoxon, bootstrap_t, bayes_t
+- ✓ Diagnostic plots: density overlay, QQ, heatmap, param distribution
+- ✓ Missingness handling with MNAR detection
+- ✓ FDR-aware power analysis
+- ✓ Empirical bootstrap fallback
+- ✓ Real-world examples (DDA and PRM)
+- ✓ Comprehensive vignettes
 
 ---
 
-## v2.2 Planned: Per-Peptide MDE Implementation
+## Known Issues / Bug Fixes for Future Sessions
 
-Implement `find = "effect_size"` for `power_analysis.peppwr_fits()`.
+### Misleading red line in per-peptide effect_size plot
 
-### Tasks
-1. Add `find_effect_size_per_peptide()` internal function
-2. Integrate into `power_analysis.peppwr_fits()`
-3. Update `plot.peppwr_power()` for per-peptide effect_size results
-4. Add tests
-5. Update examples to use the feature
+**Problem:** The `plot.peppwr_power()` method for per-peptide `find = "effect_size"` draws a horizontal red line at the `proportion_threshold` (default 50%), but users may confuse this with `target_power` (default 80%).
+
+**Location:** `R/plots.R` in the effect_size plotting section
+
+**Current behavior:**
+- Y-axis: "% of peptides reaching [target_power]% power"
+- Red line: at `proportion_threshold` (e.g., 50%)
+- This is technically correct but visually confusing
+
+**Proposed fix:**
+1. Remove the red horizontal line from the plot
+2. Add a text annotation explaining: "Answer: X-fold effect needed for Y% of peptides to reach Z% power"
+3. Alternatively, add the threshold info to the plot subtitle instead of as a line
+
+**Workaround:** The examples now include text explaining the distinction between `target_power` and `proportion_threshold`.
 
 ---
 

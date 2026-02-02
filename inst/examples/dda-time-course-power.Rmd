@@ -265,17 +265,32 @@ This curve directly answers "what percentage of my peptides will be well-powered
 
 At N=3 with 80% power target, what's the smallest effect we can reliably detect?
 
+**Understanding the two thresholds:** In per-peptide mode, there are two distinct thresholds:
+
+1. **`target_power`** (set to 0.8) - The power level each individual peptide must achieve
+2. **`proportion_threshold`** (default 0.5) - The fraction of peptides that must reach `target_power`
+
+The plot shows "% of peptides reaching 80% power" on the y-axis. The answer tells us: "At what effect size do 50% of peptides achieve 80% power?"
+
 ```{r power-q3}
 min_effect <- power_analysis(fits, n_per_group = 3, target_power = 0.8,
                              find = "effect_size", test = "bayes_t", n_sim = 100)
 print(min_effect)
 ```
 
-```{r plot-min-effect, fig.cap="Distribution of minimum detectable effect sizes across peptides. Larger values indicate peptides that require stronger effects to be detected."}
+```{r plot-min-effect, fig.cap="Proportion of peptides reaching 80% power at each effect size. The default threshold is 50% of peptides (proportion_threshold = 0.5)."}
 plot(min_effect)
 ```
 
-With only N=3, the minimum detectable effect for many peptides is quite large. This is a realistic assessment of what under-powered experiments can and cannot detect.
+With only N=3, very large effects are needed for a majority of peptides to be well-powered. This is a realistic but sobering assessment of what under-powered experiments can detect.
+
+To require a higher fraction of peptides to be well-powered, increase `proportion_threshold`:
+
+```r
+# Require 80% of peptides to reach 80% power (stricter)
+power_analysis(fits, n_per_group = 3, target_power = 0.8,
+               find = "effect_size", proportion_threshold = 0.8, ...)
+```
 
 ## Power Heatmap
 

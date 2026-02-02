@@ -325,17 +325,24 @@ plot(sample_size)
 
 At N=3, what's the smallest effect we can reliably detect?
 
+**Understanding the two thresholds:** In per-peptide mode, there are two distinct thresholds:
+
+1. **`target_power`** (set to 0.8) - The power level each individual peptide must achieve
+2. **`proportion_threshold`** (default 0.5) - The fraction of peptides that must reach `target_power`
+
+The plot shows "% of peptides reaching 80% power" on the y-axis. The answer tells us: "At what effect size do 50% of peptides achieve 80% power?"
+
 ```{r min-effect}
 min_effect <- power_analysis(fits, n_per_group = 3, target_power = 0.8,
                              find = "effect_size", test = "bayes_t", n_sim = 100)
 print(min_effect)
 ```
 
-```{r plot-min-effect, fig.cap="Distribution of minimum detectable effect sizes across peptides."}
+```{r plot-min-effect, fig.cap="Proportion of peptides reaching 80% power at each effect size. The default threshold is 50% of peptides."}
 plot(min_effect)
 ```
 
-This tells us what effect sizes are realistically detectable with current sample sizes.
+This tells us what effect sizes are realistically detectable with current sample sizes. To require more peptides to be well-powered, increase `proportion_threshold`.
 
 ### Impact of Missingness on Power
 
