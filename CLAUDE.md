@@ -267,6 +267,65 @@ See `mnar_visualization_plan.md` for detailed specifications.
 
 ---
 
+## Known Issues
+
+### `find = "effect_size"` not implemented for per-peptide mode
+
+**Problem:** The `power_analysis.peppwr_fits()` method accepts `find = "effect_size"` without error, but does not actually implement it. The code path falls through to `find = "power"` handling, returning incorrect/empty results.
+
+**Location:** `R/power.R` lines 200-363 (`power_analysis.peppwr_fits`)
+
+**Current state:**
+- `find = "power"` - IMPLEMENTED (lines 286-298)
+- `find = "sample_size"` - IMPLEMENTED (lines 306-353)
+- `find = "effect_size"` - NOT IMPLEMENTED (accepted but ignored)
+
+**Impact:** Examples using `power_analysis(fits, find = "effect_size", ...)` produce blank or misleading plots. The vignette works because it uses aggregate mode with explicit distribution parameters.
+
+**Fix outline:**
+
+1. Add validation to reject `find = "effect_size"` in per-peptide mode until implemented:
+   ```r
+   if (find == "effect_size") {
+     stop("find='effect_size' is not yet implemented for per-peptide mode. ",
+          "Use aggregate mode with explicit distribution parameters instead.")
+   }
+   ```
+
+2. Implement per-peptide MDE search (similar pattern to `find = "sample_size"`):
+   ```r
+   if (find == "effect_size") {
+     effect_values <- c(1.1, 1.2, 1.3, 1.5, 1.75, 2, 2.5, 3, 4, 5)
+     proportion_powered <- sapply(effect_values, function(es) {
+       peps <- sapply(seq_len(n_peptides), function(i) {
+         # ... get dist params for peptide i ...
+         run_power_sim(dist_rfunc, params, n_per_group, es, alpha, test, n_sim)
+       })
+       mean(peps >= target_power, na.rm = TRUE)
+     })
+     # Return curve and find minimum effect where majority reach target
+   }
+   ```
+
+3. Add corresponding `plot.peppwr_power` handling for `question = "effect_size"` in per-peptide mode
+
+4. Add tests in `test-power.R`
+
+---
+
+## v2.2 Planned: Per-Peptide MDE Implementation
+
+Implement `find = "effect_size"` for `power_analysis.peppwr_fits()`.
+
+### Tasks
+1. Add `find_effect_size_per_peptide()` internal function
+2. Integrate into `power_analysis.peppwr_fits()`
+3. Update `plot.peppwr_power()` for per-peptide effect_size results
+4. Add tests
+5. Update examples to use the feature
+
+---
+
 ## Development
 
 See `for_CLAUDE.md` for code style and `semi-autonomous-feature-development.md` for workflow.

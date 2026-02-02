@@ -145,15 +145,99 @@ Power analysis can answer three related questions:
 - Understanding the power curve
 - Show % peptides reaching target at each N
 
-### Question 3: Minimum Detectable Effect (Optional)
-- Only include if Bayes factor gives meaningful results
-- At N=3 with 80% power target, what's the smallest effect?
-- May show that large effects (>3-fold?) are needed
+### Question 3: Minimum Detectable Effect
 
-## Power Heatmap (Bayes Factor)
-- Visualize power across N × effect size combinations
-- Use Bayes factor test
-- Identify the "sweet spot" for experimental design
+**KNOWN ISSUE:** `find = "effect_size"` is NOT YET IMPLEMENTED for per-peptide mode. See CLAUDE.md "Known Issues" section for details and fix plan.
+
+**Current workaround options:**
+1. **Remove this section** from per-peptide examples until implemented
+2. **Use aggregate mode** with representative parameters derived from fits:
+   ```r
+   # Derive representative lognormal params from fitted data
+   # (most peptides are approximately lognormal on log scale)
+   log_abundances <- log(pilot$abundance[pilot$abundance > 0])
+   representative_params <- list(
+     meanlog = median(log_abundances),
+     sdlog = sd(log_abundances)
+   )
+
+   # Run MDE in aggregate mode
+   min_effect <- power_analysis(
+     distribution = "lnorm",
+     params = representative_params,
+     n_per_group = 3,
+     target_power = 0.8,
+     find = "effect_size",
+     test = "bayes_t",
+     n_sim = 100
+   )
+   ```
+3. **Wait for v2.2** implementation of per-peptide MDE
+
+**Recommendation:** For now, remove Question 3 from per-peptide examples OR use aggregate mode with clear explanation that this represents a "typical" peptide, not the full peptidome distribution.
+
+## Power Heatmap
+
+### Why Aggregate Mode for Heatmaps?
+
+The `plot_power_heatmap()` function uses **aggregate mode** (single distribution) rather than per-peptide mode because:
+
+1. **Computational cost**: Per-peptide heatmaps would require `n_peptides × n_values × effect_values × n_sim` simulations (e.g., 2228 × 10 × 10 × 100 = 22M simulations)
+2. **Visualization**: A single heatmap is more interpretable than 2000+ individual heatmaps
+3. **Purpose**: Heatmaps answer "what's the general tradeoff?" not "what's the power for peptide X?"
+
+### Deriving Representative Parameters
+
+To make the heatmap relevant to your data, derive parameters from the fitted distributions:
+
+```r
+# Option 1: Use median log-abundance parameters
+log_abundances <- log(pilot$abundance[pilot$abundance > 0])
+params <- list(
+  meanlog = median(log_abundances),
+  sdlog = mad(log_abundances, constant = 1)  # robust SD estimate
+)
+
+# Option 2: For gamma-like data, use moment matching
+abundances <- pilot$abundance[pilot$abundance > 0]
+m <- mean(abundances)
+v <- var(abundances)
+params <- list(
+  shape = m^2 / v,
+  rate = m / v
+)
+```
+
+### Heatmap Code with Explanation
+
+```r
+# Derive representative parameters from the data
+log_abundances <- log(pilot$abundance[pilot$abundance > 0])
+derived_params <- list(
+  meanlog = median(log_abundances),
+  sdlog = mad(log_abundances, constant = 1)
+)
+
+cat("Using representative lognormal parameters:\n")
+cat("  meanlog =", round(derived_params$meanlog, 2), "\n")
+cat("  sdlog =", round(derived_params$sdlog, 2), "\n")
+
+# Generate heatmap
+plot_power_heatmap(
+  distribution = "lnorm",
+  params = derived_params,
+  n_range = c(3, 12),
+  effect_range = c(1.5, 4),
+  test = "wilcoxon"  # heatmap uses aggregate mode
+)
+```
+
+### Interpreting the Heatmap
+
+The heatmap shows power for a **representative peptide** with typical abundance characteristics. Individual peptides will vary:
+- Low-variability peptides will have higher power than shown
+- High-variability peptides will have lower power than shown
+- Use the per-peptide `find = "power"` results to understand the distribution across peptides
 
 ## Summary and Recommendations
 - Key findings:
@@ -207,13 +291,19 @@ power_n3 <- power_analysis(fits, effect_size = 2, n_per_group = 3,
 sample_size <- power_analysis(fits, effect_size = 2, target_power = 0.8,
                               find = "sample_size", test = "bayes_t", n_sim = 100)
 
-# Power heatmap with Bayes factor
+# Power heatmap - derive representative parameters from data
+log_abundances <- log(pilot$abundance[pilot$abundance > 0])
+derived_params <- list(
+  meanlog = median(log_abundances),
+  sdlog = mad(log_abundances, constant = 1)
+)
+
 plot_power_heatmap(
   distribution = "lnorm",
-  params = list(meanlog = 12, sdlog = 1.5),
+  params = derived_params,
   n_range = c(3, 12),
   effect_range = c(1.5, 4),
-  test = "bayes_t"  # if supported, otherwise note limitation
+  test = "wilcoxon"  # heatmap uses aggregate mode
 )
 ```
 
