@@ -59,11 +59,14 @@ This approach captures the full complexity of phosphoproteomics data, including 
 
 This analysis uses Arabidopsis phosphoproteomics data from a time-course experiment:
 
-- **Method:** DDA (Data-Dependent Acquisition) mass spectrometry
-- **Comparison:** Early (t=0) vs late (t=600) timepoints
-- **Replicates:** 3 biological replicates per condition
-- **Peptides:** 2,228 phosphopeptides quantified
-- **Missing data:** None (complete observations)
+| Property | Value |
+|----------|-------|
+| Method | DDA (Data-Dependent Acquisition) mass spectrometry |
+| Comparison | Early (t=0) vs late (t=600) timepoints |
+| Biological replicates | 3 per condition |
+| Total observations per peptide | 6 (important limitation!) |
+| Peptides | 2,228 phosphopeptides quantified |
+| Missing data | None (complete observations) |
 
 ## Data Preparation
 
@@ -71,6 +74,7 @@ This analysis uses Arabidopsis phosphoproteomics data from a time-course experim
 library(peppwR)
 library(dplyr)
 library(ggplot2)
+library(tibble)
 ```
 
 ```{r load-data}
@@ -115,9 +119,7 @@ The abundance values span several orders of magnitude, typical for phosphoproteo
 
 ### Why Fit Distributions?
 
-To simulate realistic experiments, we need parametric models that capture the statistical properties of each peptide's abundance values. peppwR fits multiple candidate distributions (gamma, lognormal, inverse Gaussian, etc.) and selects the best fit for each peptide based on AIC.
-
-This per-peptide approach respects the heterogeneity of phosphoproteomics data - different peptides can have different underlying distributions.
+To simulate realistic experiments, we need parametric models that capture the statistical properties of each peptide's abundance values. peppwR fits multiple candidate distributions (gamma, lognormal, inverse Gaussian, Pareto, skew normal, etc.) and selects the best fit for each peptide based on AIC.
 
 ```{r fit-distributions}
 # Fit distributions to each peptide
@@ -127,31 +129,94 @@ fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
 print(fits)
 ```
 
-```{r plot-fits, fig.cap="Best-fit distribution counts across the peptidome. This shows which parametric distributions best describe phosphopeptide abundance data."}
+```{r plot-fits, fig.cap="Best-fit distribution counts across the peptidome."}
 # Visualize which distributions fit best
 plot(fits)
 ```
 
-The fitting results reveal that most phosphopeptides are best described by lognormal or gamma distributions - consistent with the positive, right-skewed nature of mass spectrometry intensities.
+### Interpreting Distribution Fitting Results: A Cautionary Note
+
+**Important:** With only 6 observations per peptide (3 replicates x 2 conditions), distribution selection is unreliable. You may observe that distributions like Pareto or Skew Normal dominate the "best fit" counts. This is an **artifact of small sample size**, not a statement about the true underlying distributions.
+
+With more biological replicates, we would expect gamma and lognormal distributions to fit better - these are the typical distributions for mass spectrometry abundance data based on the underlying measurement process.
+
+**Key insight:** The specific distribution matters less than having enough data to fit it reliably. For power analysis, we proceed with the best available fits while acknowledging this limitation.
 
 ### Parameter Distribution
 
-Understanding how fitted parameters vary across the peptidome helps assess whether our simulation assumptions are reasonable.
-
-```{r param-dist, fig.cap="Distribution of AIC values across peptides for each fitted distribution. Lower AIC indicates better fit. Note that some distributions may fit only a small subset of peptides."}
+```{r param-dist, fig.cap="Distribution of AIC values across peptides for each fitted distribution. Lower AIC indicates better fit."}
 p <- plot_param_distribution(fits)
 print(p)
 
 # Count peptides per best-fit distribution for context
 cat("\nPeptides per best-fit distribution:\n")
-tibble::tibble(distribution = fits$best) |>
+tibble(distribution = fits$best) |>
   count(distribution) |>
   arrange(desc(n))
 ```
 
-When a distribution shows a sparse histogram (few bars), it means that distribution was selected as best fit for only a small number of peptides. This is normal - it simply reflects which distributional shapes occur in the data.
-
 ## Power Analysis
+
+### Choosing the Right Statistical Test
+
+**Critical first step:** With small samples (N=3), the choice of statistical test dramatically affects power. Before proceeding with detailed analysis, we must compare tests to understand their behavior.
+
+peppwR supports several tests:
+
+| Test | Type | Characteristics |
+|------|------|-----------------|
+| Wilcoxon rank-sum | Non-parametric | Conservative, robust to outliers, needs larger N |
+| Bootstrap-t | Resampling | Handles non-normality through resampling |
+| Bayes factor | Bayesian | Evidence-based, often more powerful at small N |
+
+Let's compare all three tests at N=3 with a 2-fold effect:
+
+```{r test-comparison}
+# Run all three tests (use n_sim = 100 for faster rendering)
+power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "wilcoxon", n_sim = 100)
+
+power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                              find = "power", test = "bootstrap_t", n_sim = 100)
+
+power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "bayes_t", n_sim = 100)
+
+# Create comparison table
+comparison <- tibble(
+  Test = c("Wilcoxon rank-sum", "Bootstrap-t", "Bayes factor"),
+  `Median Power` = c(
+    median(power_wilcox$simulations$peptide_power, na.rm = TRUE),
+    median(power_boot$simulations$peptide_power, na.rm = TRUE),
+    median(power_bayes$simulations$peptide_power, na.rm = TRUE)
+  ),
+  `% > 50% Power` = c(
+    mean(power_wilcox$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.5, na.rm = TRUE) * 100
+  ),
+  `% > 80% Power` = c(
+    mean(power_wilcox$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.8, na.rm = TRUE) * 100
+  )
+)
+
+knitr::kable(comparison, digits = 2,
+             caption = "Power comparison across statistical tests (N=3, 2-fold effect)")
+```
+
+### Understanding the Test Comparison Results
+
+The comparison table reveals important insights:
+
+- **Wilcoxon rank-sum** is conservative with small samples. Non-parametric tests don't make distributional assumptions, but this comes at a cost: they need more data to achieve comparable power.
+
+- **Bootstrap-t** uses resampling to handle non-normality, potentially offering better power than Wilcoxon.
+
+- **Bayes factor** tests provide evidence for or against an effect. At small N, Bayesian approaches can be more informative than frequentist tests.
+
+**Recommendation:** For the remaining analyses in this document, we use the Bayes factor test since it provides usable power estimates at N=3.
 
 ### The Three Questions
 
@@ -168,23 +233,25 @@ These questions are mathematically related - fixing any three parameters determi
 With 3 biological replicates per group (as in this experiment), what power do we have to detect a 2-fold change?
 
 ```{r power-q1}
-# Use n_sim = 100 for faster rendering in this example
-power_n3 <- power_analysis(fits, effect_size = 2, n_per_group = 3, find = "power", n_sim = 100)
+# Using Bayes factor test based on our comparison results
+power_n3 <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                           find = "power", test = "bayes_t", n_sim = 100)
 print(power_n3)
 ```
 
-```{r plot-power-n3, fig.cap="Distribution of power across peptides with N=3 and 2-fold effect. Each bar represents the proportion of peptides achieving that power level."}
+```{r plot-power-n3, fig.cap="Distribution of power across peptides with N=3 and 2-fold effect (Bayes factor test). Each bar represents the proportion of peptides achieving that power level."}
 plot(power_n3)
 ```
 
-With N=3, power to detect a 2-fold change varies widely across peptides. Peptides with lower variability will have higher power, while noisy peptides remain under-powered.
+With N=3, power to detect a 2-fold change varies across peptides. Peptides with lower variability will have higher power, while noisy peptides remain under-powered.
 
 ### Question 2: Sample Size for Target Power
 
-What sample size would we need to achieve 80% power to detect a 1.5-fold change?
+What sample size would we need to achieve 80% power to detect a 2-fold change for most peptides?
 
 ```{r power-q2}
-sample_size <- power_analysis(fits, effect_size = 1.5, target_power = 0.8, find = "sample_size", n_sim = 100)
+sample_size <- power_analysis(fits, effect_size = 2, target_power = 0.8,
+                              find = "sample_size", test = "bayes_t", n_sim = 100)
 print(sample_size)
 ```
 
@@ -199,7 +266,8 @@ This curve directly answers "what percentage of my peptides will be well-powered
 At N=3 with 80% power target, what's the smallest effect we can reliably detect?
 
 ```{r power-q3}
-min_effect <- power_analysis(fits, n_per_group = 3, target_power = 0.8, find = "effect_size", n_sim = 100)
+min_effect <- power_analysis(fits, n_per_group = 3, target_power = 0.8,
+                             find = "effect_size", test = "bayes_t", n_sim = 100)
 print(min_effect)
 ```
 
@@ -207,48 +275,7 @@ print(min_effect)
 plot(min_effect)
 ```
 
-With only N=3, the minimum detectable effect for most peptides is quite large. This is a realistic assessment of what under-powered experiments can and cannot detect.
-
-### Comparing Statistical Tests
-
-The choice of statistical test can affect power. peppwR supports several tests:
-
-- **Wilcoxon rank-sum** (default): Non-parametric, robust to outliers
-- **Bootstrap-t**: Handles non-normality through resampling
-- **Bayes factor t-test**: Bayesian evidence for an effect
-
-Let's compare power across these tests.
-
-```{r compare-tests}
-# For test comparison, use a subset of peptides for faster computation
-# In practice, you would run this on the full dataset
-
-# Sample 200 peptides for comparison
-set.seed(123)
-sample_ids <- sample(unique(pilot$peptide_id), min(200, n_distinct(pilot$peptide_id)))
-pilot_sample <- pilot |> filter(peptide_id %in% sample_ids)
-fits_sample <- fit_distributions(pilot_sample, "peptide_id", "condition", "abundance")
-
-# Wilcoxon (default)
-power_wilcox <- power_analysis(fits_sample, effect_size = 2, n_per_group = 3,
-                                find = "power", test = "wilcoxon", n_sim = 100)
-
-# Bootstrap-t
-power_boot <- power_analysis(fits_sample, effect_size = 2, n_per_group = 3,
-                              find = "power", test = "bootstrap_t", n_sim = 100)
-
-# Bayes factor t-test
-power_bayes <- power_analysis(fits_sample, effect_size = 2, n_per_group = 3,
-                               find = "power", test = "bayes_t", n_sim = 100)
-
-# Summary comparison
-cat("Median power by test (N=3, 2-fold effect, 200-peptide sample):\n")
-cat("  Wilcoxon rank-sum:", round(median(power_wilcox$simulations$peptide_power, na.rm = TRUE), 3), "\n")
-cat("  Bootstrap-t:      ", round(median(power_boot$simulations$peptide_power, na.rm = TRUE), 3), "\n")
-cat("  Bayes factor:     ", round(median(power_bayes$simulations$peptide_power, na.rm = TRUE), 3), "\n")
-```
-
-Different tests may perform better for different data types. Wilcoxon is a robust default for proteomics data where distributional assumptions may not hold perfectly.
+With only N=3, the minimum detectable effect for many peptides is quite large. This is a realistic assessment of what under-powered experiments can and cannot detect.
 
 ## Power Heatmap
 
@@ -260,7 +287,8 @@ plot_power_heatmap(
   distribution = "lnorm",
   params = list(meanlog = 12, sdlog = 1.5),
   n_range = c(3, 12),
-  effect_range = c(1.2, 3)
+  effect_range = c(1.2, 3),
+  test = "wilcoxon"  # heatmap uses aggregate mode
 )
 ```
 
@@ -274,25 +302,30 @@ The heatmap shows:
 
 ### Key Findings
 
-1. **Distribution fitting:** Phosphopeptide abundances in this DDA dataset are predominantly lognormal or gamma distributed, consistent with typical mass spectrometry data.
+1. **Distribution fitting:** With only 6 observations per peptide, distribution selection is unreliable. The observed "best fit" distributions are artifacts of small sample size, not the true underlying distributions.
 
-2. **Current power (N=3):** With 3 replicates, power to detect a 2-fold change is moderate. Many peptides have power below 80%, especially those with higher variability.
+2. **Test selection matters:** Wilcoxon rank-sum may have limited power at N=3 due to its conservative nature. Bayes factor tests can provide more informative power estimates with small samples.
 
-3. **Sample size requirements:** Achieving 80% power for a 1.5-fold change requires more than N=3 for most peptides. The exact requirement varies by peptide.
+3. **Current power (N=3):** With 3 replicates and the Bayes factor test, power to detect a 2-fold change varies across peptides based on their individual variability.
 
-4. **Minimum detectable effect:** At N=3, only relatively large fold changes (often > 2-fold) can be reliably detected at 80% power.
+4. **Sample size requirements:** Achieving consistently high power (80%+) across most peptides requires more than N=3 biological replicates.
+
+5. **Minimum detectable effect:** At N=3, only relatively large fold changes can be reliably detected at 80% power for most peptides.
 
 ### Practical Recommendations
 
-1. **For future experiments:** Consider N=6 or more biological replicates if detecting 1.5-fold changes is important.
+1. **For future experiments:** Consider N=6 or more biological replicates if detecting smaller fold changes (<2-fold) is important.
 
 2. **For current data interpretation:** Results showing non-significance may reflect insufficient power rather than absence of biological effect. Be cautious about concluding "no difference."
 
-3. **Test selection:** Wilcoxon rank-sum is a reasonable default. Consider bootstrap-t if computational resources allow.
+3. **Test selection:** With small samples, consider Bayes factor tests which may be more informative than traditional frequentist tests.
+
+4. **Effect size expectations:** Set realistic expectations - detecting subtle changes requires adequate replication.
 
 ### Caveats
 
 - This analysis uses a single genotype (Col-0) and specific timepoint comparison (0 vs 600)
+- Distribution fitting is limited by small sample size (6 observations per peptide)
 - Power estimates assume fitted distributions accurately represent underlying biology
 - Technical variability (not modeled here) may further reduce effective power
 - Real experimental factors (batch effects, sample quality) are not captured
