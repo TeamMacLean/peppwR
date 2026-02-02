@@ -281,16 +281,45 @@ With only N=3, the minimum detectable effect for many peptides is quite large. T
 
 A power heatmap visualizes how power varies across combinations of sample size and effect size - useful for identifying the "sweet spot" for experimental design.
 
-```{r power-heatmap, fig.cap="Power as a function of sample size and effect size. Colors indicate expected power. Use this to plan experiments by finding acceptable combinations of N and target effect."}
-# Use typical lognormal parameters for aggregate simulation
+### Why Aggregate Mode for Heatmaps?
+
+The `plot_power_heatmap()` function uses **aggregate mode** (single distribution) rather than per-peptide mode because:
+
+1. **Computational cost**: Per-peptide heatmaps would require millions of simulations
+2. **Visualization**: A single heatmap is more interpretable than 2000+ individual heatmaps
+3. **Purpose**: Heatmaps answer "what's the general tradeoff?" not "what's the power for peptide X?"
+
+To make the heatmap relevant to your data, we derive representative parameters from the fitted distributions:
+
+```{r power-heatmap, fig.cap="Power as a function of sample size and effect size for a representative peptide. Colors indicate expected power. Individual peptides will vary based on their specific variability."}
+# Derive representative parameters from the data
+log_abundances <- log(pilot$abundance[pilot$abundance > 0])
+derived_params <- list(
+  meanlog = median(log_abundances),
+  sdlog = mad(log_abundances, constant = 1)  # robust SD estimate
+)
+
+cat("Using representative lognormal parameters:\n")
+cat("  meanlog =", round(derived_params$meanlog, 2), "\n")
+cat("  sdlog =", round(derived_params$sdlog, 2), "\n")
+
+# Generate heatmap with data-derived parameters
 plot_power_heatmap(
   distribution = "lnorm",
-  params = list(meanlog = 12, sdlog = 1.5),
+  params = derived_params,
   n_range = c(3, 12),
   effect_range = c(1.2, 3),
   test = "wilcoxon"  # heatmap uses aggregate mode
 )
 ```
+
+### Interpreting the Heatmap
+
+The heatmap shows power for a **representative peptide** with typical abundance characteristics. Individual peptides will vary:
+
+- Low-variability peptides will have higher power than shown
+- High-variability peptides will have lower power than shown
+- Use the per-peptide `find = "power"` results to understand the distribution across peptides
 
 The heatmap shows:
 
