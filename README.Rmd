@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# peppwR
+# peppwR <a href="https://danmaclean.github.io/peppwR/"><img src="man/figures/logo.png" align="right" height="138" alt="peppwR website" /></a>
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)

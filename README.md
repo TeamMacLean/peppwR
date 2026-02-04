@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# peppwR
+# peppwR <a href="https://danmaclean.github.io/peppwR/"><img src="man/figures/logo.png" align="right" height="138" alt="peppwR website" /></a>
 
 <!-- badges: start -->
 
