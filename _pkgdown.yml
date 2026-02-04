@@ -21,6 +21,12 @@ navbar:
         href: articles/power-analysis-workflow.html
       - text: Benchmarking
         href: articles/benchmarking.html
+      - text: "---"
+      - text: "Real-World Examples"
+      - text: DDA Time Course Analysis
+        href: articles/dda-time-course-power.html
+      - text: PRM Genotype Analysis
+        href: articles/prm-genotype-power.html
 
 articles:
 - title: Getting Started
@@ -34,6 +40,12 @@ articles:
   contents:
   - articles/benchmarking
   - articles/power-analysis-workflow
+
+- title: Real-World Examples
+  navbar: ~
+  contents:
+  - articles/dda-time-course-power
+  - articles/prm-genotype-power
 
 reference:
 - title: Core Functions
