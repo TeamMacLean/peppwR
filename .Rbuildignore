@@ -19,3 +19,8 @@
 ^vignette_spec\.md$
 ^\.claude$
 ^\.idea$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^plans$
+^examples_plan\.md$

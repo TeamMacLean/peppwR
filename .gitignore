@@ -11,4 +11,11 @@ renv/library/
 renv/staging/
 renv/sandbox/
 /doc/
+/docs/
 /Meta/
+
+# Vignette build artifacts
+vignettes/*.html
+vignettes/*.R
+vignettes/*_cache/
+vignettes/*_files/

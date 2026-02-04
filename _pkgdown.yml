@@ -1,0 +1,82 @@
+url: https://danmaclean.github.io/peppwR/
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Started
+        href: articles/getting-started.html
+      - text: Distribution Fitting
+        href: articles/find-fits.html
+      - text: "---"
+      - text: "In-depth Guides"
+      - text: Power Analysis Workflow
+        href: articles/power-analysis-workflow.html
+      - text: Benchmarking
+        href: articles/benchmarking.html
+
+articles:
+- title: Getting Started
+  navbar: ~
+  contents:
+  - getting-started
+  - find-fits
+
+- title: In-depth Guides
+  navbar: ~
+  contents:
+  - articles/benchmarking
+  - articles/power-analysis-workflow
+
+reference:
+- title: Core Functions
+  desc: Main functions for distribution fitting and power analysis
+  contents:
+  - fit_distributions
+  - power_analysis
+  - power_analysis.character
+  - power_analysis.peppwr_fits
+
+- title: Diagnostic Plots
+  desc: Visualization functions for fits and power results
+  contents:
+  - starts_with("plot_")
+  - starts_with("plot.")
+
+- title: Simulation Functions
+  desc: Functions for running power simulations
+  contents:
+  - starts_with("run_power_sim")
+  - starts_with("simulate_")
+
+- title: Missingness
+  desc: Functions for handling missing data
+  contents:
+  - compute_missingness
+  - get_mnar_peptides
+
+- title: Statistical Tests
+  desc: Test functions used in power simulations
+  contents:
+  - starts_with("test_")
+
+- title: Classes and Methods
+  desc: S3 classes and their methods
+  contents:
+  - starts_with("new_peppwr")
+  - starts_with("print.")
+  - starts_with("summary.")
+  - starts_with("validate_")
+
+- title: Utilities
+  desc: Helper functions
+  contents:
+  - get_distribution_preset
+  - is_count_data
