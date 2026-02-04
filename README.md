@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# peppwR <a href="https://danmaclean.github.io/peppwR/"><img src="man/figures/logo.png" align="right" height="138" alt="peppwR website" /></a>
+# peppwR <a href="https://teammaclean.github.io/peppwR/"><img src="man/figures/logo.png" align="right" height="138" alt="peppwR website" /></a>
 
 <!-- badges: start -->
 
@@ -9,14 +9,14 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/peppwR)](https://CRAN.R-project.org/package=peppwR)
-[![R-CMD-check](https://github.com/danmaclean/peppwR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/danmaclean/peppwR/actions/workflows/R-CMD-check.yaml)
-[![pkgdown](https://github.com/danmaclean/peppwR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/danmaclean/peppwR/actions/workflows/pkgdown.yaml)
+[![R-CMD-check](https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/TeamMacLean/peppwR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/TeamMacLean/peppwR/actions/workflows/pkgdown.yaml)
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub
-issues](https://img.shields.io/github/issues/danmaclean/peppwR)](https://github.com/danmaclean/peppwR/issues)
+issues](https://img.shields.io/github/issues/TeamMacLean/peppwR)](https://github.com/TeamMacLean/peppwR/issues)
 [![GitHub
-stars](https://img.shields.io/github/stars/danmaclean/peppwR)](https://github.com/danmaclean/peppwR/stargazers)
+stars](https://img.shields.io/github/stars/TeamMacLean/peppwR)](https://github.com/TeamMacLean/peppwR/stargazers)
 <!-- badges: end -->
 
 **Power analysis for phosphopeptide abundance hypothesis tests via
@@ -53,7 +53,7 @@ Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
-pak::pak("danmaclean/peppwR")
+pak::pak("TeamMacLean/peppwR")
 ```
 
 ## Quick Start
@@ -105,57 +105,56 @@ result <- power_analysis(
 ## Documentation
 
 - **[Getting
-  Started](https://danmaclean.github.io/peppwR/articles/getting-started.html)**
+  Started](https://teammaclean.github.io/peppwR/articles/getting-started.html)**
   — Introduction and basic usage
 - **[Power Analysis
-  Workflow](https://danmaclean.github.io/peppwR/articles/power-analysis-workflow.html)**
+  Workflow](https://teammaclean.github.io/peppwR/articles/power-analysis-workflow.html)**
   — Complete workflow with real data
-- **[Benchmarking](https://danmaclean.github.io/peppwR/articles/benchmarking.html)**
+- **[Benchmarking](https://teammaclean.github.io/peppwR/articles/benchmarking.html)**
   — Performance characteristics
 - **[Function
-  Reference](https://danmaclean.github.io/peppwR/reference/index.html)**
+  Reference](https://teammaclean.github.io/peppwR/reference/index.html)**
   — Full API documentation
 
 ### Real-World Examples
 
 - [DDA Time Course
-  Analysis](https://danmaclean.github.io/peppwR/articles/dda-time-course-power.html)
+  Analysis](https://teammaclean.github.io/peppwR/articles/dda-time-course-power.html)
 - [PRM Genotype
-  Analysis](https://danmaclean.github.io/peppwR/articles/prm-genotype-power.html)
+  Analysis](https://teammaclean.github.io/peppwR/articles/prm-genotype-power.html)
 
 ## Workflow Overview
 
-    pilot_data
-        │
-        ▼
-    ┌─────────────────────┐
-    │ fit_distributions() │
-    └─────────────────────┘
-        │
-        ▼
-    ┌─────────────────────┐
-    │  power_analysis()   │
-    │                     │
-    │  find = "power"     │
-    │  find = "sample_size"│
-    │  find = "effect_size"│
-    └─────────────────────┘
-        │
-        ▼
-    results + plots
+``` mermaid
+flowchart TD
+    A[pilot_data] --> B[fit_distributions]
+    B --> C[power_analysis]
+    C --> D{find = ?}
+    D --> E["power"]
+    D --> F["sample_size"]
+    D --> G["effect_size"]
+    E --> H[results + plots]
+    F --> H
+    G --> H
+
+    style A fill:#FFFFCC,stroke:#BD0026
+    style B fill:#FD8D3C,stroke:#BD0026,color:#fff
+    style C fill:#FD8D3C,stroke:#BD0026,color:#fff
+    style H fill:#FFFFCC,stroke:#BD0026
+```
 
 ## Citation
 
 If you use peppwR in your research, please cite:
 
-    MacLean, D. (2025). peppwR: Power Analysis for Phosphopeptide Abundance
+    MacLean, D. (2026). peppwR: Power Analysis for Phosphopeptide Abundance
     Hypothesis Tests. R package version 0.1.0.
-    https://github.com/danmaclean/peppwR
+    https://github.com/TeamMacLean/peppwR
 
 ## Contributing
 
 Contributions are welcome! Please open an
-[issue](https://github.com/danmaclean/peppwR/issues) or submit a pull
+[issue](https://github.com/TeamMacLean/peppwR/issues) or submit a pull
 request.
 
 ## License
