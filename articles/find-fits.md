@@ -1,0 +1,30 @@
+# How to find the best fitting distribution
+
+``` r
+library(peppwR)
+```
+
+The package has one function for estimating the fit of a range of
+distributions `find_fits()`. It takes a data frame with at least three
+columns:
+
+- `id_col` a unique id for the phosphopeptide
+- `group_col` a category that groups measurements from the same bio
+  replicate together
+- `value_col` the measurment abundance/counts etc
+
+``` r
+df_path <- system.file("raw_data.csv", package="peppwr")
+df <- readr::read_csv(df_path)
+
+fits_df <- find_fits(df, id_col="pep_id", group_col="group", value_col="value")
+```
+
+It returns a nested dataframe with elements for AIC and LogLikelihood of
+fit of each peptide’s counts to a range of distributions.
+
+The result can be plot with `evaldist()`
+
+``` r
+evaldist(fits_df)
+```
