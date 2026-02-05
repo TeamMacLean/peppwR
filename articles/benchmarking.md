@@ -110,10 +110,10 @@ knitr::kable(
 
 | Peptides | Time (s) | Memory (MB) | Time/peptide (ms) |
 |---------:|---------:|------------:|------------------:|
-|      100 |     3.71 |      101.29 |             37.07 |
-|      500 |    19.11 |        9.75 |             38.21 |
-|     1000 |    38.04 |       19.48 |             38.04 |
-|     2000 |    72.16 |       38.94 |             36.08 |
+|      100 |     3.38 |      101.29 |             33.80 |
+|      500 |    16.72 |        9.75 |             33.44 |
+|     1000 |    33.33 |       19.48 |             33.33 |
+|     2000 |    66.05 |       38.94 |             33.03 |
 
 Distribution fitting scaling
 
@@ -178,8 +178,8 @@ knitr::kable(
 | n_sim | Time (s) |
 |------:|---------:|
 |   500 |    0.050 |
-|  1000 |    0.102 |
-|  2000 |    0.202 |
+|  1000 |    0.109 |
+|  2000 |    0.201 |
 
 Aggregate mode timing by n_sim
 
@@ -298,9 +298,9 @@ knitr::kable(
 
 | Peptides | Time (s) | Time/peptide (ms) |
 |---------:|---------:|------------------:|
-|      100 |     4.08 |             40.84 |
-|      500 |    18.73 |             37.46 |
-|     1000 |    34.68 |             34.68 |
+|      100 |     4.00 |             39.98 |
+|      500 |    18.17 |             36.33 |
+|     1000 |    33.49 |             33.49 |
 
 Per-peptide mode scaling by peptide count (n_sim=500)
 
@@ -335,9 +335,9 @@ knitr::kable(
 
 | n_sim | Time (s) |
 |------:|---------:|
-|   250 |     9.29 |
-|   500 |    18.58 |
-|  1000 |    36.83 |
+|   250 |     9.33 |
+|   500 |    18.79 |
+|  1000 |    36.16 |
 
 Per-peptide mode scaling by n_sim (500 peptides)
 
@@ -431,10 +431,10 @@ knitr::kable(
 
 | Test        | Time (s) | Relative Speed |
 |:------------|---------:|---------------:|
-| wilcoxon    |     0.06 |           2.94 |
-| bootstrap_t |    16.80 |         892.76 |
+| wilcoxon    |     0.05 |           2.86 |
+| bootstrap_t |    16.47 |         915.17 |
 | bayes_t     |     0.02 |           1.00 |
-| rankprod    |     8.45 |         449.08 |
+| rankprod    |     8.46 |         469.94 |
 
 Statistical test speed comparison (n_sim=500)
 
@@ -506,8 +506,8 @@ knitr::kable(
 
 | Mode                | Time (s) |
 |:--------------------|---------:|
-| Without missingness |     5.76 |
-| With missingness    |     7.48 |
+| Without missingness |     5.72 |
+| With missingness    |     7.09 |
 
 Missingness-aware simulation overhead
 
@@ -548,8 +548,8 @@ knitr::kable(
 
 | Mode                 | Time (s) |
 |:---------------------|---------:|
-| Per-peptide (no FDR) |     3.80 |
-| FDR-adjusted         |     4.54 |
+| Per-peptide (no FDR) |     3.86 |
+| FDR-adjusted         |     4.19 |
 
 FDR mode vs per-peptide mode timing
 
@@ -588,9 +588,9 @@ knitr::kable(
 
 | Peptides | Time (s) |
 |---------:|---------:|
-|      100 |     0.44 |
-|      500 |     2.18 |
-|     1000 |     4.03 |
+|      100 |     0.43 |
+|      500 |     2.22 |
+|     1000 |     3.99 |
 
 FDR mode scaling by peptide count (n_sim=50)
 
@@ -622,9 +622,9 @@ knitr::kable(
 
 | Plot Type          | Time (s) |
 |:-------------------|---------:|
-| Density overlay    |    0.063 |
-| QQ plots           |    0.044 |
-| Param distribution |    0.779 |
+| Density overlay    |    0.059 |
+| QQ plots           |    0.040 |
+| Param distribution |    0.769 |
 
 Diagnostic plot generation times
 

@@ -88,9 +88,9 @@ glimpse(prm)
 
     ## Rows: 20,520
     ## Columns: 7
-    ## $ molecule_list_name        <chr> "gi|145601729|ref|XP_363034.2|", "gi|1456017…
-    ## $ peptide_modified_sequence <chr> "KLS[+80]ASGS[+80]PGSVNLGR", "KLS[+80]ASGS[+…
-    ## $ genotype                  <chr> "Guy11", "Guy11", "Guy11", "Guy11", "Guy11",…
+    ## $ molecule_list_name        <chr> "MOL_0001", "MOL_0001", "MOL_0001", "MOL_000…
+    ## $ peptide_modified_sequence <chr> "PEP_00001", "PEP_00001", "PEP_00001", "PEP_…
+    ## $ genotype                  <chr> "Genotype_A", "Genotype_A", "Genotype_A", "G…
     ## $ timepoint                 <dbl> 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,…
     ## $ bio_rep                   <int> 1, 1, 2, 2, 3, 3, 1, 1, 2, 2, 3, 3, 1, 1, 2,…
     ## $ tech_rep                  <int> 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1,…
@@ -202,9 +202,9 @@ print(fits)
     ##   Inverse Gaussian: 36
     ##   InvGamma: 2
     ##   Lognormal: 5
-    ##   Normal: 90
+    ##   Normal: 91
     ##   Pareto: 273
-    ##   Skew Normal: 61
+    ##   Skew Normal: 60
     ## 
     ## Missingness: 429/3420 values NA (12.5%)
     ## Peptides with missing data: 180
@@ -328,8 +328,8 @@ tibble(distribution = fits$best) |>
     ##   <chr>            <int>
     ## 1 Pareto             273
     ## 2 Gamma              103
-    ## 3 Normal              90
-    ## 4 Skew Normal         61
+    ## 3 Normal              91
+    ## 4 Skew Normal         60
     ## 5 Inverse Gaussian    36
     ## 6 Lognormal            5
     ## 7 InvGamma             2
@@ -386,8 +386,8 @@ knitr::kable(comparison, digits = 2,
 | Test              | Median Power | % \> 50% Power | % \> 80% Power |
 |:------------------|-------------:|---------------:|---------------:|
 | Wilcoxon rank-sum |         0.00 |           0.00 |           0.00 |
-| Bootstrap-t       |         0.20 |          11.31 |           4.74 |
-| Bayes factor      |         0.55 |          61.31 |          16.42 |
+| Bootstrap-t       |         0.20 |           9.85 |           4.74 |
+| Bayes factor      |         0.56 |          64.60 |          16.06 |
 
 Power comparison across statistical tests (N=3, 2-fold effect)
 
@@ -548,14 +548,14 @@ cat("Median power WITHOUT missingness:",
     round(median(power_no_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
 ```
 
-    ## Median power WITHOUT missingness: 0.57
+    ## Median power WITHOUT missingness: 0.575
 
 ``` r
 cat("Median power WITH missingness:   ",
     round(median(power_with_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
 ```
 
-    ## Median power WITH missingness:    0.56
+    ## Median power WITH missingness:    0.565
 
 Accounting for missingness typically reduces power estimates - this is
 the realistic cost of missing data on your experiment’s ability to
@@ -622,8 +622,8 @@ if (is.numeric(nominal_power) && length(nominal_power) > 0) {
 }
 ```
 
-    ##   Median power: 0.58 
-    ##   % peptides > 80% power: 17.2 %
+    ##   Median power: 0.56 
+    ##   % peptides > 80% power: 16.1 %
 
 ``` r
 cat("\nFDR-aware power (BH correction, 80% true nulls):\n")
@@ -645,7 +645,7 @@ if (is.numeric(fdr_power) && length(fdr_power) > 0) {
     ## ---------------------
     ## Mode: per_peptide
     ## 
-    ## Power: 8%
+    ## Power: 6%
     ## Sample size: 3 per group
     ## Effect size: 2.00-fold
     ## 

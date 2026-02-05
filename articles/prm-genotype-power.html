@@ -193,9 +193,9 @@ experiment:</p>
 <span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">prm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Rows: 20,520</span></span>
 <span><span class="co">## Columns: 7</span></span>
-<span><span class="co">## $ molecule_list_name        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "gi|145601729|ref|XP_363034.2|"<span style="color: #949494;">, </span>"gi|1456017…</span></span>
-<span><span class="co">## $ peptide_modified_sequence <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "KLS[+80]ASGS[+80]PGSVNLGR"<span style="color: #949494;">, </span>"KLS[+80]ASGS[+…</span></span>
-<span><span class="co">## $ genotype                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Guy11"<span style="color: #949494;">, </span>"Guy11"<span style="color: #949494;">, </span>"Guy11"<span style="color: #949494;">, </span>"Guy11"<span style="color: #949494;">, </span>"Guy11"<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">## $ molecule_list_name        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "MOL_0001"<span style="color: #949494;">, </span>"MOL_0001"<span style="color: #949494;">, </span>"MOL_0001"<span style="color: #949494;">, </span>"MOL_000…</span></span>
+<span><span class="co">## $ peptide_modified_sequence <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "PEP_00001"<span style="color: #949494;">, </span>"PEP_00001"<span style="color: #949494;">, </span>"PEP_00001"<span style="color: #949494;">, </span>"PEP_…</span></span>
+<span><span class="co">## $ genotype                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Genotype_A"<span style="color: #949494;">, </span>"Genotype_A"<span style="color: #949494;">, </span>"Genotype_A"<span style="color: #949494;">, </span>"G…</span></span>
 <span><span class="co">## $ timepoint                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0<span style="color: #949494;">, </span>0.0<span style="color: #949494;">, </span>0.0<span style="color: #949494;">, </span>0.0<span style="color: #949494;">, </span>0.0<span style="color: #949494;">, </span>0.0<span style="color: #949494;">, </span>1.0<span style="color: #949494;">, </span>1.0<span style="color: #949494;">, </span>1.0<span style="color: #949494;">,</span>…</span></span>
 <span><span class="co">## $ bio_rep                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">,</span>…</span></span>
 <span><span class="co">## $ tech_rep                  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>1<span style="color: #949494;">,</span>…</span></span>
@@ -283,9 +283,9 @@ distribution fitting.</p>
 <span><span class="co">##   Inverse Gaussian: 36</span></span>
 <span><span class="co">##   InvGamma: 2</span></span>
 <span><span class="co">##   Lognormal: 5</span></span>
-<span><span class="co">##   Normal: 90</span></span>
+<span><span class="co">##   Normal: 91</span></span>
 <span><span class="co">##   Pareto: 273</span></span>
-<span><span class="co">##   Skew Normal: 61</span></span>
+<span><span class="co">##   Skew Normal: 60</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Missingness: 429/3420 values NA (12.5%)</span></span>
 <span><span class="co">## Peptides with missing data: 180</span></span>
@@ -421,8 +421,8 @@ Distribution of AIC values across peptides for each fitted distribution.
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> Pareto             273</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">2</span> Gamma              103</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> Normal              90</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> Skew Normal         61</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> Normal              91</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> Skew Normal         60</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">5</span> Inverse Gaussian    36</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">6</span> Lognormal            5</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">7</span> InvGamma             2</span></span></code></pre>
@@ -518,14 +518,14 @@ effect)</caption>
 <tr class="even">
 <td align="left">Bootstrap-t</td>
 <td align="right">0.20</td>
-<td align="right">11.31</td>
+<td align="right">9.85</td>
 <td align="right">4.74</td>
 </tr>
 <tr class="odd">
 <td align="left">Bayes factor</td>
-<td align="right">0.55</td>
-<td align="right">61.31</td>
-<td align="right">16.42</td>
+<td align="right">0.56</td>
+<td align="right">64.60</td>
+<td align="right">16.06</td>
 </tr>
 </tbody>
 </table>
@@ -679,11 +679,11 @@ increase <code>proportion_threshold</code>.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median power WITHOUT missingness:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">power_no_miss</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Median power WITHOUT missingness: 0.57</span></span></code></pre>
+<pre><code><span><span class="co">## Median power WITHOUT missingness: 0.575</span></span></code></pre>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median power WITH missingness:   "</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">power_with_miss</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Median power WITH missingness:    0.56</span></span></code></pre>
+<pre><code><span><span class="co">## Median power WITH missingness:    0.565</span></span></code></pre>
 <p>Accounting for missingness typically reduces power estimates - this
 is the realistic cost of missing data on your experiment’s ability to
 detect effects.</p>
@@ -760,8 +760,8 @@ experiments.</p>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">power_nominal</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Median power: 0.58 </span></span>
-<span><span class="co">##   % peptides &gt; 80% power: 17.2 %</span></span></code></pre>
+<pre><code><span><span class="co">##   Median power: 0.56 </span></span>
+<span><span class="co">##   % peptides &gt; 80% power: 16.1 %</span></span></code></pre>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nFDR-aware power (BH correction, 80% true nulls):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -777,7 +777,7 @@ experiments.</p>
 <span><span class="co">## ---------------------</span></span>
 <span><span class="co">## Mode: per_peptide</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Power: 8%</span></span>
+<span><span class="co">## Power: 6%</span></span>
 <span><span class="co">## Sample size: 3 per group</span></span>
 <span><span class="co">## Effect size: 2.00-fold</span></span>
 <span><span class="co">## </span></span>
