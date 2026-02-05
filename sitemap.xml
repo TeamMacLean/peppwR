@@ -11,11 +11,8 @@
 <url><loc>https://teammaclean.github.io/peppwR/articles/power-analysis-workflow.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/articles/prm-genotype-power.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/authors.html</loc></url>
-<url><loc>https://teammaclean.github.io/peppwR/examples_plan.html</loc></url>
-<url><loc>https://teammaclean.github.io/peppwR/feature_plan_v2.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/index.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/news/index.html</loc></url>
-<url><loc>https://teammaclean.github.io/peppwR/next_prompt.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/apply_missingness.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/bf_jzs.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/compute_fitted_density.html</loc></url>
@@ -71,5 +68,6 @@
 <url><loc>https://teammaclean.github.io/peppwR/reference/test_wilcoxon.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/validate_peppwr_fits.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/validate_peppwr_power.html</loc></url>
+<url><loc>https://teammaclean.github.io/peppwR/semi-autonomous-feature-development.html</loc></url>
 </urlset>
 
