@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">peppwR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>In-depth Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/power-analysis-workflow.html">Power Analysis Workflow</a></li>
     <li><a class="dropdown-item" href="../articles/benchmarking.html">Benchmarking</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Real-World Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/dda-time-course-power.html">DDA Time Course Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/prm-genotype-power.html">PRM Genotype Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -46,7 +50,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/danmaclean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/TeamMacLean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -59,18 +63,17 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Power Analysis Workflow</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Power Analysis Workflow</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danmaclean/peppwR/blob/master/vignettes/articles/power-analysis-workflow.Rmd" class="external-link"><code>vignettes/articles/power-analysis-workflow.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/TeamMacLean/peppwR/blob/master/vignettes/articles/power-analysis-workflow.Rmd" class="external-link"><code>vignettes/articles/power-analysis-workflow.Rmd</code></a></small>
       <div class="d-none name"><code>power-analysis-workflow.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://danmaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://teammaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>

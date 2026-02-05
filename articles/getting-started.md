@@ -85,7 +85,7 @@ head(pilot_data, 12)
 ## Fit Distributions
 
 Use
-[`fit_distributions()`](https://danmaclean.github.io/peppwR/reference/fit_distributions.md)
+[`fit_distributions()`](https://teammaclean.github.io/peppwR/reference/fit_distributions.md)
 to determine which statistical distributions best describe your peptide
 abundance data.
 

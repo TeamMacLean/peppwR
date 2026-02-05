@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">peppwR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>In-depth Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/power-analysis-workflow.html">Power Analysis Workflow</a></li>
     <li><a class="dropdown-item" href="../articles/benchmarking.html">Benchmarking</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Real-World Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/dda-time-course-power.html">DDA Time Course Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/prm-genotype-power.html">PRM Genotype Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -46,7 +50,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/danmaclean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/TeamMacLean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -59,18 +63,17 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Benchmarking peppwR</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Benchmarking peppwR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danmaclean/peppwR/blob/master/vignettes/articles/benchmarking.Rmd" class="external-link"><code>vignettes/articles/benchmarking.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/TeamMacLean/peppwR/blob/master/vignettes/articles/benchmarking.Rmd" class="external-link"><code>vignettes/articles/benchmarking.Rmd</code></a></small>
       <div class="d-none name"><code>benchmarking.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://danmaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://teammaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bench.r-lib.org/" class="external-link">bench</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -188,27 +191,27 @@ lognormal, normal, etc.).</p>
 <tbody>
 <tr class="odd">
 <td align="right">100</td>
-<td align="right">3.27</td>
+<td align="right">3.71</td>
 <td align="right">101.29</td>
-<td align="right">32.73</td>
+<td align="right">37.07</td>
 </tr>
 <tr class="even">
 <td align="right">500</td>
-<td align="right">16.41</td>
+<td align="right">19.11</td>
 <td align="right">9.75</td>
-<td align="right">32.82</td>
+<td align="right">38.21</td>
 </tr>
 <tr class="odd">
 <td align="right">1000</td>
-<td align="right">33.05</td>
+<td align="right">38.04</td>
 <td align="right">19.48</td>
-<td align="right">33.05</td>
+<td align="right">38.04</td>
 </tr>
 <tr class="even">
 <td align="right">2000</td>
-<td align="right">64.49</td>
+<td align="right">72.16</td>
 <td align="right">38.94</td>
-<td align="right">32.24</td>
+<td align="right">36.08</td>
 </tr>
 </tbody>
 </table>
@@ -279,15 +282,15 @@ peptide).</p>
 <tbody>
 <tr class="odd">
 <td align="right">500</td>
-<td align="right">0.05</td>
+<td align="right">0.050</td>
 </tr>
 <tr class="even">
 <td align="right">1000</td>
-<td align="right">0.10</td>
+<td align="right">0.102</td>
 </tr>
 <tr class="odd">
 <td align="right">2000</td>
-<td align="right">0.20</td>
+<td align="right">0.202</td>
 </tr>
 </tbody>
 </table>
@@ -442,18 +445,18 @@ n_sim.</p>
 <tbody>
 <tr class="odd">
 <td align="right">100</td>
-<td align="right">3.71</td>
-<td align="right">37.09</td>
+<td align="right">4.08</td>
+<td align="right">40.84</td>
 </tr>
 <tr class="even">
 <td align="right">500</td>
-<td align="right">18.28</td>
-<td align="right">36.57</td>
+<td align="right">18.73</td>
+<td align="right">37.46</td>
 </tr>
 <tr class="odd">
 <td align="right">1000</td>
-<td align="right">33.27</td>
-<td align="right">33.27</td>
+<td align="right">34.68</td>
+<td align="right">34.68</td>
 </tr>
 </tbody>
 </table>
@@ -495,15 +498,15 @@ n_sim.</p>
 <tbody>
 <tr class="odd">
 <td align="right">250</td>
-<td align="right">9.31</td>
+<td align="right">9.29</td>
 </tr>
 <tr class="even">
 <td align="right">500</td>
-<td align="right">18.53</td>
+<td align="right">18.58</td>
 </tr>
 <tr class="odd">
 <td align="right">1000</td>
-<td align="right">36.18</td>
+<td align="right">36.83</td>
 </tr>
 </tbody>
 </table>
@@ -641,13 +644,13 @@ available RAM</li>
 <tbody>
 <tr class="odd">
 <td align="left">wilcoxon</td>
-<td align="right">0.05</td>
-<td align="right">2.61</td>
+<td align="right">0.06</td>
+<td align="right">2.94</td>
 </tr>
 <tr class="even">
 <td align="left">bootstrap_t</td>
-<td align="right">16.32</td>
-<td align="right">883.86</td>
+<td align="right">16.80</td>
+<td align="right">892.76</td>
 </tr>
 <tr class="odd">
 <td align="left">bayes_t</td>
@@ -656,8 +659,8 @@ available RAM</li>
 </tr>
 <tr class="even">
 <td align="left">rankprod</td>
-<td align="right">8.30</td>
-<td align="right">449.59</td>
+<td align="right">8.45</td>
+<td align="right">449.08</td>
 </tr>
 </tbody>
 </table>
@@ -734,11 +737,11 @@ overhead:</p>
 <tbody>
 <tr class="odd">
 <td align="left">Without missingness</td>
-<td align="right">5.55</td>
+<td align="right">5.76</td>
 </tr>
 <tr class="even">
 <td align="left">With missingness</td>
-<td align="right">7.15</td>
+<td align="right">7.48</td>
 </tr>
 </tbody>
 </table>
@@ -785,11 +788,11 @@ computationally intensive than per-peptide mode.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Per-peptide (no FDR)</td>
-<td align="right">3.68</td>
+<td align="right">3.80</td>
 </tr>
 <tr class="even">
 <td align="left">FDR-adjusted</td>
-<td align="right">4.41</td>
+<td align="right">4.54</td>
 </tr>
 </tbody>
 </table>
@@ -833,15 +836,15 @@ peptides together 3. Applying BH correction across all p-values</p>
 <tbody>
 <tr class="odd">
 <td align="right">100</td>
-<td align="right">0.43</td>
+<td align="right">0.44</td>
 </tr>
 <tr class="even">
 <td align="right">500</td>
-<td align="right">2.12</td>
+<td align="right">2.18</td>
 </tr>
 <tr class="odd">
 <td align="right">1000</td>
-<td align="right">3.93</td>
+<td align="right">4.03</td>
 </tr>
 </tbody>
 </table>
@@ -881,15 +884,15 @@ peptides together 3. Applying BH correction across all p-values</p>
 <tbody>
 <tr class="odd">
 <td align="left">Density overlay</td>
-<td align="right">0.058</td>
+<td align="right">0.063</td>
 </tr>
 <tr class="even">
 <td align="left">QQ plots</td>
-<td align="right">0.043</td>
+<td align="right">0.044</td>
 </tr>
 <tr class="odd">
 <td align="left">Param distribution</td>
-<td align="right">0.776</td>
+<td align="right">0.779</td>
 </tr>
 </tbody>
 </table>
@@ -923,7 +926,7 @@ peptides together 3. Applying BH correction across all p-values</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">Power heatmap (5x5 grid, n_sim=50)</td>
-<td align="right">0.17</td>
+<td align="right">0.18</td>
 </tr></tbody>
 </table>
 <p><strong>Note</strong>: The power heatmap is expensive because it runs
@@ -956,7 +959,7 @@ simulations for exploratory work.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices datasets  utils     methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] bench_1.1.4       peppwR_0.0.0.9000</span></span>
+<span><span class="co">#&gt; [1] bench_1.1.4  peppwR_0.1.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] sass_0.4.10         generics_0.1.4      tidyr_1.3.2        </span></span>

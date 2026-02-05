@@ -199,7 +199,7 @@ OR use aggregate mode with clear explanation that this represents a
 ### Why Aggregate Mode for Heatmaps?
 
 The
-[`plot_power_heatmap()`](https://danmaclean.github.io/peppwR/reference/plot_power_heatmap.md)
+[`plot_power_heatmap()`](https://teammaclean.github.io/peppwR/reference/plot_power_heatmap.md)
 function uses **aggregate mode** (single distribution) rather than
 per-peptide mode because:
 
@@ -429,7 +429,7 @@ print(fits)  # Shows missingness summary
 ### Visualizing Missingness Patterns
 
 The
-[`plot_missingness()`](https://danmaclean.github.io/peppwR/reference/plot_missingness.md)
+[`plot_missingness()`](https://teammaclean.github.io/peppwR/reference/plot_missingness.md)
 function provides three complementary views:
 
 1.  **NA Rate Distribution**: What fraction of observations are missing

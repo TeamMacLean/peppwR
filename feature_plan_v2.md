@@ -45,35 +45,35 @@ Handling** - Track NA rates, detect MNAR, incorporate into simulations
 
 **Files**: `R/simulation.R`, `R/power.R`
 
-| Task | Function                                                                                                                           | Description                      |
-|------|------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| B1   | `simulate_empirical(raw_data, n_per_group, effect_size)`                                                                           | Bootstrap resample from observed |
-| B2   | `run_power_sim_empirical(raw_data, n_per_group, ...)`                                                                              | Power sim using bootstrap        |
-| B3   | Update [`power_analysis.peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) lines 202-206 | Wire up “empirical” option       |
+| Task | Function                                                                                                                            | Description                      |
+|------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+| B1   | `simulate_empirical(raw_data, n_per_group, effect_size)`                                                                            | Bootstrap resample from observed |
+| B2   | `run_power_sim_empirical(raw_data, n_per_group, ...)`                                                                               | Power sim using bootstrap        |
+| B3   | Update [`power_analysis.peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) lines 202-206 | Wire up “empirical” option       |
 
 ### Phase C: Missing Data Handling
 
 **Files**: `R/fits.R`, `R/classes.R`, `R/simulation.R`, `R/plots.R`
 
-| Task | Function                                                                                                                                         | Description                                 |
-|------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
-| C1   | `compute_missingness(values)`                                                                                                                    | Calculate NA rate, MNAR score, MNAR p-value |
-| C2   | Extend [`fit_distributions()`](https://danmaclean.github.io/peppwR/reference/fit_distributions.md)                                               | Add `missingness` slot to peppwr_fits       |
-| C3   | Update `print/summary.peppwr_fits()`                                                                                                             | Report missingness statistics               |
-| C4   | `simulate_with_missingness(dist, params, ..., na_rate, mnar_score)`                                                                              | Introduce realistic missingness             |
-| C5   | [`run_power_sim_with_missingness()`](https://danmaclean.github.io/peppwR/reference/run_power_sim_with_missingness.md)                            | Power sim incorporating NA rates            |
-| C6   | Add `include_missingness` param to [`power_analysis.peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) | Use peptide-specific NA rates               |
-| C7   | `plot_missingness(fits)`                                                                                                                         | NA rate distribution + MNAR score plot      |
+| Task | Function                                                                                                                                          | Description                                 |
+|------|---------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| C1   | `compute_missingness(values)`                                                                                                                     | Calculate NA rate, MNAR score, MNAR p-value |
+| C2   | Extend [`fit_distributions()`](https://teammaclean.github.io/peppwR/reference/fit_distributions.md)                                               | Add `missingness` slot to peppwr_fits       |
+| C3   | Update `print/summary.peppwr_fits()`                                                                                                              | Report missingness statistics               |
+| C4   | `simulate_with_missingness(dist, params, ..., na_rate, mnar_score)`                                                                               | Introduce realistic missingness             |
+| C5   | [`run_power_sim_with_missingness()`](https://teammaclean.github.io/peppwR/reference/run_power_sim_with_missingness.md)                            | Power sim incorporating NA rates            |
+| C6   | Add `include_missingness` param to [`power_analysis.peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) | Use peptide-specific NA rates               |
+| C7   | `plot_missingness(fits)`                                                                                                                          | NA rate distribution + MNAR score plot      |
 
 ### Phase D: FDR-Aware Mode
 
 **Files**: `R/simulation.R`, `R/power.R`, `R/classes.R`
 
-| Task | Function                                                                                                                                                              | Description                   |
-|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| D1   | `run_power_sim_fdr(fits, effect_size, n_per_group, prop_null, fdr_threshold)`                                                                                         | Whole-peptidome FDR sim       |
-| D2   | Add `apply_fdr`, `prop_null`, `fdr_threshold` params to [`power_analysis.peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) | Enable FDR mode               |
-| D3   | Update [`print.peppwr_power()`](https://danmaclean.github.io/peppwR/reference/print.peppwr_power.md)                                                                  | Describe FDR-adjusted results |
+| Task | Function                                                                                                                                                               | Description                   |
+|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
+| D1   | `run_power_sim_fdr(fits, effect_size, n_per_group, prop_null, fdr_threshold)`                                                                                          | Whole-peptidome FDR sim       |
+| D2   | Add `apply_fdr`, `prop_null`, `fdr_threshold` params to [`power_analysis.peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md) | Enable FDR mode               |
+| D3   | Update [`print.peppwr_power()`](https://teammaclean.github.io/peppwR/reference/print.peppwr_power.md)                                                                  | Describe FDR-adjusted results |
 
 ------------------------------------------------------------------------
 

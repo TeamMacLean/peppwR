@@ -659,7 +659,7 @@ models missingness to provide more realistic power estimates.
 ### Understanding Missingness
 
 The
-[`fit_distributions()`](https://danmaclean.github.io/peppwR/reference/fit_distributions.md)
+[`fit_distributions()`](https://teammaclean.github.io/peppwR/reference/fit_distributions.md)
 function automatically computes missingness statistics for each peptide:
 
 ``` r
@@ -951,7 +951,7 @@ cat("1.2-fold change: N =", small$answer, "per group\n")
 ## Next Steps
 
 - **Getting Started**: See
-  [`vignette("getting-started")`](https://danmaclean.github.io/peppwR/articles/getting-started.md)
+  [`vignette("getting-started")`](https://teammaclean.github.io/peppwR/articles/getting-started.md)
   for a minimal workflow
 - **Benchmarking**: See `vignette("benchmarking")` for performance with
   large datasets

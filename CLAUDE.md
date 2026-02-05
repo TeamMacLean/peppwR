@@ -197,29 +197,29 @@ Implementation order with dependencies:
 ### Phase 1: Class Foundation
 
 1.  **`peppwr_fits` constructor** -
-    [`new_peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/new_peppwr_fits.md)
+    [`new_peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/new_peppwr_fits.md)
     with validation
 2.  **`print.peppwr_fits`** - Summary output (fit counts, failure rate)
 3.  **`peppwr_power` constructor** -
-    [`new_peppwr_power()`](https://danmaclean.github.io/peppwR/reference/new_peppwr_power.md)
+    [`new_peppwr_power()`](https://teammaclean.github.io/peppwR/reference/new_peppwr_power.md)
     with validation
 4.  **`print.peppwr_power`** - Clear answer to question asked
 
 ### Phase 2: Distribution Fitting (refactor existing)
 
 5.  **Refactor
-    [`fit_distributions()`](https://danmaclean.github.io/peppwR/reference/fit_distributions.md)** -
+    [`fit_distributions()`](https://teammaclean.github.io/peppwR/reference/fit_distributions.md)** -
     Wraps existing logic, returns `peppwr_fits`
 6.  **`plot.peppwr_fits`** - Distribution summary bar chart (refactor
     `evaldist()`)
 
 ### Phase 3: Simulation Engine
 
-7.  **[`simulate_experiment()`](https://danmaclean.github.io/peppwR/reference/simulate_experiment.md)** -
+7.  **[`simulate_experiment()`](https://teammaclean.github.io/peppwR/reference/simulate_experiment.md)** -
     Draw from distribution, apply effect, return samples
-8.  **[`test_wilcoxon()`](https://danmaclean.github.io/peppwR/reference/test_wilcoxon.md)** -
+8.  **[`test_wilcoxon()`](https://teammaclean.github.io/peppwR/reference/test_wilcoxon.md)** -
     Wilcoxon rank-sum test wrapper
-9.  **[`run_power_sim()`](https://danmaclean.github.io/peppwR/reference/run_power_sim.md)** -
+9.  **[`run_power_sim()`](https://teammaclean.github.io/peppwR/reference/run_power_sim.md)** -
     Run n_sim iterations, return power estimate
 
 ### Phase 4: Power Analysis - Aggregate Mode
@@ -242,11 +242,11 @@ Implementation order with dependencies:
 
 ### Phase 7: Additional Statistical Tests
 
-17. **[`test_bootstrap_t()`](https://danmaclean.github.io/peppwR/reference/test_bootstrap_t.md)** -
+17. **[`test_bootstrap_t()`](https://teammaclean.github.io/peppwR/reference/test_bootstrap_t.md)** -
     Bootstrap-t implementation
-18. **[`test_bayes_t()`](https://danmaclean.github.io/peppwR/reference/test_bayes_t.md)** -
+18. **[`test_bayes_t()`](https://teammaclean.github.io/peppwR/reference/test_bayes_t.md)** -
     Bayes factor t-test (via BayesFactor)
-19. **[`test_rankprod()`](https://danmaclean.github.io/peppwR/reference/test_rankprod.md)** -
+19. **[`test_rankprod()`](https://teammaclean.github.io/peppwR/reference/test_rankprod.md)** -
     Rank products implementation
 
 ### Phase 8: Polish (COMPLETE)
@@ -264,22 +264,22 @@ See `feature_plan_v2.md` for detailed specifications.
 
 ### Phase A: Diagnostic Plots ✓
 
-- [`plot_density_overlay()`](https://danmaclean.github.io/peppwR/reference/plot_density_overlay.md) -
+- [`plot_density_overlay()`](https://teammaclean.github.io/peppwR/reference/plot_density_overlay.md) -
   Observed histogram + fitted density curve
-- [`plot_qq()`](https://danmaclean.github.io/peppwR/reference/plot_qq.md) -
+- [`plot_qq()`](https://teammaclean.github.io/peppwR/reference/plot_qq.md) -
   QQ plots for goodness-of-fit
-- [`plot_power_heatmap()`](https://danmaclean.github.io/peppwR/reference/plot_power_heatmap.md) -
+- [`plot_power_heatmap()`](https://teammaclean.github.io/peppwR/reference/plot_power_heatmap.md) -
   N × effect size lookup grid
-- [`plot_power_vs_effect()`](https://danmaclean.github.io/peppwR/reference/plot_power_vs_effect.md) -
+- [`plot_power_vs_effect()`](https://teammaclean.github.io/peppwR/reference/plot_power_vs_effect.md) -
   Sensitivity at fixed N
-- [`plot_param_distribution()`](https://danmaclean.github.io/peppwR/reference/plot_param_distribution.md) -
+- [`plot_param_distribution()`](https://teammaclean.github.io/peppwR/reference/plot_param_distribution.md) -
   Fitted params across peptidome
 
 ### Phase B: Empirical Bootstrap ✓
 
-- [`simulate_empirical()`](https://danmaclean.github.io/peppwR/reference/simulate_empirical.md) -
+- [`simulate_empirical()`](https://teammaclean.github.io/peppwR/reference/simulate_empirical.md) -
   Bootstrap resample from observed data
-- [`run_power_sim_empirical()`](https://danmaclean.github.io/peppwR/reference/run_power_sim_empirical.md) -
+- [`run_power_sim_empirical()`](https://teammaclean.github.io/peppwR/reference/run_power_sim_empirical.md) -
   Power sim using bootstrap
 - `on_fit_failure = "empirical"` implemented
 
@@ -287,22 +287,22 @@ See `feature_plan_v2.md` for detailed specifications.
 
 **Philosophy: Track and model missingness, never impute**
 
-- [`compute_missingness()`](https://danmaclean.github.io/peppwR/reference/compute_missingness.md) -
+- [`compute_missingness()`](https://teammaclean.github.io/peppwR/reference/compute_missingness.md) -
   Calculate NA rate and MNAR score (z-statistic)
 - `peppwr_fits` includes `missingness` slot
 - MNAR detection (Missing Not At Random - when low values systematically
   missing)
-- [`simulate_with_missingness()`](https://danmaclean.github.io/peppwR/reference/simulate_with_missingness.md) -
+- [`simulate_with_missingness()`](https://teammaclean.github.io/peppwR/reference/simulate_with_missingness.md) -
   Incorporate NA rates into simulations
-- [`plot_missingness()`](https://danmaclean.github.io/peppwR/reference/plot_missingness.md) -
+- [`plot_missingness()`](https://teammaclean.github.io/peppwR/reference/plot_missingness.md) -
   NA rate and MNAR score distributions
 
 ### Phase D: FDR-Aware Mode ✓
 
-- [`run_power_sim_fdr()`](https://danmaclean.github.io/peppwR/reference/run_power_sim_fdr.md) -
+- [`run_power_sim_fdr()`](https://teammaclean.github.io/peppwR/reference/run_power_sim_fdr.md) -
   Whole-peptidome simulation with BH correction
 - `apply_fdr`, `prop_null`, `fdr_threshold` params in
-  [`power_analysis.peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md)
+  [`power_analysis.peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md)
 - User-configurable `prop_null` (default 0.9 = 90% true nulls)
 
 ------------------------------------------------------------------------
@@ -329,7 +329,7 @@ All planned features from v1, v2, v2.1, and v2.2 have been implemented:
 ### Misleading red line in per-peptide effect_size plot
 
 **Problem:** The
-[`plot.peppwr_power()`](https://danmaclean.github.io/peppwR/reference/plot.peppwr_power.md)
+[`plot.peppwr_power()`](https://teammaclean.github.io/peppwR/reference/plot.peppwr_power.md)
 method for per-peptide `find = "effect_size"` draws a horizontal red
 line at the `proportion_threshold` (default 50%), but users may confuse
 this with `target_power` (default 80%).
@@ -381,7 +381,7 @@ Skip peptides with no valid fit, report count in output -
 ### Multiple testing / FDR
 
 **v2: FDR-aware mode implemented.** Use `apply_fdr = TRUE` in
-[`power_analysis.peppwr_fits()`](https://danmaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md)
+[`power_analysis.peppwr_fits()`](https://teammaclean.github.io/peppwR/reference/power_analysis.peppwr_fits.md)
 to simulate whole-peptidome experiments with Benjamini-Hochberg
 correction. Configure `prop_null` (default 0.9) for expected proportion
 of true nulls.

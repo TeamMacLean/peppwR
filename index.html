@@ -13,6 +13,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Power Analysis For Phosphopeptide Abundance Hypothesis Test">
 <meta name="description" content="Estimate best fit distributions and do power analysis for hypothesis tests on phosphopeptide abundance data.">
 <meta property="og:description" content="Estimate best fit distributions and do power analysis for hypothesis tests on phosphopeptide abundance data.">
+<meta property="og:image" content="https://teammaclean.github.io/peppwR/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">peppwR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +42,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>In-depth Guides</h6></li>
     <li><a class="dropdown-item" href="articles/power-analysis-workflow.html">Power Analysis Workflow</a></li>
     <li><a class="dropdown-item" href="articles/benchmarking.html">Benchmarking</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Real-World Examples</h6></li>
+    <li><a class="dropdown-item" href="articles/dda-time-course-power.html">DDA Time Course Analysis</a></li>
+    <li><a class="dropdown-item" href="articles/prm-genotype-power.html">PRM Genotype Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -48,7 +53,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/danmaclean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/TeamMacLean/peppwR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -57,28 +62,161 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="peppwr">peppwR<a class="anchor" aria-label="anchor" href="#peppwr"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.svg" class="logo" alt=""><h1 id="peppwr-">peppwR 
+<a class="anchor" aria-label="anchor" href="#peppwr-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
-<p>The goal of peppwR is to carry out power analysis in phosphopeptide data</p>
+<p><strong>Power analysis for phosphopeptide abundance hypothesis tests via simulation.</strong></p>
+<p>peppwR helps proteomics researchers answer critical experimental design questions:</p>
+<ul>
+<li>
+<strong>“What sample size do I need?”</strong> — Find the N required for 80% power to detect a given effect</li>
+<li>
+<strong>“What’s my power?”</strong> — Calculate power for a given sample size and effect</li>
+<li>
+<strong>“What can I detect?”</strong> — Find the minimum detectable effect size for your design</li>
+</ul>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<ul>
+<li>
+<strong>Distribution fitting</strong> — Fit gamma, lognormal, normal, and other distributions to pilot data</li>
+<li>
+<strong>Per-peptide analysis</strong> — Get power estimates across your entire peptidome</li>
+<li>
+<strong>Multiple statistical tests</strong> — Wilcoxon, bootstrap-t, and Bayes factor t-tests</li>
+<li>
+<strong>Missing data handling</strong> — Model MNAR (Missing Not At Random) patterns common in proteomics</li>
+<li>
+<strong>FDR-aware mode</strong> — Account for multiple testing correction in power calculations</li>
+<li>
+<strong>Rich visualizations</strong> — Power curves, heatmaps, QQ plots, and diagnostic plots</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of peppwR from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"TeamMacLean/peppwR"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"TeamMacLean/peppwR"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="section level3">
+<h3 id="from-pilot-data-per-peptide-mode">From Pilot Data (Per-Peptide Mode)<a class="anchor" aria-label="anchor" href="#from-pilot-data-per-peptide-mode"></a>
+</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://danmaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"find-fits"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://teammaclean.github.io/peppwR/">peppwR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit distributions to your pilot data</span></span>
+<span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_distributions.html">fit_distributions</a></span><span class="op">(</span></span>
+<span>  <span class="va">pilot_data</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"peptide"</span>,</span>
+<span>  group <span class="op">=</span> <span class="st">"condition"</span>,</span>
+<span>  value <span class="op">=</span> <span class="st">"abundance"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Find required sample size for 80% power to detect 2-fold change</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/power_analysis.html">power_analysis</a></span><span class="op">(</span></span>
+<span>  <span class="va">fits</span>,</span>
+<span>  effect_size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  find <span class="op">=</span> <span class="st">"sample_size"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Per-peptide power analysis</span></span>
+<span><span class="co">#&gt; Question: sample_size</span></span>
+<span><span class="co">#&gt; Answer: N = 6 per group</span></span>
+<span><span class="co">#&gt; 73% of peptides achieve 80% power</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="from-scratch-aggregate-mode">From Scratch (Aggregate Mode)<a class="anchor" aria-label="anchor" href="#from-scratch-aggregate-mode"></a>
+</h3>
+<p>No pilot data? Specify assumed distribution parameters:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/power_analysis.html">power_analysis</a></span><span class="op">(</span></span>
+<span>  distribution <span class="op">=</span> <span class="st">"gamma"</span>,</span>
+<span>  params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
+<span>  effect_size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  find <span class="op">=</span> <span class="st">"sample_size"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<ul>
+<li>
+<strong><a href="https://teammaclean.github.io/peppwR/articles/getting-started.html">Getting Started</a></strong> — Introduction and basic usage</li>
+<li>
+<strong><a href="https://teammaclean.github.io/peppwR/articles/power-analysis-workflow.html">Power Analysis Workflow</a></strong> — Complete workflow with real data</li>
+<li>
+<strong><a href="https://teammaclean.github.io/peppwR/articles/benchmarking.html">Benchmarking</a></strong> — Performance characteristics</li>
+<li>
+<strong><a href="https://teammaclean.github.io/peppwR/reference/index.html">Function Reference</a></strong> — Full API documentation</li>
+</ul>
+<div class="section level3">
+<h3 id="real-world-examples">Real-World Examples<a class="anchor" aria-label="anchor" href="#real-world-examples"></a>
+</h3>
+<ul>
+<li><a href="https://teammaclean.github.io/peppwR/articles/dda-time-course-power.html">DDA Time Course Analysis</a></li>
+<li><a href="https://teammaclean.github.io/peppwR/articles/prm-genotype-power.html">PRM Genotype Analysis</a></li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="workflow-overview">Workflow Overview<a class="anchor" aria-label="anchor" href="#workflow-overview"></a>
+</h2>
+<pre class="mermaid"><code>flowchart TD
+    A[pilot_data] --&gt; B[fit_distributions]
+    B --&gt; C[power_analysis]
+    C --&gt; D{find = ?}
+    D --&gt; E["power"]
+    D --&gt; F["sample_size"]
+    D --&gt; G["effect_size"]
+    E --&gt; H[results + plots]
+    F --&gt; H
+    G --&gt; H
+
+    style A fill:#FFFFCC,stroke:#BD0026
+    style B fill:#FD8D3C,stroke:#BD0026,color:#fff
+    style C fill:#FD8D3C,stroke:#BD0026,color:#fff
+    style H fill:#FFFFCC,stroke:#BD0026</code></pre>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use peppwR in your research, please cite:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>MacLean, <span class="fu">D.</span> (<span class="dv">2026</span>). peppwR<span class="sc">:</span> Power Analysis <span class="cf">for</span> Phosphopeptide Abundance</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>Hypothesis Tests. R package version <span class="dv">0</span>.<span class="dv">1</span>.<span class="fl">0.</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>TeamMacLean<span class="sc">/</span>peppwR</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>Contributions are welcome! Please open an <a href="https://github.com/TeamMacLean/peppwR/issues" class="external-link">issue</a> or submit a pull request.</p>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>MIT © <a href="https://github.com/danmaclean" class="external-link">Dan MacLean</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/danmaclean/peppwR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/danmaclean/peppwR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/TeamMacLean/peppwR/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/TeamMacLean/peppwR/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -108,7 +246,13 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://CRAN.R-project.org/package=peppwR" class="external-link"><img src="https://www.r-pkg.org/badges/version/peppwR" alt="CRAN status"></a></li>
 <li><a href="https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/TeamMacLean/peppwR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/TeamMacLean/peppwR/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/TeamMacLean/peppwR/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+<li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
+<li><a href="https://github.com/TeamMacLean/peppwR/issues" class="external-link"><img src="https://img.shields.io/github/issues/TeamMacLean/peppwR" alt="GitHub issues"></a></li>
+<li><a href="https://github.com/TeamMacLean/peppwR/stargazers" class="external-link"><img src="https://img.shields.io/github/stars/TeamMacLean/peppwR" alt="GitHub stars"></a></li>
 </ul>
 </div>
 
