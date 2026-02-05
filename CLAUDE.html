@@ -46,17 +46,29 @@
 <div id="peppwr" class="section level1">
 
 <p>Power analysis for phosphopeptide abundance hypothesis tests via simulation.</p>
+<p><strong>Repository:</strong> <a href="https://github.com/TeamMacLean/peppwR" class="external-link uri">https://github.com/TeamMacLean/peppwR</a> <strong>Documentation:</strong> <a href="https://teammaclean.github.io/peppwR/" class="uri">https://teammaclean.github.io/peppwR/</a> <strong>Version:</strong> 0.1.0 (CRAN-ready)</p>
 <div class="section level2">
-<h2 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a></h2>
-<p>Help researchers answer: 1. “What sample size do I need for 80% power to detect a given effect?” 2. “With N samples per group, what’s my power to detect a 2-fold change?” 3. “Given my sample size and target power, what’s the minimum detectable effect?”</p>
+<h2 id="related-package">Related Package<a class="anchor" aria-label="anchor" href="#related-package"></a></h2>
+<p><strong>pepdiff</strong> - Companion package for differential abundance analysis of phosphopeptide data. While peppwR handles experimental design (power analysis), pepdiff handles the actual analysis once data is collected.</p>
 </div>
 <div class="section level2">
+<h2 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a></h2>
+<p>Help proteomics researchers answer experimental design questions:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>“What sample size do I need?”</strong> → <code>find = "sample_size"</code>
+</li>
+<li>
+<strong>“What’s my power?”</strong> → <code>find = "power"</code>
+</li>
+<li>
+<strong>“What’s the minimum detectable effect?”</strong> → <code>find = "effect_size"</code>
+</li>
+</ol></div>
+<div class="section level2">
 <h2 id="core-workflow">Core Workflow<a class="anchor" aria-label="anchor" href="#core-workflow"></a></h2>
-<pre><code>pilot_data → fit_distributions() → power_analysis() → results/recommendation</code></pre>
-<p>Two modes of operation:</p>
+<pre><code>pilot_data → fit_distributions() → power_analysis() → results + plots</code></pre>
 <div class="section level3">
-<h3 id="from-scratch-aggregate-mode">From Scratch (Aggregate Mode)<a class="anchor" aria-label="anchor" href="#from-scratch-aggregate-mode"></a></h3>
-<p>No pilot data required. User specifies assumed distribution and parameters (or uses sensible proteomics defaults). Simulates a “typical” peptide.</p>
+<h3 id="aggregate-mode-no-pilot-data">Aggregate Mode (No Pilot Data)<a class="anchor" aria-label="anchor" href="#aggregate-mode-no-pilot-data"></a></h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/power_analysis.html">power_analysis</a></span><span class="op">(</span></span>
 <span>  distribution <span class="op">=</span> <span class="st">"gamma"</span>,</span>
@@ -67,8 +79,7 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="with-pilot-data-per-peptide-mode">With Pilot Data (Per-Peptide Mode)<a class="anchor" aria-label="anchor" href="#with-pilot-data-per-peptide-mode"></a></h3>
-<p>Uses real pilot data. Fits distributions to each peptide, then simulates using actual fitted parameters. Reports power across the peptidome.</p>
+<h3 id="per-peptide-mode-with-pilot-data">Per-Peptide Mode (With Pilot Data)<a class="anchor" aria-label="anchor" href="#per-peptide-mode-with-pilot-data"></a></h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_distributions.html">fit_distributions</a></span><span class="op">(</span><span class="va">pilot_data</span>, id <span class="op">=</span> <span class="st">"peptide"</span>, group <span class="op">=</span> <span class="st">"condition"</span>, value <span class="op">=</span> <span class="st">"abundance"</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, target_power <span class="op">=</span> <span class="fl">0.8</span>, find <span class="op">=</span> <span class="st">"sample_size"</span><span class="op">)</span></span>
@@ -76,296 +87,130 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a></h2>
+<table class="table"><colgroup><col width="40%"><col width="59%"></colgroup><thead><tr class="header"><th>Feature</th>
+<th>Description</th>
+</tr></thead><tbody><tr class="odd"><td><strong>Distribution fitting</strong></td>
+<td>gamma, lognormal, normal, inverse gaussian via <code>fitdistrplus</code>/<code>univariateML</code>
+</td>
+</tr><tr class="even"><td><strong>Statistical tests</strong></td>
+<td>
+<code>wilcoxon</code> (default), <code>bootstrap_t</code>, <code>bayes_t</code>
+</td>
+</tr><tr class="odd"><td><strong>Missing data</strong></td>
+<td>MNAR detection, missingness-aware simulations</td>
+</tr><tr class="even"><td><strong>FDR-aware mode</strong></td>
+<td>Whole-peptidome simulation with BH correction</td>
+</tr><tr class="odd"><td><strong>Empirical bootstrap</strong></td>
+<td>Fallback when parametric fitting fails</td>
+</tr><tr class="even"><td><strong>Diagnostic plots</strong></td>
+<td>Density overlay, QQ, power heatmap, missingness</td>
+</tr></tbody></table></div>
+<div class="section level2">
 <h2 id="s3-classes">S3 Classes<a class="anchor" aria-label="anchor" href="#s3-classes"></a></h2>
 <div class="section level3">
 <h3 id="peppwr_fits"><code>peppwr_fits</code><a class="anchor" aria-label="anchor" href="#peppwr_fits"></a></h3>
-<p>Distribution fitting results. Contains nested data with per-peptide fit statistics.</p>
-<p><strong>Slots:</strong> - <code>data</code> - Original data (nested) - <code>fits</code> - Fit results per peptide (distribution, parameters, AIC, loglik) - <code>best</code> - Best-fitting distribution per peptide - <code>call</code> - Original function call</p>
-<p><strong>Methods:</strong> - <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> - Summary of fits (best distribution counts, failure rate) - <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> - Distribution evaluation dashboard (best fits, failed fits) - <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> - Detailed fit statistics</p>
+<p>Distribution fitting results with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods.</p>
 </div>
 <div class="section level3">
 <h3 id="peppwr_power"><code>peppwr_power</code><a class="anchor" aria-label="anchor" href="#peppwr_power"></a></h3>
-<p>Power analysis results.</p>
-<p><strong>Slots:</strong> - <code>mode</code> - “aggregate” or “per_peptide” - <code>question</code> - Which question was asked: “sample_size”, “power”, or “effect_size” - <code>answer</code> - The computed answer - <code>simulations</code> - Simulation details (for diagnostics) - <code>params</code> - Input parameters used - <code>call</code> - Original function call</p>
-<p><strong>Methods:</strong> - <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> - Clear answer to the question asked - <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> - Power curves, sample size recommendations - <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> - Detailed simulation results</p>
+<p>Power analysis results with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="core-functions">Core Functions<a class="anchor" aria-label="anchor" href="#core-functions"></a></h2>
-<div class="section level3">
-<h3 id="distribution-fitting">Distribution Fitting<a class="anchor" aria-label="anchor" href="#distribution-fitting"></a></h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/fit_distributions.html">fit_distributions</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span>, <span class="va">group</span>, <span class="va">value</span>, distributions <span class="op">=</span> <span class="st">"continuous"</span><span class="op">)</span></span></code></pre></div>
-<ul><li>Fits candidate distributions to each peptide’s values</li>
-<li>Returns <code>peppwr_fits</code> object</li>
-<li>
-<code>distributions</code> parameter: <code>"continuous"</code> (default), <code>"counts"</code>, <code>"all"</code>, or explicit vector</li>
-<li>Continuous distributions: gamma, normal, lognormal, inverse gaussian, etc.</li>
-<li>Count distributions: negative binomial (for spectral count data)</li>
-</ul></div>
-<div class="section level3">
-<h3 id="power-analysis">Power Analysis<a class="anchor" aria-label="anchor" href="#power-analysis"></a></h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
-<p>Generic with methods for: - <code>peppwr_fits</code> - Per-peptide mode using fitted parameters - <code>character</code> - Aggregate mode with specified distribution - <code>default</code> - Aggregate mode with proteomics defaults</p>
-<p><strong>Key parameters:</strong> - <code>effect_size</code> - Fold change (e.g., 2 for 2-fold) - <code>n_per_group</code> - Sample size per group (if known) - <code>target_power</code> - Desired power (default 0.8) - <code>alpha</code> - Significance level (default 0.05) - <code>find</code> - What to solve for: “sample_size”, “power”, or “effect_size” - <code>test</code> - Statistical test to use (see below) - <code>n_sim</code> - Number of simulations (default 1000) - <code>on_fit_failure</code> - How to handle peptides with no valid fit: “exclude” (default), “empirical”, “lognormal”</p>
-</div>
-<div class="section level3">
-<h3 id="simulation-engine-internal">Simulation Engine (Internal)<a class="anchor" aria-label="anchor" href="#simulation-engine-internal"></a></h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/simulate_experiment.html">simulate_experiment</a></span><span class="op">(</span><span class="va">distribution</span>, <span class="va">params</span>, <span class="va">n_per_group</span>, <span class="va">effect_size</span>, <span class="va">n_sim</span><span class="op">)</span></span>
-<span><span class="fu">run_test</span><span class="op">(</span><span class="va">control</span>, <span class="va">treatment</span>, <span class="va">test</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="plots">Plots<a class="anchor" aria-label="anchor" href="#plots"></a></h2>
-<div class="section level3">
-<h3 id="core-plots-v1">Core plots (v1)<a class="anchor" aria-label="anchor" href="#core-plots-v1"></a></h3>
-<p><strong>1. <code>plot(peppwr_fits)</code> - Distribution summary</strong> Bar chart showing best-fit distribution counts by metric (AIC/LogLik). Quick sanity check that fitting worked.</p>
-<p><strong>2. <code>plot(peppwr_power)</code> aggregate mode - Power curve with recommendation</strong> Power vs sample size curve with: - Horizontal line at target power (default 80%) - Vertical annotation at recommended N - Clear title: “Recommended sample size: N=X per group”</p>
-<p><strong>3. <code>plot(peppwr_power)</code> per-peptide mode - Peptide threshold curve</strong> “% of peptides reaching target power” vs sample size. Directly answers “how many of my peptides are well-powered at each N?”</p>
-</div>
-<div class="section level3">
-<h3 id="diagnostic-plots-future-versions">Diagnostic plots (future versions)<a class="anchor" aria-label="anchor" href="#diagnostic-plots-future-versions"></a></h3>
-<table class="table"><colgroup><col width="40%"><col width="60%"></colgroup><thead><tr class="header"><th>Plot</th>
-<th>Purpose</th>
-</tr></thead><tbody><tr class="odd"><td>Failed fits bar chart</td>
-<td>Data quality check - which distributions fail</td>
-</tr><tr class="even"><td>Density overlay</td>
-<td>Visual fit assessment - observed vs fitted</td>
-</tr><tr class="odd"><td>QQ plots</td>
-<td>Goodness-of-fit diagnostics</td>
-</tr><tr class="even"><td>Power vs effect size</td>
-<td>Sensitivity analysis at fixed N</td>
-</tr><tr class="odd"><td>Power heatmap</td>
-<td>N × effect size lookup grid</td>
-</tr><tr class="even"><td>Parameter distributions</td>
-<td>Distribution of fitted params across peptidome</td>
-</tr></tbody></table></div>
-</div>
-<div class="section level2">
-<h2 id="statistical-tests">Statistical Tests<a class="anchor" aria-label="anchor" href="#statistical-tests"></a></h2>
-<p>Configurable via <code>test</code> parameter:</p>
-<table class="table"><colgroup><col width="26%"><col width="17%"><col width="56%"></colgroup><thead><tr class="header"><th>Test</th>
-<th>ID</th>
-<th>Description</th>
-</tr></thead><tbody><tr class="odd"><td>Wilcoxon rank-sum</td>
-<td><code>"wilcoxon"</code></td>
-<td>Non-parametric, robust</td>
-</tr><tr class="even"><td>Bootstrap-t</td>
-<td><code>"bootstrap_t"</code></td>
-<td>Resampling-based, handles non-normality</td>
-</tr><tr class="odd"><td>Bayes factor t-test</td>
-<td><code>"bayes_t"</code></td>
-<td>Bayesian evidence for effect</td>
-</tr><tr class="even"><td>Rank Products</td>
-<td><code>"rankprod"</code></td>
-<td>Designed for omics, handles small samples</td>
-</tr></tbody></table><p>Default: <code>"wilcoxon"</code></p>
-</div>
-<div class="section level2">
-<h2 id="simulation-approach">Simulation Approach<a class="anchor" aria-label="anchor" href="#simulation-approach"></a></h2>
-<ol style="list-style-type: decimal"><li>
-<strong>Control group</strong>: Draw <code>n_per_group</code> samples from fitted distribution</li>
-<li>
-<strong>Treatment group</strong>: Draw from same distribution, apply multiplicative effect</li>
-<li>
-<strong>Test</strong>: Run specified statistical test</li>
-<li>
-<strong>Repeat</strong>: <code>n_sim</code> iterations</li>
-<li>
-<strong>Power</strong>: Proportion of significant results</li>
-</ol><p>For per-peptide mode, repeat across all peptides and report distribution of power values.</p>
 </div>
 <div class="section level2">
 <h2 id="file-structure">File Structure<a class="anchor" aria-label="anchor" href="#file-structure"></a></h2>
 <pre><code>R/
-  fits.R          - Distribution fitting (fit_distributions, single_fit, do_fits)
-  power.R         - Power analysis (power_analysis, simulate_experiment)
-  tests.R         - Statistical tests (run_test, wilcoxon, bootstrap_t, etc.)
-  plots.R         - Visualization (plot methods, evaldist)
-  classes.R       - S3 class constructors and validators
-  utils.R         - Helpers (distribution utilities, parameter extraction)
+├── classes.R       # S3 class constructors and validators
+├── fits.R          # fit_distributions(), distribution fitting
+├── missingness.R   # compute_missingness(), MNAR detection
+├── plots.R         # All plot methods and diagnostic plots
+├── power.R         # power_analysis() and methods
+├── simulation.R    # Simulation engine, run_power_sim*()
+├── tests.R         # Statistical test wrappers
+└── utils.R         # Distribution utilities, helpers
 
-tests/testthat/
-  test-fits.R     - Distribution fitting tests
-  test-power.R    - Power analysis tests
-  test-tests.R    - Statistical test implementations
-  test-plots.R    - Plot output tests</code></pre>
+vignettes/
+├── getting-started.Rmd        # CRAN vignette (quick)
+├── find-fits.Rmd              # CRAN vignette (quick)
+└── articles/                  # pkgdown articles (not in CRAN package)
+    ├── benchmarking.Rmd
+    ├── power-analysis-workflow.Rmd
+    ├── dda-time-course-power.Rmd
+    └── prm-genotype-power.Rmd
+
+sample_data/                   # Example datasets (in .Rbuildignore)
+├── dda_data.csv               # Anonymized DDA phosphoproteomics
+└── prm_data.csv               # Anonymized PRM phosphoproteomics</code></pre>
 </div>
 <div class="section level2">
-<h2 id="project-plan">Project Plan<a class="anchor" aria-label="anchor" href="#project-plan"></a></h2>
-<p>Implementation order with dependencies:</p>
+<h2 id="distribution--ci">Distribution &amp; CI<a class="anchor" aria-label="anchor" href="#distribution--ci"></a></h2>
 <div class="section level3">
-<h3 id="phase-1-class-foundation">Phase 1: Class Foundation<a class="anchor" aria-label="anchor" href="#phase-1-class-foundation"></a></h3>
-<ol style="list-style-type: decimal"><li>
-<strong><code>peppwr_fits</code> constructor</strong> - <code><a href="reference/new_peppwr_fits.html">new_peppwr_fits()</a></code> with validation</li>
+<h3 id="github-actions">GitHub Actions<a class="anchor" aria-label="anchor" href="#github-actions"></a></h3>
+<ul><li>
+<strong>R-CMD-check.yaml</strong> - Multi-platform R CMD check (Ubuntu, macOS, Windows)</li>
 <li>
-<strong><code>print.peppwr_fits</code></strong> - Summary output (fit counts, failure rate)</li>
-<li>
-<strong><code>peppwr_power</code> constructor</strong> - <code><a href="reference/new_peppwr_power.html">new_peppwr_power()</a></code> with validation</li>
-<li>
-<strong><code>print.peppwr_power</code></strong> - Clear answer to question asked</li>
-</ol></div>
+<strong>pkgdown.yaml</strong> - Builds and deploys documentation to gh-pages</li>
+</ul></div>
 <div class="section level3">
-<h3 id="phase-2-distribution-fitting-refactor-existing">Phase 2: Distribution Fitting (refactor existing)<a class="anchor" aria-label="anchor" href="#phase-2-distribution-fitting-refactor-existing"></a></h3>
-<ol start="5" style="list-style-type: decimal"><li>
-<strong>Refactor <code><a href="reference/fit_distributions.html">fit_distributions()</a></code></strong> - Wraps existing logic, returns <code>peppwr_fits</code>
+<h3 id="cran-preparation">CRAN Preparation<a class="anchor" aria-label="anchor" href="#cran-preparation"></a></h3>
+<ul><li>Version 0.1.0, passes <code>R CMD check --as-cran</code> with 0 errors, 0 warnings</li>
+<li>Heavy vignettes moved to pkgdown articles to reduce check time</li>
+<li>Package size optimized (&lt;5MB)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="pkgdown-site">pkgdown Site<a class="anchor" aria-label="anchor" href="#pkgdown-site"></a></h3>
+<ul><li>Hosted at <a href="https://teammaclean.github.io/peppwR/" class="uri">https://teammaclean.github.io/peppwR/</a>
+</li>
+<li>Includes all articles, function reference, and hex logo</li>
+</ul></div>
+</div>
+<div class="section level2">
+<h2 id="development-style">Development Style<a class="anchor" aria-label="anchor" href="#development-style"></a></h2>
+<ul><li>
+<strong>Tidyverse style</strong> - Pipes, dplyr verbs</li>
+<li>
+<strong>Explicit namespacing</strong> - <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot()</a></code>
 </li>
 <li>
-<strong><code>plot.peppwr_fits</code></strong> - Distribution summary bar chart (refactor <code>evaldist()</code>)</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-3-simulation-engine">Phase 3: Simulation Engine<a class="anchor" aria-label="anchor" href="#phase-3-simulation-engine"></a></h3>
-<ol start="7" style="list-style-type: decimal"><li>
-<strong><code><a href="reference/simulate_experiment.html">simulate_experiment()</a></code></strong> - Draw from distribution, apply effect, return samples</li>
+<strong>S3 OOP</strong> - Classes with print/plot/summary methods</li>
 <li>
-<strong><code><a href="reference/test_wilcoxon.html">test_wilcoxon()</a></code></strong> - Wilcoxon rank-sum test wrapper</li>
-<li>
-<strong><code><a href="reference/run_power_sim.html">run_power_sim()</a></code></strong> - Run n_sim iterations, return power estimate</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-4-power-analysis---aggregate-mode">Phase 4: Power Analysis - Aggregate Mode<a class="anchor" aria-label="anchor" href="#phase-4-power-analysis---aggregate-mode"></a></h3>
-<ol start="10" style="list-style-type: decimal"><li>
-<strong><code>power_analysis.default</code></strong> - Aggregate mode, find = “power”</li>
-<li>
-<strong>Extend for find = “sample_size”</strong> - Search over N values</li>
-<li>
-<strong>Extend for find = “effect_size”</strong> - Search over effect values</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-5-power-analysis---per-peptide-mode">Phase 5: Power Analysis - Per-Peptide Mode<a class="anchor" aria-label="anchor" href="#phase-5-power-analysis---per-peptide-mode"></a></h3>
-<ol start="13" style="list-style-type: decimal"><li>
-<strong><code>power_analysis.peppwr_fits</code></strong> - Per-peptide mode using fitted params</li>
-<li>
-<strong><code>on_fit_failure</code> handling</strong> - exclude/empirical/lognormal options</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-6-core-plots">Phase 6: Core Plots<a class="anchor" aria-label="anchor" href="#phase-6-core-plots"></a></h3>
-<ol start="15" style="list-style-type: decimal"><li>
-<strong><code>plot.peppwr_power</code> aggregate</strong> - Power curve with recommendation annotation</li>
-<li>
-<strong><code>plot.peppwr_power</code> per-peptide</strong> - % peptides at threshold vs N</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-7-additional-statistical-tests">Phase 7: Additional Statistical Tests<a class="anchor" aria-label="anchor" href="#phase-7-additional-statistical-tests"></a></h3>
-<ol start="17" style="list-style-type: decimal"><li>
-<strong><code><a href="reference/test_bootstrap_t.html">test_bootstrap_t()</a></code></strong> - Bootstrap-t implementation</li>
-<li>
-<strong><code><a href="reference/test_bayes_t.html">test_bayes_t()</a></code></strong> - Bayes factor t-test (via BayesFactor)</li>
-<li>
-<strong><code><a href="reference/test_rankprod.html">test_rankprod()</a></code></strong> - Rank products implementation</li>
-</ol></div>
-<div class="section level3">
-<h3 id="phase-8-polish-complete">Phase 8: Polish (COMPLETE)<a class="anchor" aria-label="anchor" href="#phase-8-polish-complete"></a></h3>
-<ol start="20" style="list-style-type: decimal"><li>
-<strong><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods</strong> - Detailed output for both classes</li>
-<li>
-<strong>Vignettes</strong> - Three comprehensive vignettes (getting-started, power-analysis-workflow, benchmarking)</li>
-</ol><hr></div>
-</div>
-<div class="section level2">
-<h2 id="v2-feature-phases-complete">v2 Feature Phases (COMPLETE)<a class="anchor" aria-label="anchor" href="#v2-feature-phases-complete"></a></h2>
-<p>See <code>feature_plan_v2.md</code> for detailed specifications.</p>
-<div class="section level3">
-<h3 id="phase-a-diagnostic-plots-">Phase A: Diagnostic Plots ✓<a class="anchor" aria-label="anchor" href="#phase-a-diagnostic-plots-"></a></h3>
-<ul><li>
-<code><a href="reference/plot_density_overlay.html">plot_density_overlay()</a></code> - Observed histogram + fitted density curve</li>
-<li>
-<code><a href="reference/plot_qq.html">plot_qq()</a></code> - QQ plots for goodness-of-fit</li>
-<li>
-<code><a href="reference/plot_power_heatmap.html">plot_power_heatmap()</a></code> - N × effect size lookup grid</li>
-<li>
-<code><a href="reference/plot_power_vs_effect.html">plot_power_vs_effect()</a></code> - Sensitivity at fixed N</li>
-<li>
-<code><a href="reference/plot_param_distribution.html">plot_param_distribution()</a></code> - Fitted params across peptidome</li>
+<strong>TDD</strong> - testthat with 270+ tests</li>
 </ul></div>
-<div class="section level3">
-<h3 id="phase-b-empirical-bootstrap-">Phase B: Empirical Bootstrap ✓<a class="anchor" aria-label="anchor" href="#phase-b-empirical-bootstrap-"></a></h3>
-<ul><li>
-<code><a href="reference/simulate_empirical.html">simulate_empirical()</a></code> - Bootstrap resample from observed data</li>
-<li>
-<code><a href="reference/run_power_sim_empirical.html">run_power_sim_empirical()</a></code> - Power sim using bootstrap</li>
-<li>
-<code>on_fit_failure = "empirical"</code> implemented</li>
-</ul></div>
-<div class="section level3">
-<h3 id="phase-c-missing-data-handling-">Phase C: Missing Data Handling ✓<a class="anchor" aria-label="anchor" href="#phase-c-missing-data-handling-"></a></h3>
-<p><strong>Philosophy: Track and model missingness, never impute</strong></p>
-<ul><li>
-<code><a href="reference/compute_missingness.html">compute_missingness()</a></code> - Calculate NA rate and MNAR score (z-statistic)</li>
-<li>
-<code>peppwr_fits</code> includes <code>missingness</code> slot</li>
-<li>MNAR detection (Missing Not At Random - when low values systematically missing)</li>
-<li>
-<code><a href="reference/simulate_with_missingness.html">simulate_with_missingness()</a></code> - Incorporate NA rates into simulations</li>
-<li>
-<code><a href="reference/plot_missingness.html">plot_missingness()</a></code> - NA rate and MNAR score distributions</li>
-</ul></div>
-<div class="section level3">
-<h3 id="phase-d-fdr-aware-mode-">Phase D: FDR-Aware Mode ✓<a class="anchor" aria-label="anchor" href="#phase-d-fdr-aware-mode-"></a></h3>
-<ul><li>
-<code><a href="reference/run_power_sim_fdr.html">run_power_sim_fdr()</a></code> - Whole-peptidome simulation with BH correction</li>
-<li>
-<code>apply_fdr</code>, <code>prop_null</code>, <code>fdr_threshold</code> params in <code><a href="reference/power_analysis.peppwr_fits.html">power_analysis.peppwr_fits()</a></code>
-</li>
-<li>User-configurable <code>prop_null</code> (default 0.9 = 90% true nulls)</li>
-</ul><hr></div>
-</div>
-<div class="section level2">
-<h2 id="project-status-all-features-complete">Project Status: ALL FEATURES COMPLETE<a class="anchor" aria-label="anchor" href="#project-status-all-features-complete"></a></h2>
-<p>All planned features from v1, v2, v2.1, and v2.2 have been implemented:</p>
-<ul><li>✓ Core power analysis (aggregate and per-peptide modes)</li>
-<li>✓ All three questions: find = “power”, “sample_size”, “effect_size”</li>
-<li>✓ Distribution fitting with multiple candidates</li>
-<li>✓ Statistical tests: wilcoxon, bootstrap_t, bayes_t</li>
-<li>✓ Diagnostic plots: density overlay, QQ, heatmap, param distribution</li>
-<li>✓ Missingness handling with MNAR detection</li>
-<li>✓ FDR-aware power analysis</li>
-<li>✓ Empirical bootstrap fallback</li>
-<li>✓ Real-world examples (DDA and PRM)</li>
-<li>✓ Comprehensive vignettes</li>
-</ul><hr></div>
-<div class="section level2">
-<h2 id="known-issues--bug-fixes-for-future-sessions">Known Issues / Bug Fixes for Future Sessions<a class="anchor" aria-label="anchor" href="#known-issues--bug-fixes-for-future-sessions"></a></h2>
-<div class="section level3">
-<h3 id="misleading-red-line-in-per-peptide-effect_size-plot">Misleading red line in per-peptide effect_size plot<a class="anchor" aria-label="anchor" href="#misleading-red-line-in-per-peptide-effect_size-plot"></a></h3>
-<p><strong>Problem:</strong> The <code><a href="reference/plot.peppwr_power.html">plot.peppwr_power()</a></code> method for per-peptide <code>find = "effect_size"</code> draws a horizontal red line at the <code>proportion_threshold</code> (default 50%), but users may confuse this with <code>target_power</code> (default 80%).</p>
-<p><strong>Location:</strong> <code>R/plots.R</code> in the effect_size plotting section</p>
-<p><strong>Current behavior:</strong> - Y-axis: “% of peptides reaching [target_power]% power” - Red line: at <code>proportion_threshold</code> (e.g., 50%) - This is technically correct but visually confusing</p>
-<p><strong>Proposed fix:</strong> 1. Remove the red horizontal line from the plot 2. Add a text annotation explaining: “Answer: X-fold effect needed for Y% of peptides to reach Z% power” 3. Alternatively, add the threshold info to the plot subtitle instead of as a line</p>
-<p><strong>Workaround:</strong> The examples now include text explaining the distinction between <code>target_power</code> and <code>proportion_threshold</code>.</p>
-<hr></div>
-</div>
-<div class="section level2">
-<h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a></h2>
-<p>See <code>for_CLAUDE.md</code> for code style and <code>semi-autonomous-feature-development.md</code> for workflow.</p>
-<p><strong>Key principles:</strong> - Tidyverse style (pipes, dplyr verbs) - Explicit namespacing (<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>) - S3 classes with print/plot methods - Discuss → TDD → Ralph Loop workflow</p>
-</div>
 <div class="section level2">
 <h2 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a></h2>
-<p>Current: - <code>fitdistrplus</code>, <code>univariateML</code> - Distribution fitting - <code>dplyr</code>, <code>tidyr</code>, <code>purrr</code>, <code>tibble</code> - Data manipulation - <code>ggplot2</code>, <code>cowplot</code>, <code>RColorBrewer</code> - Visualization</p>
-<p>Likely additions: - <code>BayesFactor</code> - Bayes factor t-tests - <code>RankProd</code> or custom implementation - Rank products test - <code>boot</code> - Bootstrap methods</p>
+<p><strong>Imports:</strong> - <code>fitdistrplus</code>, <code>univariateML</code> - Distribution fitting - <code>dplyr</code>, <code>tidyr</code>, <code>purrr</code>, <code>tibble</code> - Data manipulation - <code>ggplot2</code>, <code>cowplot</code>, <code>RColorBrewer</code>, <code>scales</code> - Visualization</p>
+<p><strong>Suggests:</strong> - <code>testthat</code>, <code>knitr</code>, <code>rmarkdown</code>, <code>pkgdown</code>, <code>bench</code></p>
 </div>
 <div class="section level2">
 <h2 id="design-decisions">Design Decisions<a class="anchor" aria-label="anchor" href="#design-decisions"></a></h2>
 <div class="section level3">
-<h3 id="handling-fit-failures">Handling fit failures<a class="anchor" aria-label="anchor" href="#handling-fit-failures"></a></h3>
-<p>Configurable via <code>on_fit_failure</code> parameter: - <code>"exclude"</code> (default) - Skip peptides with no valid fit, report count in output - <code>"empirical"</code> - Bootstrap resample from observed values - <code>"lognormal"</code> - Fallback to lognormal with moment-matched parameters</p>
+<h3 id="fit-failures">Fit Failures<a class="anchor" aria-label="anchor" href="#fit-failures"></a></h3>
+<p>Configurable via <code>on_fit_failure</code>: - <code>"exclude"</code> (default) - Skip peptides, report count - <code>"empirical"</code> - Bootstrap resample from observed values - <code>"lognormal"</code> - Fallback with moment-matched parameters</p>
 </div>
 <div class="section level3">
-<h3 id="multiple-testing--fdr">Multiple testing / FDR<a class="anchor" aria-label="anchor" href="#multiple-testing--fdr"></a></h3>
-<p><strong>v2: FDR-aware mode implemented.</strong> Use <code>apply_fdr = TRUE</code> in <code><a href="reference/power_analysis.peppwr_fits.html">power_analysis.peppwr_fits()</a></code> to simulate whole-peptidome experiments with Benjamini-Hochberg correction. Configure <code>prop_null</code> (default 0.9) for expected proportion of true nulls.</p>
+<h3 id="fdr-aware-mode">FDR-Aware Mode<a class="anchor" aria-label="anchor" href="#fdr-aware-mode"></a></h3>
+<p>Use <code>apply_fdr = TRUE</code> in per-peptide mode for whole-peptidome simulation with Benjamini-Hochberg correction. Configure <code>prop_null</code> (default 0.9).</p>
 </div>
 <div class="section level3">
 <h3 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a></h3>
-<p><strong>v1: Single-threaded.</strong> Rely on R’s vectorization. Parallelization (via <code>future</code>/<code>furrr</code>) deferred - benchmarks show acceptable performance for typical datasets.</p>
-</div>
-<div class="section level3">
-<h3 id="distribution-presets">Distribution presets<a class="anchor" aria-label="anchor" href="#distribution-presets"></a></h3>
-<p><strong>v2:</strong> Default changed from <code>distributions = "all"</code> to <code>"continuous"</code> to avoid nbinom warnings on abundance data. Use <code>"counts"</code> for spectral count data.</p>
+<p>Single-threaded with R vectorization. Benchmarks show acceptable performance for typical datasets (1000s of peptides).</p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="project-status">Project Status<a class="anchor" aria-label="anchor" href="#project-status"></a></h2>
+<p><strong>COMPLETE</strong> - All planned features implemented:</p>
+<ul><li>Core power analysis (aggregate and per-peptide modes)</li>
+<li>All three questions: power, sample_size, effect_size</li>
+<li>Distribution fitting with multiple candidates</li>
+<li>Statistical tests: wilcoxon, bootstrap_t, bayes_t</li>
+<li>Diagnostic plots: density overlay, QQ, heatmap, param distribution</li>
+<li>Missingness handling with MNAR detection</li>
+<li>FDR-aware power analysis</li>
+<li>Empirical bootstrap fallback</li>
+<li>Real-world examples (DDA and PRM)</li>
+<li>Comprehensive documentation and pkgdown site</li>
+<li>Hex sticker logo (chilli pepper power curve)</li>
+</ul></div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
