@@ -378,16 +378,9 @@ run_power_sim_fdr <- function(fits, effect_size, n_per_group,
 
       if (is.null(samples)) return(NA)
 
-      # Get p-value
+      # Get p-value (bayes_t is blocked at power_analysis level for FDR mode)
       tryCatch({
-        if (test == "bayes_t") {
-          # For Bayes: convert BF to pseudo p-value for FDR correction
-          bf <- test_func(samples$control, samples$treatment)
-          # Rough conversion: p ~ 1/BF for large BF
-          if (bf > 1) 1/bf else 1
-        } else {
-          test_func(samples$control, samples$treatment)
-        }
+        test_func(samples$control, samples$treatment)
       }, error = function(e) NA)
     })
 

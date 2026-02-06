@@ -313,3 +313,62 @@ test_that("print.peppwr_power shows prop_null when FDR enabled", {
   # Should show proportion of true nulls
   expect_true(any(grepl("null|unchanged|0\\.85|85", output, ignore.case = TRUE)))
 })
+
+# --- D4: bayes_t incompatibility with FDR mode ---
+
+test_that("power_analysis errors when bayes_t used with apply_fdr=TRUE", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:5), each = 20),
+    condition = rep("control", 100),
+    abundance = rgamma(100, shape = 2, rate = 0.1)
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  expect_error(
+    power_analysis(
+      fits,
+      effect_size = 2,
+      n_per_group = 6,
+      test = "bayes_t",
+      apply_fdr = TRUE,
+      n_sim = 50
+    ),
+    "FDR-adjusted analysis is not supported with bayes_t"
+  )
+})
+
+test_that("bayes_t works without FDR mode", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:5), each = 20),
+    condition = rep("control", 100),
+    abundance = rgamma(100, shape = 2, rate = 0.1)
+  )
+
+  fits <- fit_distributions(
+    test_data,
+    id = "peptide",
+    group = "condition",
+    value = "abundance"
+  )
+
+  # Should work fine without FDR
+  result <- power_analysis(
+    fits,
+    effect_size = 2,
+    n_per_group = 6,
+    test = "bayes_t",
+    apply_fdr = FALSE,
+    n_sim = 50
+  )
+
+  expect_s3_class(result, "peppwr_power")
+  expect_true(result$answer >= 0 && result$answer <= 1)
+})

@@ -216,11 +216,16 @@ print.peppwr_power <- function(x, ...) {
     }
   }
 
-  if (!is.null(x$params$alpha)) {
-    cat(sprintf("\nSignificance level: %.2f\n", x$params$alpha))
-  }
+  # Show test-appropriate threshold
   if (!is.null(x$params$test)) {
-    cat(sprintf("Statistical test: %s\n", x$params$test))
+    cat(sprintf("\nStatistical test: %s\n", x$params$test))
+    if (x$params$test == "bayes_t") {
+      cat("Decision threshold: BF > 3 (substantial evidence)\n")
+    } else if (!is.null(x$params$alpha)) {
+      cat(sprintf("Significance level: %.2f\n", x$params$alpha))
+    }
+  } else if (!is.null(x$params$alpha)) {
+    cat(sprintf("\nSignificance level: %.2f\n", x$params$alpha))
   }
 
   # FDR information
@@ -409,11 +414,15 @@ print.summary.peppwr_power <- function(x, ...) {
   if (!is.null(x$params$n_per_group)) {
     cat(sprintf("  Sample size: %d per group\n", x$params$n_per_group))
   }
-  if (!is.null(x$params$alpha)) {
-    cat(sprintf("  Alpha: %.2f\n", x$params$alpha))
-  }
   if (!is.null(x$params$test)) {
     cat(sprintf("  Test: %s\n", x$params$test))
+    if (x$params$test == "bayes_t") {
+      cat("  Decision threshold: BF > 3\n")
+    } else if (!is.null(x$params$alpha)) {
+      cat(sprintf("  Alpha: %.2f\n", x$params$alpha))
+    }
+  } else if (!is.null(x$params$alpha)) {
+    cat(sprintf("  Alpha: %.2f\n", x$params$alpha))
   }
 
   # Confidence interval

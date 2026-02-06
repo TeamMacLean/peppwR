@@ -155,6 +155,14 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
     NULL
   }
 
+
+  # Block bayes_t with FDR mode - Bayes factors cannot be converted to p-values
+
+  if (apply_fdr && test == "bayes_t") {
+    stop("FDR-adjusted analysis is not supported with bayes_t test. ",
+         "Bayes factors cannot be converted to p-values for BH correction.")
+  }
+
   # FDR mode - use whole-peptidome simulation
   if (apply_fdr && find == "power") {
     if (is.null(n_per_group)) {

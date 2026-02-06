@@ -139,3 +139,60 @@ test_that("print.peppwr_power shows clear answer for sample_size question", {
   expect_true(any(grepl("8", output)))
   expect_true(any(grepl("sample|per group", output, ignore.case = TRUE)))
 })
+
+# --- bayes_t print output ---
+
+test_that("print.peppwr_power shows BF threshold for bayes_t test", {
+  power_result <- new_peppwr_power(
+    mode = "aggregate",
+    question = "power",
+    answer = 0.65,
+    simulations = list(n_sim = 1000),
+    params = list(effect_size = 2, n_per_group = 6, alpha = 0.05, test = "bayes_t"),
+    call = quote(power_analysis(effect_size = 2, n_per_group = 6, test = "bayes_t"))
+  )
+
+  output <- capture.output(print(power_result))
+
+  # Should show BF threshold, not significance level
+
+  expect_true(any(grepl("BF.*3|Bayes|threshold", output, ignore.case = TRUE)))
+  # Should NOT show "Significance level" for bayes_t
+  expect_false(any(grepl("Significance level", output)))
+})
+
+test_that("print.peppwr_power shows significance level for non-Bayesian tests", {
+  power_result <- new_peppwr_power(
+    mode = "aggregate",
+    question = "power",
+    answer = 0.75,
+    simulations = list(n_sim = 1000),
+    params = list(effect_size = 2, n_per_group = 6, alpha = 0.05, test = "wilcoxon"),
+    call = quote(power_analysis(effect_size = 2, n_per_group = 6))
+  )
+
+  output <- capture.output(print(power_result))
+
+  # Should show significance level for non-Bayesian tests
+  expect_true(any(grepl("Significance level|0\\.05", output)))
+  # Should NOT show BF threshold
+  expect_false(any(grepl("BF.*3", output)))
+})
+
+test_that("summary.peppwr_power shows BF threshold for bayes_t test", {
+  power_result <- new_peppwr_power(
+    mode = "aggregate",
+    question = "power",
+    answer = 0.65,
+    simulations = list(n_sim = 1000),
+    params = list(effect_size = 2, n_per_group = 6, alpha = 0.05, test = "bayes_t"),
+    call = quote(power_analysis(effect_size = 2, n_per_group = 6, test = "bayes_t"))
+  )
+
+  output <- capture.output(print(summary(power_result)))
+
+  # Should show BF threshold in summary
+  expect_true(any(grepl("BF.*3|threshold", output, ignore.case = TRUE)))
+  # Should NOT show Alpha for bayes_t
+  expect_false(any(grepl("Alpha:", output)))
+})
