@@ -886,12 +886,27 @@ utils::globalVariables(c("value", "density", "theoretical", "best_dist",
 
 #' Plot missingness statistics
 #'
-#' Shows distribution of NA rates, MNAR scores, and relationship between
-#' abundance and missingness across peptides.
+#' Creates a multi-panel visualization of missing data patterns:
+#'
+#' - **Panel 1**: Distribution of NA rates across peptides
+#' - **Panel 2**: Per-peptide MNAR score histogram (scores > 2 suggest within-peptide MNAR)
+#' - **Panel 3**: Mean abundance vs NA rate scatter plot showing the **dataset-level
+#'   MNAR correlation**. The subtitle displays the Spearman correlation coefficient
+#'   and p-value. A negative correlation indicates that low-abundance peptides have
+#'   more missing values - the hallmark of detection-limit-driven MNAR.
+#'
+#' @section Dataset-Level vs Per-Peptide MNAR:
+#' Panel 3 shows the **dataset-level** (between-peptide) MNAR pattern, which is
+#' reliable even with small sample sizes. This is more informative than the
+#' per-peptide scores in Panel 2 when N < 15 per peptide.
 #'
 #' @param fits A peppwr_fits object
 #'
 #' @return A ggplot object or gtable (combined panels)
+#'
+#' @seealso [compute_dataset_mnar()] for the underlying correlation calculation,
+#'   [compute_missingness()] for per-peptide MNAR scores
+#'
 #' @export
 plot_missingness <- function(fits) {
   validate_peppwr_fits(fits)

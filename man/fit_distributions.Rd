@@ -19,8 +19,36 @@ fit_distributions(data, id, group, value, distributions = "continuous")
 "counts", "all", or a character vector of distribution names}
 }
 \value{
-A peppwr_fits object
+A peppwr_fits object containing:
+\itemize{
+\item \verb{$data}: Nested tibble with original data and fit results
+\item \verb{$best}: Best-fitting distribution for each peptide
+\item \verb{$missingness}: Per-peptide missingness statistics
+\item \verb{$dataset_mnar}: Dataset-level MNAR correlation and interpretation
+}
 }
 \description{
-Fit distributions to peptide abundance data
+Fits candidate distributions to each peptide's abundance values and selects
+the best fit by AIC. Also computes missingness statistics including
+dataset-level MNAR detection.
+}
+\section{Missingness Tracking}{
+
+The returned object includes:
+\itemize{
+\item Per-peptide NA rates and MNAR scores (in \verb{$missingness})
+\item Dataset-level MNAR correlation (in \verb{$dataset_mnar})
+}
+
+The dataset-level MNAR metric correlates log(mean_abundance) with NA rate
+across peptides. A negative correlation indicates low-abundance peptides
+have more missing values - typical of detection-limit-driven MNAR.
+
+Print the result to see both metrics. For small sample sizes (N < 15),
+the dataset-level correlation is more reliable than per-peptide scores.
+}
+
+\seealso{
+\code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}} for dataset-level MNAR details,
+\code{\link[=plot_missingness]{plot_missingness()}} to visualize missingness patterns
 }

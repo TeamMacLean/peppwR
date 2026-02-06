@@ -31,6 +31,23 @@ is_count_data <- function(x) {
 
 #' Fit distributions to peptide abundance data
 #'
+#' Fits candidate distributions to each peptide's abundance values and selects
+#' the best fit by AIC. Also computes missingness statistics including
+#' dataset-level MNAR detection.
+#'
+#' @section Missingness Tracking:
+#' The returned object includes:
+#' - Per-peptide NA rates and MNAR scores (in `$missingness`)
+#' - Dataset-level MNAR correlation (in `$dataset_mnar`)
+#'
+#' The dataset-level MNAR metric correlates log(mean_abundance) with NA rate
+
+#' across peptides. A negative correlation indicates low-abundance peptides
+#' have more missing values - typical of detection-limit-driven MNAR.
+#'
+#' Print the result to see both metrics. For small sample sizes (N < 15),
+#' the dataset-level correlation is more reliable than per-peptide scores.
+#'
 #' @param data A data frame containing peptide abundance data
 #' @param id Column name for peptide identifier
 #' @param group Column name for group/condition
@@ -38,7 +55,15 @@ is_count_data <- function(x) {
 #' @param distributions Which distributions to fit: "continuous" (default),
 #'   "counts", "all", or a character vector of distribution names
 #'
-#' @return A peppwr_fits object
+#' @return A peppwr_fits object containing:
+#'   - `$data`: Nested tibble with original data and fit results
+#'   - `$best`: Best-fitting distribution for each peptide
+#'   - `$missingness`: Per-peptide missingness statistics
+#'   - `$dataset_mnar`: Dataset-level MNAR correlation and interpretation
+#'
+#' @seealso [compute_dataset_mnar()] for dataset-level MNAR details,
+#'   [plot_missingness()] to visualize missingness patterns
+#'
 #' @export
 fit_distributions <- function(data, id, group, value, distributions = "continuous") {
   the_call <- match.call()
