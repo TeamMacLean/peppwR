@@ -129,7 +129,8 @@ power_analysis.default <- function(distribution, ...) {
 #' @param on_fit_failure How to handle failed fits: "exclude", "empirical", or "lognormal"
 #' @param proportion_threshold Proportion of peptides that must reach target_power (default 0.5)
 #' @param include_missingness If TRUE, incorporate peptide-specific NA rates into simulations
-#' @param apply_fdr If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction
+#' @param apply_fdr If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction.
+#'   Note: not compatible with `test = "bayes_t"` (Bayes factors cannot be converted to p-values)
 #' @param prop_null Proportion of true null peptides (default 0.9 = 90% unchanged)
 #' @param fdr_threshold FDR threshold for calling discoveries (default 0.05)
 #' @param ... Additional arguments (ignored)

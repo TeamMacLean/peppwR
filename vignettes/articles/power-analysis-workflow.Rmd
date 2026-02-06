@@ -643,6 +643,7 @@ print(result_fdr)
 ```
 
 The `apply_fdr` mode simulates entire experiments with a mixture of null and alternative peptides, then applies Benjamini-Hochberg correction before computing power.
+**Note:** FDR-adjusted mode requires frequentist tests (`wilcoxon` or `bootstrap_t`). The `bayes_t` test is not compatible with FDR mode because Bayes factors cannot be converted to p-values for BH correction.
 
 ### Understanding prop_null
 

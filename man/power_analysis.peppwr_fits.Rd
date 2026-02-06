@@ -45,7 +45,8 @@
 
 \item{include_missingness}{If TRUE, incorporate peptide-specific NA rates into simulations}
 
-\item{apply_fdr}{If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction}
+\item{apply_fdr}{If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction.
+Note: not compatible with \code{test = "bayes_t"} (Bayes factors cannot be converted to p-values)}
 
 \item{prop_null}{Proportion of true null peptides (default 0.9 = 90\% unchanged)}
 

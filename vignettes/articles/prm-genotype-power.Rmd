@@ -388,16 +388,18 @@ In targeted proteomics, you typically select peptides expected to change, so `pr
 
 ### Standard vs FDR-Corrected Power
 
+Note: FDR-aware mode requires frequentist tests (Wilcoxon or bootstrap-t) because Benjamini-Hochberg correction operates on p-values. Bayes factors cannot be meaningfully converted to p-values for this correction.
+
 ```{r power-fdr}
-# Standard power (nominal alpha = 0.05)
+# Standard power with Wilcoxon (nominal alpha = 0.05)
 power_nominal <- power_analysis(fits, effect_size = 2, n_per_group = 3,
-                                find = "power", test = "bayes_t",
+                                find = "power", test = "wilcoxon",
                                 apply_fdr = FALSE, n_sim = 100)
 
 # FDR-aware power (BH correction)
 # prop_null = 0.8 means we assume 80% of peptides have no true effect
 power_fdr <- power_analysis(fits, effect_size = 2, n_per_group = 3,
-                            find = "power", test = "bayes_t",
+                            find = "power", test = "wilcoxon",
                             apply_fdr = TRUE, prop_null = 0.8,
                             fdr_threshold = 0.05, n_sim = 100)
 ```
@@ -407,7 +409,7 @@ power_fdr <- power_analysis(fits, effect_size = 2, n_per_group = 3,
 nominal_power <- power_nominal$simulations$peptide_power
 fdr_power <- power_fdr$simulations$peptide_power
 
-cat("Nominal power (no FDR correction):\n")
+cat("Nominal power (Wilcoxon, no FDR correction):\n")
 if (is.numeric(nominal_power) && length(nominal_power) > 0) {
   cat("  Median power:", round(median(nominal_power, na.rm = TRUE), 3), "\n")
   cat("  % peptides > 80% power:", round(mean(nominal_power > 0.8, na.rm = TRUE) * 100, 1), "%\n")
@@ -415,7 +417,7 @@ if (is.numeric(nominal_power) && length(nominal_power) > 0) {
   print(power_nominal)
 }
 
-cat("\nFDR-aware power (BH correction, 80% true nulls):\n")
+cat("\nFDR-aware power (Wilcoxon, BH correction, 80% true nulls):\n")
 if (is.numeric(fdr_power) && length(fdr_power) > 0) {
   cat("  Median power:", round(median(fdr_power, na.rm = TRUE), 3), "\n")
   cat("  % peptides > 80% power:", round(mean(fdr_power > 0.8, na.rm = TRUE) * 100, 1), "%\n")
