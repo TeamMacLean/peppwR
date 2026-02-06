@@ -49,7 +49,7 @@ A peppwr_fits object containing:
 
 The returned object includes:
 
-- Per-peptide NA rates and MNAR scores (in `$missingness`)
+- Per-peptide NA rates (in `$missingness`)
 
 - Dataset-level MNAR correlation (in `$dataset_mnar`)
 

@@ -687,8 +687,8 @@ for discovery proteomics with thousands of tests.
 3.  **Test selection:** With small samples, Bayes factor tests may be
     more informative than traditional frequentist approaches.
 
-4.  **MNAR peptides:** Report peptides with high MNAR scores separately
-    and interpret their results cautiously.
+4.  **MNAR patterns:** If dataset-level MNAR is detected, low-abundance
+    peptide results should be interpreted cautiously.
 
 ### Caveats
 

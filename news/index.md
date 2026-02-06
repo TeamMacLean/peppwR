@@ -31,8 +31,8 @@ Initial CRAN release.
 ### Missing Data Handling
 
 - [`compute_missingness()`](https://teammaclean.github.io/peppwR/reference/compute_missingness.md)
-  calculates NA rates and MNAR scores per peptide
-- MNAR (Missing Not At Random) detection for low-abundance dropouts
+  calculates NA rates per peptide
+- Dataset-level MNAR detection via abundance-missingness correlation
 - [`simulate_with_missingness()`](https://teammaclean.github.io/peppwR/reference/simulate_with_missingness.md)
   incorporates missing data patterns in power simulations
 
@@ -55,7 +55,7 @@ Initial CRAN release.
 - [`plot_param_distribution()`](https://teammaclean.github.io/peppwR/reference/plot_param_distribution.md):
   Distribution of fit quality across peptidome
 - [`plot_missingness()`](https://teammaclean.github.io/peppwR/reference/plot_missingness.md):
-  NA rate and MNAR score distributions
+  NA rate distribution and abundance vs missingness
 
 ### Empirical Bootstrap
 
