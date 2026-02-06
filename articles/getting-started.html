@@ -189,6 +189,13 @@ tries all distributions with auto-detection</p>
 <span><span class="co">#&gt;   Skew Normal: 41</span></span></code></pre></div>
 <p>The output shows how many peptides are best fit by each distribution.
 This helps you understand the statistical properties of your data.</p>
+<p>If your data contains missing values, the output will also show: -
+Missingness statistics (NA rates, peptides with missing data) -
+<strong>Dataset-level MNAR</strong>: Correlation between abundance and
+missingness (negative correlation indicates low-abundance peptides have
+more missing values)</p>
+<p>See <code>vignette("power-analysis-workflow")</code> for details on
+missingness handling.</p>
 <div class="section level3">
 <h3 id="visualize-distribution-fits">Visualize Distribution Fits<a class="anchor" aria-label="anchor" href="#visualize-distribution-fits"></a>
 </h3>

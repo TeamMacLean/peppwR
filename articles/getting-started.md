@@ -119,6 +119,15 @@ print(fits)
 The output shows how many peptides are best fit by each distribution.
 This helps you understand the statistical properties of your data.
 
+If your data contains missing values, the output will also show: -
+Missingness statistics (NA rates, peptides with missing data) -
+**Dataset-level MNAR**: Correlation between abundance and missingness
+(negative correlation indicates low-abundance peptides have more missing
+values)
+
+See `vignette("power-analysis-workflow")` for details on missingness
+handling.
+
 ### Visualize Distribution Fits
 
 ``` r

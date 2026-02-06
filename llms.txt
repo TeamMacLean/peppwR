@@ -206,8 +206,8 @@ Functions for handling missing data
 
 - [`compute_missingness()`](https://teammaclean.github.io/peppwR/reference/compute_missingness.md)
   : Compute missingness statistics for a vector of values
-- [`get_mnar_peptides()`](https://teammaclean.github.io/peppwR/reference/get_mnar_peptides.md)
-  : Get peptides showing MNAR pattern
+- [`compute_dataset_mnar()`](https://teammaclean.github.io/peppwR/reference/compute_dataset_mnar.md)
+  : Compute dataset-level MNAR metric
 
 ## Statistical Tests
 

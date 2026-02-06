@@ -50,7 +50,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_peppwr_fits</span><span class="op">(</span><span class="va">data</span>, <span class="va">fits</span>, <span class="va">best</span>, <span class="va">call</span>, missingness <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_peppwr_fits</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">fits</span>,</span>
+<span>  <span class="va">best</span>,</span>
+<span>  <span class="va">call</span>,</span>
+<span>  missingness <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dataset_mnar <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +82,10 @@
 
 <dt id="arg-missingness">missingness<a class="anchor" aria-label="anchor" href="#arg-missingness"></a></dt>
 <dd><p>Tibble with missingness statistics per peptide (optional)</p></dd>
+
+
+<dt id="arg-dataset-mnar">dataset_mnar<a class="anchor" aria-label="anchor" href="#arg-dataset-mnar"></a></dt>
+<dd><p>Dataset-level MNAR metric (optional, from compute_dataset_mnar)</p></dd>
 
 </dl></div>
     <div class="section level2">

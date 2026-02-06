@@ -98,7 +98,7 @@
 <code>wilcoxon</code> (default), <code>bootstrap_t</code>, <code>bayes_t</code>
 </td>
 </tr><tr class="odd"><td><strong>Missing data</strong></td>
-<td>MNAR detection, missingness-aware simulations</td>
+<td>Dataset-level MNAR detection (abundance vs NA rate correlation), missingness-aware simulations</td>
 </tr><tr class="even"><td><strong>FDR-aware mode</strong></td>
 <td>Whole-peptidome simulation with BH correction</td>
 </tr><tr class="odd"><td><strong>Empirical bootstrap</strong></td>
@@ -121,8 +121,7 @@
 <h2 id="file-structure">File Structure<a class="anchor" aria-label="anchor" href="#file-structure"></a></h2>
 <pre><code>R/
 ├── classes.R       # S3 class constructors and validators
-├── fits.R          # fit_distributions(), distribution fitting
-├── missingness.R   # compute_missingness(), MNAR detection
+├── fits.R          # fit_distributions(), missingness computation, MNAR detection
 ├── plots.R         # All plot methods and diagnostic plots
 ├── power.R         # power_analysis() and methods
 ├── simulation.R    # Simulation engine, run_power_sim*()
@@ -174,7 +173,7 @@ sample_data/                   # Example datasets (in .Rbuildignore)
 <li>
 <strong>S3 OOP</strong> - Classes with print/plot/summary methods</li>
 <li>
-<strong>TDD</strong> - testthat with 270+ tests</li>
+<strong>TDD</strong> - testthat with 299 tests</li>
 </ul></div>
 <div class="section level2">
 <h2 id="development-workflow-for-future-changes">Development Workflow for Future Changes<a class="anchor" aria-label="anchor" href="#development-workflow-for-future-changes"></a></h2>
@@ -237,7 +236,7 @@ sample_data/                   # Example datasets (in .Rbuildignore)
 <li>Distribution fitting with multiple candidates</li>
 <li>Statistical tests: wilcoxon, bootstrap_t, bayes_t</li>
 <li>Diagnostic plots: density overlay, QQ, heatmap, param distribution</li>
-<li>Missingness handling with MNAR detection</li>
+<li>Missingness handling with dataset-level MNAR detection</li>
 <li>FDR-aware power analysis</li>
 <li>Empirical bootstrap fallback</li>
 <li>Real-world examples (DDA and PRM)</li>

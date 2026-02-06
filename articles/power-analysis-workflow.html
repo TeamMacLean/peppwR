@@ -814,30 +814,31 @@ missingness statistics for each peptide:</p>
 <span><span class="co">#&gt; $n_peptides_with_na</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $mean_mnar_score</span></span>
-<span><span class="co">#&gt; [1] NaN</span></span>
+<span><span class="co">#&gt; $dataset_mnar_correlation</span></span>
+<span><span class="co">#&gt; [1] NA</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_potential_mnar</span></span>
-<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<span><span class="co">#&gt; $dataset_mnar_pvalue</span></span>
+<span><span class="co">#&gt; [1] NA</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dataset_mnar_interpretation</span></span>
+<span><span class="co">#&gt; [1] "Insufficient peptides with missing data (&lt; 5)"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualizing-missingness-patterns">Visualizing Missingness Patterns<a class="anchor" aria-label="anchor" href="#visualizing-missingness-patterns"></a>
 </h3>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Visualize NA rate and MNAR score distributions</span></span>
+<code class="sourceCode R"><span><span class="co"># Visualize NA rate distribution and MNAR pattern</span></span>
 <span><span class="fu"><a href="../reference/plot_missingness.html">plot_missingness</a></span><span class="op">(</span><span class="va">fits_na</span><span class="op">)</span></span></code></pre></div>
 <p><img src="power-analysis-workflow_files/figure-html/plot-missingness-1.png" class="r-plt" alt="" width="672"></p>
-<p>The plot shows three panels:</p>
+<p>The plot shows two panels:</p>
 <ul>
 <li>
-<strong>Top</strong>: Distribution of NA rates across peptides</li>
+<strong>Left</strong>: Distribution of NA rates across peptides</li>
 <li>
-<strong>Middle</strong>: MNAR score histogram - scores above 2 (red
-line) suggest systematic missingness</li>
-<li>
-<strong>Bottom</strong>: Mean abundance vs NA rate, colored by MNAR
-score. A negative trend (low abundance → high NA rate) is the hallmark
-of MNAR in proteomics</li>
+<strong>Right</strong>: Mean abundance vs NA rate with dataset-level
+correlation. A negative correlation (shown in subtitle) indicates
+low-abundance peptides have more missing values - the hallmark of MNAR
+in proteomics</li>
 </ul>
 </div>
 <div class="section level3">
@@ -846,29 +847,44 @@ of MNAR in proteomics</li>
 <p>MNAR (Missing Not At Random) occurs when the probability of a value
 being missing depends on the value itself. In proteomics, this typically
 happens when low-abundance peptides fall below the detection limit.</p>
-<p>peppwR detects MNAR patterns by comparing the mean rank of observed
-values to what would be expected under random (MCAR) missingness. A
-positive MNAR score indicates that observed values tend to be higher
-than expected - suggesting low values are preferentially missing.</p>
-<p>To identify specific peptides showing MNAR evidence:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get peptides with MNAR score &gt; 2</span></span>
-<span><span class="va">mnar_peptides</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_mnar_peptides.html">get_mnar_peptides</a></span><span class="op">(</span><span class="va">fits_na</span>, threshold <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mnar_peptides</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span></span>
-<span><span class="co"># View top MNAR candidates (if any)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mnar_peptides</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 variables: peptide_id &lt;chr&gt;, condition &lt;chr&gt;, na_rate &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   mnar_score &lt;dbl&gt;, mean_abundance &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>peppwR detects MNAR by correlating mean abundance with NA rate across
+all peptides. This dataset-level metric is shown automatically when you
+print a fits object and in the <code><a href="../reference/plot_missingness.html">plot_missingness()</a></code>
+visualization.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Correlation (r)</th>
+<th>Interpretation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>r &gt; -0.1</td>
+<td>No evidence of MNAR</td>
+</tr>
+<tr class="even">
+<td>-0.3 &lt; r &lt; -0.1</td>
+<td>Weak evidence</td>
+</tr>
+<tr class="odd">
+<td>-0.5 &lt; r &lt; -0.3</td>
+<td>Moderate evidence</td>
+</tr>
+<tr class="even">
+<td>r &lt; -0.5</td>
+<td>Strong evidence of MNAR</td>
+</tr>
+</tbody>
+</table>
+<p>A strong negative correlation indicates that low-abundance peptides
+have more missing values, consistent with detection-limit-driven
+MNAR.</p>
 </div>
 <div class="section level3">
 <h3 id="incorporating-missingness-into-simulations">Incorporating Missingness into Simulations<a class="anchor" aria-label="anchor" href="#incorporating-missingness-into-simulations"></a>
 </h3>
 <p>For more realistic power estimates, you can incorporate
 peptide-specific NA rates:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Power analysis accounting for expected NA rates</span></span>
@@ -893,9 +909,8 @@ peptide-specific NA rates:</p>
 <span><span class="co">#&gt; Statistical test: wilcoxon</span></span>
 <span><span class="co">#&gt; Significance level: 0.05</span></span></code></pre></div>
 <p>When <code>include_missingness = TRUE</code>, simulations incorporate
-each peptide’s observed NA rate and MNAR pattern, providing power
-estimates that reflect what you’d actually observe in your
-experiment.</p>
+each peptide’s observed NA rate, providing power estimates that reflect
+what you’d actually observe in your experiment.</p>
 </div>
 </div>
 <div class="section level2">
@@ -915,7 +930,7 @@ to detect true effects</p>
 <div class="section level3">
 <h3 id="running-fdr-adjusted-analysis">Running FDR-Adjusted Analysis<a class="anchor" aria-label="anchor" href="#running-fdr-adjusted-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">result_fdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span></span>
@@ -966,7 +981,7 @@ reducing power.</p>
 <div class="section level3">
 <h3 id="fdr-vs-uncorrected-power">FDR vs Uncorrected Power<a class="anchor" aria-label="anchor" href="#fdr-vs-uncorrected-power"></a>
 </h3>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Uncorrected (per-peptide) power</span></span>
@@ -996,7 +1011,7 @@ correction.</p>
 </h3>
 <p>When distributions fail to fit some peptides, you have three
 options:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Option 1: Exclude failed fits (default)</span></span>
@@ -1036,7 +1051,7 @@ Increase n_sim for more stable estimates</p>
 <p>Very large effects (&gt;5-fold) typically achieve high power with
 minimal samples. Very small effects (&lt;1.2-fold) may require
 impractically large samples.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Large effect</span></span>

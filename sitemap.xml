@@ -15,6 +15,7 @@
 <url><loc>https://teammaclean.github.io/peppwR/news/index.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/apply_missingness.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/bf_jzs.html</loc></url>
+<url><loc>https://teammaclean.github.io/peppwR/reference/compute_dataset_mnar.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/compute_fitted_density.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/compute_missingness.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/compute_perpeptide_power.html</loc></url>
@@ -27,11 +28,11 @@
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_dfunc.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_dist_params.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_distribution_preset.html</loc></url>
-<url><loc>https://teammaclean.github.io/peppwR/reference/get_mnar_peptides.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_qfunc.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_rfunc.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/get_test_func.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/index.html</loc></url>
+<url><loc>https://teammaclean.github.io/peppwR/reference/interpret_dataset_mnar.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/is_count_data.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/map_dist_name.html</loc></url>
 <url><loc>https://teammaclean.github.io/peppwR/reference/new_peppwr_fits.html</loc></url>

@@ -80,15 +80,6 @@
 <div class="section level3">
 <h3 id="what-makes-targeted-proteomics-different">What Makes Targeted Proteomics Different?<a class="anchor" aria-label="anchor" href="#what-makes-targeted-proteomics-different"></a>
 </h3>
-<p>Mass spectrometry-based proteomics operates in two fundamentally
-different modes:</p>
-<p><strong>Discovery proteomics (DDA)</strong> casts a wide net:</p>
-<ul>
-<li>Measures thousands of proteins/peptides</li>
-<li>Identifies whatever is abundant enough to detect</li>
-<li>Great for hypothesis generation</li>
-<li>High multiple testing burden</li>
-</ul>
 <p><strong>Targeted proteomics (PRM/SRM)</strong> takes aim at specific
 targets:</p>
 <ul>
@@ -289,7 +280,10 @@ distribution fitting.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Missingness: 429/3420 values NA (12.5%)</span></span>
 <span><span class="co">## Peptides with missing data: 180</span></span>
-<span><span class="co">##   MNAR pattern: 0 of 180 peptides with missing data (score &gt; 2)</span></span></code></pre>
+<span><span class="co">## </span></span>
+<span><span class="co">## MNAR detection (abundance vs missingness):</span></span>
+<span><span class="co">##   Correlation: r = -0.40 (p = 1.3e-07)</span></span>
+<span><span class="co">##   Moderate evidence of MNAR: low-abundance peptides have more missing values (p = 1.3e-07)</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="visualizing-missingness-patterns">Visualizing Missingness Patterns<a class="anchor" aria-label="anchor" href="#visualizing-missingness-patterns"></a>
@@ -301,83 +295,71 @@ complementary views:</p>
 <strong>NA Rate Distribution</strong>: What fraction of observations
 are missing for each peptide?</li>
 <li>
-<strong>MNAR Score Distribution</strong>: Is there evidence that
-missingness correlates with abundance?</li>
-<li>
 <strong>Abundance vs NA Rate</strong>: Do low-abundance peptides
 have more missing values?</li>
 </ol>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_missingness.html">plot_missingness</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="prm-genotype-power_files/figure-html/plot-missingness-1.png" class="r-plt" alt="Missingness patterns across the PRM peptidome. Left: Distribution of NA rates. Middle: MNAR scores (z-statistic; values &gt; 2 suggest informative missingness). Right: Relationship between mean abundance and NA rate." width="768"><p class="caption">
+<img src="prm-genotype-power_files/figure-html/plot-missingness-1.png" class="r-plt" alt="Missingness patterns across the PRM peptidome. Left: Distribution of NA rates. Right: Relationship between mean abundance and NA rate." width="768"><p class="caption">
 Missingness patterns across the PRM peptidome. Left: Distribution of NA
-rates. Middle: MNAR scores (z-statistic; values &gt; 2 suggest
-informative missingness). Right: Relationship between mean abundance and
-NA rate.
+rates. Right: Relationship between mean abundance and NA rate.
 </p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="interpreting-mnar-scores">Interpreting MNAR Scores<a class="anchor" aria-label="anchor" href="#interpreting-mnar-scores"></a>
+<h3 id="mnar-detection">MNAR Detection<a class="anchor" aria-label="anchor" href="#mnar-detection"></a>
 </h3>
-<p>The MNAR score is a z-statistic testing whether missing observations
-have systematically different (lower) abundance than observed values.
-Higher scores indicate stronger evidence for informative
+<p>MNAR (Missing Not At Random) in mass spectrometry typically occurs
+when low-abundance peptides fall below the detection limit. peppwR
+detects this by correlating mean abundance with NA rate across all
+peptides.</p>
+<p>A negative correlation indicates that low-abundance peptides have
+more missing values - the hallmark of detection-limit-driven
 missingness.</p>
 <table class="table">
 <thead><tr class="header">
-<th>MNAR Score</th>
+<th>Correlation (r)</th>
 <th>Interpretation</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>&lt; 1</td>
-<td>Little evidence for MNAR</td>
+<td>r &gt; -0.1</td>
+<td>No evidence of MNAR</td>
 </tr>
 <tr class="even">
-<td>1-2</td>
-<td>Weak evidence</td>
+<td>-0.3 &lt; r &lt; -0.1</td>
+<td>Weak evidence of MNAR</td>
 </tr>
 <tr class="odd">
-<td>2-3</td>
-<td>Moderate evidence</td>
+<td>-0.5 &lt; r &lt; -0.3</td>
+<td>Moderate evidence of MNAR</td>
 </tr>
 <tr class="even">
-<td>&gt; 3</td>
-<td>Strong evidence for MNAR</td>
+<td>r &lt; -0.5</td>
+<td>Strong evidence of MNAR</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Identify peptides with strong MNAR evidence</span></span>
-<span><span class="va">mnar_peptides</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_mnar_peptides.html">get_mnar_peptides</a></span><span class="op">(</span><span class="va">fits</span>, threshold <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Peptides with MNAR evidence (z &gt; 2):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mnar_peptides</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Peptides with MNAR evidence (z &gt; 2): 0</span></span></code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mnar_peptides</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nTop MNAR peptides:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mnar_peptides</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="what-to-do-with-mnar-peptides">What to Do with MNAR Peptides<a class="anchor" aria-label="anchor" href="#what-to-do-with-mnar-peptides"></a>
+<h3 id="implications-of-mnar">Implications of MNAR<a class="anchor" aria-label="anchor" href="#implications-of-mnar"></a>
 </h3>
-<p>Peptides with high MNAR scores require careful handling:</p>
+<p>When MNAR is detected, be aware that:</p>
 <ul>
-<li>Their abundance estimates may be biased upward (low values are
-missing)</li>
-<li>Power calculations may be optimistic</li>
-<li>Consider robust statistical methods</li>
-<li>Report separately in publications</li>
+<li>Abundance estimates for low-abundance peptides may be biased upward
+(since low values are missing)</li>
+<li>Power calculations may be optimistic for these peptides</li>
+<li>Consider robust statistical methods that account for non-random
+missingness</li>
+<li>Report the MNAR pattern in publications</li>
 </ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="distribution-fitting-results">Distribution Fitting Results<a class="anchor" aria-label="anchor" href="#distribution-fitting-results"></a>
 </h2>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="prm-genotype-power_files/figure-html/plot-fits-1.png" class="r-plt" alt="Best-fit distribution counts for PRM data." width="768"><p class="caption">
@@ -399,7 +381,7 @@ mass spectrometry abundance data.</p>
 <div class="section level3">
 <h3 id="parameter-distribution">Parameter Distribution<a class="anchor" aria-label="anchor" href="#parameter-distribution"></a>
 </h3>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_param_distribution.html">plot_param_distribution</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -407,12 +389,12 @@ mass spectrometry abundance data.</p>
 Distribution of AIC values across peptides for each fitted distribution.
 </p>
 </div>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Count peptides per best-fit distribution</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nPeptides per best-fit distribution:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Peptides per best-fit distribution:</span></span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>distribution <span class="op">=</span> <span class="va">fits</span><span class="op">$</span><span class="va">best</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">distribution</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -466,7 +448,7 @@ analyses, we compare available tests.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run all three tests (use n_sim = 100 for faster rendering)</span></span>
 <span><span class="va">power_wilcox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                                find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"wilcoxon"</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
@@ -568,7 +550,7 @@ power, what effect can we detect?</li>
 </h3>
 <p>With 3 biological replicates and a 2-fold effect, what power do we
 achieve?</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using Bayes factor test based on comparison results</span></span>
 <span><span class="va">power_current</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                                 find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
@@ -583,7 +565,7 @@ achieve?</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Statistical test: bayes_t</span></span>
 <span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">power_current</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="prm-genotype-power_files/figure-html/plot-power-current-1.png" class="r-plt" alt="Distribution of power across peptides with N=3 and 2-fold effect (Bayes factor test)." width="768"><p class="caption">
@@ -596,7 +578,7 @@ factor test).
 <h3 id="question-2-what-sample-size-do-we-need">Question 2: What Sample Size Do We Need?<a class="anchor" aria-label="anchor" href="#question-2-what-sample-size-do-we-need"></a>
 </h3>
 <p>What N would achieve 80% power to detect a 2-fold change?</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                              find <span class="op">=</span> <span class="st">"sample_size"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sample_size</span><span class="op">)</span></span></code></pre></div>
@@ -610,7 +592,7 @@ factor test).
 <span><span class="co">## </span></span>
 <span><span class="co">## Statistical test: bayes_t</span></span>
 <span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_size</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="prm-genotype-power_files/figure-html/plot-sample-size-1.png" class="r-plt" alt="Percentage of peptides achieving 80% power at each sample size." width="768"><p class="caption">
@@ -636,7 +618,7 @@ The fraction of peptides that must reach <code>target_power</code>
 <p>The plot shows “% of peptides reaching 80% power” on the y-axis. The
 answer tells us: “At what effect size do 50% of peptides achieve 80%
 power?”</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">min_effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>, target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                             find <span class="op">=</span> <span class="st">"effect_size"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">min_effect</span><span class="op">)</span></span></code></pre></div>
@@ -650,7 +632,7 @@ power?”</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Statistical test: bayes_t</span></span>
 <span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">min_effect</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="prm-genotype-power_files/figure-html/plot-min-effect-1.png" class="r-plt" alt="Proportion of peptides reaching 80% power at each effect size. The default threshold is 50% of peptides." width="768"><p class="caption">
@@ -666,7 +648,7 @@ increase <code>proportion_threshold</code>.</p>
 <h3 id="impact-of-missingness-on-power">Impact of Missingness on Power<a class="anchor" aria-label="anchor" href="#impact-of-missingness-on-power"></a>
 </h3>
 <p>How does accounting for missingness affect power estimates?</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Power without accounting for missingness (optimistic)</span></span>
 <span><span class="va">power_no_miss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                                 find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>,</span>
@@ -680,7 +662,7 @@ increase <code>proportion_threshold</code>.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median power WITHOUT missingness:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">power_no_miss</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Median power WITHOUT missingness: 0.575</span></span></code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median power WITH missingness:   "</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">power_with_miss</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Median power WITH missingness:    0.565</span></span></code></pre>
@@ -738,7 +720,7 @@ experiments.</p>
 bootstrap-t) because Benjamini-Hochberg correction operates on p-values.
 Bayes factors cannot be meaningfully converted to p-values for this
 correction.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Standard power with Wilcoxon (nominal alpha = 0.05)</span></span>
 <span><span class="va">power_nominal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                                find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"wilcoxon"</span>,</span>
@@ -750,14 +732,14 @@ correction.</p>
 <span>                            find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"wilcoxon"</span>,</span>
 <span>                            apply_fdr <span class="op">=</span> <span class="cn">TRUE</span>, prop_null <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                            fdr_threshold <span class="op">=</span> <span class="fl">0.05</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract power values safely</span></span>
 <span><span class="va">nominal_power</span> <span class="op">&lt;-</span> <span class="va">power_nominal</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span></span>
 <span><span class="va">fdr_power</span> <span class="op">&lt;-</span> <span class="va">power_fdr</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Nominal power (Wilcoxon, no FDR correction):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Nominal power (Wilcoxon, no FDR correction):</span></span></code></pre>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">nominal_power</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nominal_power</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Median power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">nominal_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  % peptides &gt; 80% power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">nominal_power</span> <span class="op">&gt;</span> <span class="fl">0.8</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
@@ -766,11 +748,11 @@ correction.</p>
 <span><span class="op">}</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Median power: 0 </span></span>
 <span><span class="co">##   % peptides &gt; 80% power: 0 %</span></span></code></pre>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nFDR-aware power (Wilcoxon, BH correction, 80% true nulls):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## FDR-aware power (Wilcoxon, BH correction, 80% true nulls):</span></span></code></pre>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">fdr_power</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fdr_power</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Median power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">fdr_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  % peptides &gt; 80% power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fdr_power</span> <span class="op">&gt;</span> <span class="fl">0.8</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
@@ -855,30 +837,6 @@ scores separately and interpret their results cautiously.</p></li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="targeted-vs-discovery-considerations">Targeted vs Discovery Considerations<a class="anchor" aria-label="anchor" href="#targeted-vs-discovery-considerations"></a>
-</h3>
-<p>This PRM dataset (285 peptides) has advantages over discovery
-proteomics:</p>
-<ul>
-<li>
-<strong>Lower multiple testing burden:</strong> Fewer tests = less
-severe FDR correction</li>
-<li>
-<strong>Focused power:</strong> Resources concentrated on peptides
-of interest</li>
-<li>
-<strong>Better reproducibility:</strong> Targeted methods have lower
-technical variability</li>
-</ul>
-<p>However:</p>
-<ul>
-<li>
-<strong>No discovery:</strong> Can’t detect unexpected changes</li>
-<li>
-<strong>Panel bias:</strong> Limited to pre-selected targets</li>
-</ul>
-</div>
-<div class="section level3">
 <h3 id="caveats">Caveats<a class="anchor" aria-label="anchor" href="#caveats"></a>
 </h3>
 <ul>
@@ -897,7 +855,7 @@ effect rates</li>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>

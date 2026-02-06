@@ -4,16 +4,6 @@
 
 ### What Makes Targeted Proteomics Different?
 
-Mass spectrometry-based proteomics operates in two fundamentally
-different modes:
-
-**Discovery proteomics (DDA)** casts a wide net:
-
-- Measures thousands of proteins/peptides
-- Identifies whatever is abundant enough to detect
-- Great for hypothesis generation
-- High multiple testing burden
-
 **Targeted proteomics (PRM/SRM)** takes aim at specific targets:
 
 - Measures a pre-defined panel of peptides
@@ -208,7 +198,10 @@ print(fits)
     ## 
     ## Missingness: 429/3420 values NA (12.5%)
     ## Peptides with missing data: 180
-    ##   MNAR pattern: 0 of 180 peptides with missing data (score > 2)
+    ## 
+    ## MNAR detection (abundance vs missingness):
+    ##   Correlation: r = -0.40 (p = 1.3e-07)
+    ##   Moderate evidence of MNAR: low-abundance peptides have more missing values (p = 1.3e-07)
 
 ### Visualizing Missingness Patterns
 
@@ -218,9 +211,7 @@ function provides three complementary views:
 
 1.  **NA Rate Distribution**: What fraction of observations are missing
     for each peptide?
-2.  **MNAR Score Distribution**: Is there evidence that missingness
-    correlates with abundance?
-3.  **Abundance vs NA Rate**: Do low-abundance peptides have more
+2.  **Abundance vs NA Rate**: Do low-abundance peptides have more
     missing values?
 
 ``` r
@@ -228,52 +219,38 @@ plot_missingness(fits)
 ```
 
 ![Missingness patterns across the PRM peptidome. Left: Distribution of
-NA rates. Middle: MNAR scores (z-statistic; values \> 2 suggest
-informative missingness). Right: Relationship between mean abundance and
-NA rate.](prm-genotype-power_files/figure-html/plot-missingness-1.png)
+NA rates. Right: Relationship between mean abundance and NA
+rate.](prm-genotype-power_files/figure-html/plot-missingness-1.png)
 
 Missingness patterns across the PRM peptidome. Left: Distribution of NA
-rates. Middle: MNAR scores (z-statistic; values \> 2 suggest informative
-missingness). Right: Relationship between mean abundance and NA rate.
+rates. Right: Relationship between mean abundance and NA rate.
 
-### Interpreting MNAR Scores
+### MNAR Detection
 
-The MNAR score is a z-statistic testing whether missing observations
-have systematically different (lower) abundance than observed values.
-Higher scores indicate stronger evidence for informative missingness.
+MNAR (Missing Not At Random) in mass spectrometry typically occurs when
+low-abundance peptides fall below the detection limit. peppwR detects
+this by correlating mean abundance with NA rate across all peptides.
 
-| MNAR Score | Interpretation           |
-|------------|--------------------------|
-| \< 1       | Little evidence for MNAR |
-| 1-2        | Weak evidence            |
-| 2-3        | Moderate evidence        |
-| \> 3       | Strong evidence for MNAR |
+A negative correlation indicates that low-abundance peptides have more
+missing values - the hallmark of detection-limit-driven missingness.
 
-``` r
-# Identify peptides with strong MNAR evidence
-mnar_peptides <- get_mnar_peptides(fits, threshold = 2)
+| Correlation (r)   | Interpretation            |
+|-------------------|---------------------------|
+| r \> -0.1         | No evidence of MNAR       |
+| -0.3 \< r \< -0.1 | Weak evidence of MNAR     |
+| -0.5 \< r \< -0.3 | Moderate evidence of MNAR |
+| r \< -0.5         | Strong evidence of MNAR   |
 
-cat("Peptides with MNAR evidence (z > 2):", nrow(mnar_peptides), "\n")
-```
+### Implications of MNAR
 
-    ## Peptides with MNAR evidence (z > 2): 0
+When MNAR is detected, be aware that:
 
-``` r
-if (nrow(mnar_peptides) > 0) {
-  cat("\nTop MNAR peptides:\n")
-  print(head(mnar_peptides, 10))
-}
-```
-
-### What to Do with MNAR Peptides
-
-Peptides with high MNAR scores require careful handling:
-
-- Their abundance estimates may be biased upward (low values are
-  missing)
-- Power calculations may be optimistic
-- Consider robust statistical methods
-- Report separately in publications
+- Abundance estimates for low-abundance peptides may be biased upward
+  (since low values are missing)
+- Power calculations may be optimistic for these peptides
+- Consider robust statistical methods that account for non-random
+  missingness
+- Report the MNAR pattern in publications
 
 ## Distribution Fitting Results
 
@@ -712,22 +689,6 @@ for discovery proteomics with thousands of tests.
 
 4.  **MNAR peptides:** Report peptides with high MNAR scores separately
     and interpret their results cautiously.
-
-### Targeted vs Discovery Considerations
-
-This PRM dataset (285 peptides) has advantages over discovery
-proteomics:
-
-- **Lower multiple testing burden:** Fewer tests = less severe FDR
-  correction
-- **Focused power:** Resources concentrated on peptides of interest
-- **Better reproducibility:** Targeted methods have lower technical
-  variability
-
-However:
-
-- **No discovery:** Can’t detect unexpected changes
-- **Panel bias:** Limited to pre-selected targets
 
 ### Caveats
 

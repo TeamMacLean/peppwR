@@ -695,30 +695,31 @@ summary(fits)$missingness
 #> $n_peptides_with_na
 #> [1] 0
 #> 
-#> $mean_mnar_score
-#> [1] NaN
+#> $dataset_mnar_correlation
+#> [1] NA
 #> 
-#> $n_potential_mnar
-#> [1] 0
+#> $dataset_mnar_pvalue
+#> [1] NA
+#> 
+#> $dataset_mnar_interpretation
+#> [1] "Insufficient peptides with missing data (< 5)"
 ```
 
 ### Visualizing Missingness Patterns
 
 ``` r
-# Visualize NA rate and MNAR score distributions
+# Visualize NA rate distribution and MNAR pattern
 plot_missingness(fits_na)
 ```
 
 ![](power-analysis-workflow_files/figure-html/plot-missingness-1.png)
 
-The plot shows three panels:
+The plot shows two panels:
 
-- **Top**: Distribution of NA rates across peptides
-- **Middle**: MNAR score histogram - scores above 2 (red line) suggest
-  systematic missingness
-- **Bottom**: Mean abundance vs NA rate, colored by MNAR score. A
-  negative trend (low abundance → high NA rate) is the hallmark of MNAR
-  in proteomics
+- **Left**: Distribution of NA rates across peptides
+- **Right**: Mean abundance vs NA rate with dataset-level correlation. A
+  negative correlation (shown in subtitle) indicates low-abundance
+  peptides have more missing values - the hallmark of MNAR in proteomics
 
 ### MNAR Detection
 
@@ -726,25 +727,21 @@ MNAR (Missing Not At Random) occurs when the probability of a value
 being missing depends on the value itself. In proteomics, this typically
 happens when low-abundance peptides fall below the detection limit.
 
-peppwR detects MNAR patterns by comparing the mean rank of observed
-values to what would be expected under random (MCAR) missingness. A
-positive MNAR score indicates that observed values tend to be higher
-than expected - suggesting low values are preferentially missing.
+peppwR detects MNAR by correlating mean abundance with NA rate across
+all peptides. This dataset-level metric is shown automatically when you
+print a fits object and in the
+[`plot_missingness()`](https://teammaclean.github.io/peppwR/reference/plot_missingness.md)
+visualization.
 
-To identify specific peptides showing MNAR evidence:
+| Correlation (r)   | Interpretation          |
+|-------------------|-------------------------|
+| r \> -0.1         | No evidence of MNAR     |
+| -0.3 \< r \< -0.1 | Weak evidence           |
+| -0.5 \< r \< -0.3 | Moderate evidence       |
+| r \< -0.5         | Strong evidence of MNAR |
 
-``` r
-# Get peptides with MNAR score > 2
-mnar_peptides <- get_mnar_peptides(fits_na, threshold = 2)
-nrow(mnar_peptides)
-#> [1] 0
-
-# View top MNAR candidates (if any)
-head(mnar_peptides)
-#> # A tibble: 0 × 5
-#> # ℹ 5 variables: peptide_id <chr>, condition <chr>, na_rate <dbl>,
-#> #   mnar_score <dbl>, mean_abundance <dbl>
-```
+A strong negative correlation indicates that low-abundance peptides have
+more missing values, consistent with detection-limit-driven MNAR.
 
 ### Incorporating Missingness into Simulations
 
@@ -778,8 +775,8 @@ print(result_na)
 ```
 
 When `include_missingness = TRUE`, simulations incorporate each
-peptide’s observed NA rate and MNAR pattern, providing power estimates
-that reflect what you’d actually observe in your experiment.
+peptide’s observed NA rate, providing power estimates that reflect what
+you’d actually observe in your experiment.
 
 ## FDR-Aware Power Analysis
 

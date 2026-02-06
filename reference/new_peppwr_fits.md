@@ -5,7 +5,14 @@ Create a new peppwr_fits object
 ## Usage
 
 ``` r
-new_peppwr_fits(data, fits, best, call, missingness = NULL)
+new_peppwr_fits(
+  data,
+  fits,
+  best,
+  call,
+  missingness = NULL,
+  dataset_mnar = NULL
+)
 ```
 
 ## Arguments
@@ -29,6 +36,10 @@ new_peppwr_fits(data, fits, best, call, missingness = NULL)
 - missingness:
 
   Tibble with missingness statistics per peptide (optional)
+
+- dataset_mnar:
+
+  Dataset-level MNAR metric (optional, from compute_dataset_mnar)
 
 ## Value
 
