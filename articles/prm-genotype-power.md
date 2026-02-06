@@ -437,8 +437,8 @@ print(power_current)
     ## Sample size: 3 per group
     ## Effect size: 2.00-fold
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(power_current)
@@ -469,8 +469,8 @@ print(sample_size)
     ## Target power: 80%
     ## Effect size: 2.00-fold
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(sample_size)
@@ -511,8 +511,8 @@ print(min_effect)
     ## Sample size: 3 per group
     ## Target power: 80%
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(min_effect)
@@ -589,16 +589,21 @@ change, so `prop_null` might be lower than in discovery experiments.
 
 ### Standard vs FDR-Corrected Power
 
+Note: FDR-aware mode requires frequentist tests (Wilcoxon or
+bootstrap-t) because Benjamini-Hochberg correction operates on p-values.
+Bayes factors cannot be meaningfully converted to p-values for this
+correction.
+
 ``` r
-# Standard power (nominal alpha = 0.05)
+# Standard power with Wilcoxon (nominal alpha = 0.05)
 power_nominal <- power_analysis(fits, effect_size = 2, n_per_group = 3,
-                                find = "power", test = "bayes_t",
+                                find = "power", test = "wilcoxon",
                                 apply_fdr = FALSE, n_sim = 100)
 
 # FDR-aware power (BH correction)
 # prop_null = 0.8 means we assume 80% of peptides have no true effect
 power_fdr <- power_analysis(fits, effect_size = 2, n_per_group = 3,
-                            find = "power", test = "bayes_t",
+                            find = "power", test = "wilcoxon",
                             apply_fdr = TRUE, prop_null = 0.8,
                             fdr_threshold = 0.05, n_sim = 100)
 ```
@@ -608,10 +613,10 @@ power_fdr <- power_analysis(fits, effect_size = 2, n_per_group = 3,
 nominal_power <- power_nominal$simulations$peptide_power
 fdr_power <- power_fdr$simulations$peptide_power
 
-cat("Nominal power (no FDR correction):\n")
+cat("Nominal power (Wilcoxon, no FDR correction):\n")
 ```
 
-    ## Nominal power (no FDR correction):
+    ## Nominal power (Wilcoxon, no FDR correction):
 
 ``` r
 if (is.numeric(nominal_power) && length(nominal_power) > 0) {
@@ -622,15 +627,15 @@ if (is.numeric(nominal_power) && length(nominal_power) > 0) {
 }
 ```
 
-    ##   Median power: 0.56 
-    ##   % peptides > 80% power: 16.1 %
+    ##   Median power: 0 
+    ##   % peptides > 80% power: 0 %
 
 ``` r
-cat("\nFDR-aware power (BH correction, 80% true nulls):\n")
+cat("\nFDR-aware power (Wilcoxon, BH correction, 80% true nulls):\n")
 ```
 
     ## 
-    ## FDR-aware power (BH correction, 80% true nulls):
+    ## FDR-aware power (Wilcoxon, BH correction, 80% true nulls):
 
 ``` r
 if (is.numeric(fdr_power) && length(fdr_power) > 0) {
@@ -645,12 +650,12 @@ if (is.numeric(fdr_power) && length(fdr_power) > 0) {
     ## ---------------------
     ## Mode: per_peptide
     ## 
-    ## Power: 6%
+    ## Power: 0%
     ## Sample size: 3 per group
     ## Effect size: 2.00-fold
     ## 
+    ## Statistical test: wilcoxon
     ## Significance level: 0.05
-    ## Statistical test: bayes_t
     ## 
     ## FDR-adjusted analysis (Benjamini-Hochberg)
     ## Proportion true nulls: 80%

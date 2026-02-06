@@ -73,7 +73,9 @@ power_analysis(
 
 - apply_fdr:
 
-  If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction
+  If TRUE, use FDR-aware simulation with Benjamini-Hochberg correction.
+  Note: not compatible with `test = "bayes_t"` (Bayes factors cannot be
+  converted to p-values)
 
 - prop_null:
 

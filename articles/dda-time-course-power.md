@@ -349,8 +349,8 @@ print(power_n3)
     ## Sample size: 3 per group
     ## Effect size: 2.00-fold
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(power_n3)
@@ -388,8 +388,8 @@ print(sample_size)
     ## Target power: 80%
     ## Effect size: 2.00-fold
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(sample_size)
@@ -437,8 +437,8 @@ print(min_effect)
     ## Sample size: 3 per group
     ## Target power: 80%
     ## 
-    ## Significance level: 0.05
     ## Statistical test: bayes_t
+    ## Decision threshold: BF > 3 (substantial evidence)
 
 ``` r
 plot(min_effect)

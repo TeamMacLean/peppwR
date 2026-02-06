@@ -239,8 +239,8 @@ print(result_n)
 #> Target power: 80%
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r
@@ -275,8 +275,8 @@ print(result_power)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ## Power Analysis - Per-Peptide Mode
@@ -304,8 +304,8 @@ print(result_pp)
 #> Target power: 80%
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r

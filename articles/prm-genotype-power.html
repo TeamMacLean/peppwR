@@ -66,7 +66,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Power Analysis for Targeted Proteomics with Missing Data (PRM)</h1>
                         <h4 data-toc-skip class="author">peppwR</h4>
             
-            <h4 data-toc-skip class="date">2026-02-05</h4>
+            <h4 data-toc-skip class="date">2026-02-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/TeamMacLean/peppwR/blob/master/vignettes/articles/prm-genotype-power.Rmd" class="external-link"><code>vignettes/articles/prm-genotype-power.Rmd</code></a></small>
       <div class="d-none name"><code>prm-genotype-power.Rmd</code></div>
@@ -581,8 +581,8 @@ achieve?</p>
 <span><span class="co">## Sample size: 3 per group</span></span>
 <span><span class="co">## Effect size: 2.00-fold</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Significance level: 0.05</span></span>
-<span><span class="co">## Statistical test: bayes_t</span></span></code></pre>
+<span><span class="co">## Statistical test: bayes_t</span></span>
+<span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">power_current</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -608,8 +608,8 @@ factor test).
 <span><span class="co">## Target power: 80%</span></span>
 <span><span class="co">## Effect size: 2.00-fold</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Significance level: 0.05</span></span>
-<span><span class="co">## Statistical test: bayes_t</span></span></code></pre>
+<span><span class="co">## Statistical test: bayes_t</span></span>
+<span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_size</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -648,8 +648,8 @@ power?”</p>
 <span><span class="co">## Sample size: 3 per group</span></span>
 <span><span class="co">## Target power: 80%</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Significance level: 0.05</span></span>
-<span><span class="co">## Statistical test: bayes_t</span></span></code></pre>
+<span><span class="co">## Statistical test: bayes_t</span></span>
+<span><span class="co">## Decision threshold: BF &gt; 3 (substantial evidence)</span></span></code></pre>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">min_effect</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -734,16 +734,20 @@ experiments.</p>
 <div class="section level3">
 <h3 id="standard-vs-fdr-corrected-power">Standard vs FDR-Corrected Power<a class="anchor" aria-label="anchor" href="#standard-vs-fdr-corrected-power"></a>
 </h3>
+<p>Note: FDR-aware mode requires frequentist tests (Wilcoxon or
+bootstrap-t) because Benjamini-Hochberg correction operates on p-values.
+Bayes factors cannot be meaningfully converted to p-values for this
+correction.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Standard power (nominal alpha = 0.05)</span></span>
+<code class="sourceCode R"><span><span class="co"># Standard power with Wilcoxon (nominal alpha = 0.05)</span></span>
 <span><span class="va">power_nominal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                                find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>,</span>
+<span>                                find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"wilcoxon"</span>,</span>
 <span>                                apply_fdr <span class="op">=</span> <span class="cn">FALSE</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># FDR-aware power (BH correction)</span></span>
 <span><span class="co"># prop_null = 0.8 means we assume 80% of peptides have no true effect</span></span>
 <span><span class="va">power_fdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_analysis.html">power_analysis</a></span><span class="op">(</span><span class="va">fits</span>, effect_size <span class="op">=</span> <span class="fl">2</span>, n_per_group <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                            find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"bayes_t"</span>,</span>
+<span>                            find <span class="op">=</span> <span class="st">"power"</span>, test <span class="op">=</span> <span class="st">"wilcoxon"</span>,</span>
 <span>                            apply_fdr <span class="op">=</span> <span class="cn">TRUE</span>, prop_null <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                            fdr_threshold <span class="op">=</span> <span class="fl">0.05</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
@@ -751,8 +755,8 @@ experiments.</p>
 <span><span class="va">nominal_power</span> <span class="op">&lt;-</span> <span class="va">power_nominal</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span></span>
 <span><span class="va">fdr_power</span> <span class="op">&lt;-</span> <span class="va">power_fdr</span><span class="op">$</span><span class="va">simulations</span><span class="op">$</span><span class="va">peptide_power</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Nominal power (no FDR correction):\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Nominal power (no FDR correction):</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Nominal power (Wilcoxon, no FDR correction):\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Nominal power (Wilcoxon, no FDR correction):</span></span></code></pre>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">nominal_power</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nominal_power</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Median power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">nominal_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -760,12 +764,12 @@ experiments.</p>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">power_nominal</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Median power: 0.56 </span></span>
-<span><span class="co">##   % peptides &gt; 80% power: 16.1 %</span></span></code></pre>
+<pre><code><span><span class="co">##   Median power: 0 </span></span>
+<span><span class="co">##   % peptides &gt; 80% power: 0 %</span></span></code></pre>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nFDR-aware power (BH correction, 80% true nulls):\n"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nFDR-aware power (Wilcoxon, BH correction, 80% true nulls):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## FDR-aware power (BH correction, 80% true nulls):</span></span></code></pre>
+<span><span class="co">## FDR-aware power (Wilcoxon, BH correction, 80% true nulls):</span></span></code></pre>
 <div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">fdr_power</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fdr_power</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Median power:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">fdr_power</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -777,12 +781,12 @@ experiments.</p>
 <span><span class="co">## ---------------------</span></span>
 <span><span class="co">## Mode: per_peptide</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Power: 6%</span></span>
+<span><span class="co">## Power: 0%</span></span>
 <span><span class="co">## Sample size: 3 per group</span></span>
 <span><span class="co">## Effect size: 2.00-fold</span></span>
 <span><span class="co">## </span></span>
+<span><span class="co">## Statistical test: wilcoxon</span></span>
 <span><span class="co">## Significance level: 0.05</span></span>
-<span><span class="co">## Statistical test: bayes_t</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## FDR-adjusted analysis (Benjamini-Hochberg)</span></span>
 <span><span class="co">## Proportion true nulls: 80%</span></span>

@@ -71,8 +71,8 @@ print(result)
 #> Target power: 80%
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r
@@ -109,8 +109,8 @@ print(result)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ### Finding Minimum Detectable Effect
@@ -139,8 +139,8 @@ print(result)
 #> Sample size: 6 per group
 #> Target power: 80%
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r
@@ -322,8 +322,8 @@ print(result_pp)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r
@@ -360,8 +360,8 @@ print(result_n)
 #> Target power: 80%
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ``` r
@@ -467,8 +467,8 @@ print(result_wilcox)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 ### Bootstrap-t Test
@@ -497,8 +497,8 @@ print(result_boot)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: bootstrap_t
+#> Significance level: 0.05
 ```
 
 ### Bayes Factor Test
@@ -529,8 +529,8 @@ print(result_bayes)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: bayes_t
+#> Decision threshold: BF > 3 (substantial evidence)
 ```
 
 ### Rank Products Test
@@ -559,8 +559,8 @@ print(result_rp)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: rankprod
+#> Significance level: 0.05
 ```
 
 ## Diagnostic Plots
@@ -773,8 +773,8 @@ print(result_na)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 ```
 
 When `include_missingness = TRUE`, simulations incorporate each
@@ -819,8 +819,8 @@ print(result_fdr)
 #> Sample size: 6 per group
 #> Effect size: 2.00-fold
 #> 
-#> Significance level: 0.05
 #> Statistical test: wilcoxon
+#> Significance level: 0.05
 #> 
 #> FDR-adjusted analysis (Benjamini-Hochberg)
 #> Proportion true nulls: 90%
@@ -829,7 +829,10 @@ print(result_fdr)
 
 The `apply_fdr` mode simulates entire experiments with a mixture of null
 and alternative peptides, then applies Benjamini-Hochberg correction
-before computing power.
+before computing power. **Note:** FDR-adjusted mode requires frequentist
+tests (`wilcoxon` or `bootstrap_t`). The `bayes_t` test is not
+compatible with FDR mode because Bayes factors cannot be converted to
+p-values for BH correction.
 
 ### Understanding prop_null
 
