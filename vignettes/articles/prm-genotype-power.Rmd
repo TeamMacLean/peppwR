@@ -25,15 +25,6 @@ set.seed(42)
 
 ### What Makes Targeted Proteomics Different?
 
-Mass spectrometry-based proteomics operates in two fundamentally different modes:
-
-**Discovery proteomics (DDA)** casts a wide net:
-
-- Measures thousands of proteins/peptides
-- Identifies whatever is abundant enough to detect
-- Great for hypothesis generation
-- High multiple testing burden
-
 **Targeted proteomics (PRM/SRM)** takes aim at specific targets:
 
 - Measures a pre-defined panel of peptides
@@ -450,18 +441,6 @@ For a targeted panel of 285 peptides, the FDR impact is more modest than for dis
 
 4. **MNAR peptides:** Report peptides with high MNAR scores separately and interpret their results cautiously.
 
-### Targeted vs Discovery Considerations
-
-This PRM dataset (285 peptides) has advantages over discovery proteomics:
-
-- **Lower multiple testing burden:** Fewer tests = less severe FDR correction
-- **Focused power:** Resources concentrated on peptides of interest
-- **Better reproducibility:** Targeted methods have lower technical variability
-
-However:
-
-- **No discovery:** Can't detect unexpected changes
-- **Panel bias:** Limited to pre-selected targets
 
 ### Caveats
 
