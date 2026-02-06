@@ -24,8 +24,8 @@ Initial CRAN release.
 
 ## Missing Data Handling
 
-* `compute_missingness()` calculates NA rates and MNAR scores per peptide
-* MNAR (Missing Not At Random) detection for low-abundance dropouts
+* `compute_missingness()` calculates NA rates per peptide
+* Dataset-level MNAR detection via abundance-missingness correlation
 * `simulate_with_missingness()` incorporates missing data patterns in power simulations
 
 ## FDR-Aware Mode
@@ -41,7 +41,7 @@ Initial CRAN release.
 * `plot_power_heatmap()`: N x effect size power lookup grid
 * `plot_power_vs_effect()`: Power sensitivity at fixed N
 * `plot_param_distribution()`: Distribution of fit quality across peptidome
-* `plot_missingness()`: NA rate and MNAR score distributions
+* `plot_missingness()`: NA rate distribution and abundance vs missingness
 
 ## Empirical Bootstrap
 

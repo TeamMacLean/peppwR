@@ -37,7 +37,7 @@ is_count_data <- function(x) {
 #'
 #' @section Missingness Tracking:
 #' The returned object includes:
-#' - Per-peptide NA rates and MNAR scores (in `$missingness`)
+#' - Per-peptide NA rates (in `$missingness`)
 #' - Dataset-level MNAR correlation (in `$dataset_mnar`)
 #'
 #' The dataset-level MNAR metric correlates log(mean_abundance) with NA rate

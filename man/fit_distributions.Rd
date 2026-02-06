@@ -36,7 +36,7 @@ dataset-level MNAR detection.
 
 The returned object includes:
 \itemize{
-\item Per-peptide NA rates and MNAR scores (in \verb{$missingness})
+\item Per-peptide NA rates (in \verb{$missingness})
 \item Dataset-level MNAR correlation (in \verb{$dataset_mnar})
 }
 
