@@ -50,7 +50,7 @@ result <- power_analysis(fits, effect_size = 2, target_power = 0.8, find = "samp
 |---------|-------------|
 | **Distribution fitting** | gamma, lognormal, normal, inverse gaussian via `fitdistrplus`/`univariateML` |
 | **Statistical tests** | `wilcoxon` (default), `bootstrap_t`, `bayes_t` |
-| **Missing data** | MNAR detection, missingness-aware simulations |
+| **Missing data** | Dataset-level MNAR detection (abundance vs NA rate correlation), missingness-aware simulations |
 | **FDR-aware mode** | Whole-peptidome simulation with BH correction |
 | **Empirical bootstrap** | Fallback when parametric fitting fails |
 | **Diagnostic plots** | Density overlay, QQ, power heatmap, missingness |
@@ -68,8 +68,7 @@ Power analysis results with `print()`, `plot()`, `summary()` methods.
 ```
 R/
 ├── classes.R       # S3 class constructors and validators
-├── fits.R          # fit_distributions(), distribution fitting
-├── missingness.R   # compute_missingness(), MNAR detection
+├── fits.R          # fit_distributions(), missingness computation, MNAR detection
 ├── plots.R         # All plot methods and diagnostic plots
 ├── power.R         # power_analysis() and methods
 ├── simulation.R    # Simulation engine, run_power_sim*()
@@ -110,7 +109,7 @@ sample_data/                   # Example datasets (in .Rbuildignore)
 - **Tidyverse style** - Pipes, dplyr verbs
 - **Explicit namespacing** - `dplyr::filter()`, `ggplot2::ggplot()`
 - **S3 OOP** - Classes with print/plot/summary methods
-- **TDD** - testthat with 270+ tests
+- **TDD** - testthat with 299 tests
 
 ## Development Workflow for Future Changes
 
@@ -173,7 +172,7 @@ Single-threaded with R vectorization. Benchmarks show acceptable performance for
 - Distribution fitting with multiple candidates
 - Statistical tests: wilcoxon, bootstrap_t, bayes_t
 - Diagnostic plots: density overlay, QQ, heatmap, param distribution
-- Missingness handling with MNAR detection
+- Missingness handling with dataset-level MNAR detection
 - FDR-aware power analysis
 - Empirical bootstrap fallback
 - Real-world examples (DDA and PRM)
