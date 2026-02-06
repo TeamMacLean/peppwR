@@ -592,3 +592,184 @@ test_that("print.peppwr_fits shows MNAR pattern count", {
   # Should mention MNAR pattern in output
   expect_true(any(grepl("MNAR", output, ignore.case = TRUE)))
 })
+
+# --- Dataset-level MNAR tests ---
+
+test_that("compute_dataset_mnar returns expected structure", {
+  missingness <- tibble::tibble(
+    na_rate = c(0.5, 0.3, 0.1, 0.2, 0.4, 0.0),
+    mean_abundance = c(10, 20, 50, 30, 15, 100)
+  )
+
+  result <- compute_dataset_mnar(missingness)
+
+  expect_type(result, "list")
+  expect_named(result, c("correlation", "p_value", "n_peptides", "interpretation"))
+  expect_true(is.numeric(result$correlation) || is.na(result$correlation))
+  expect_true(is.numeric(result$p_value) || is.na(result$p_value))
+  expect_equal(result$n_peptides, 5)  # Excludes peptide with na_rate = 0
+  expect_type(result$interpretation, "character")
+})
+
+test_that("compute_dataset_mnar detects strong MNAR pattern", {
+  # Strong negative correlation: low abundance -> high NA rate
+  set.seed(42)
+  missingness <- tibble::tibble(
+    mean_abundance = c(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000),
+    na_rate = c(0.9, 0.8, 0.7, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.02)
+  )
+
+  result <- compute_dataset_mnar(missingness)
+
+  # Should detect negative correlation
+  expect_lt(result$correlation, -0.5)
+  expect_lt(result$p_value, 0.05)
+  expect_true(grepl("MNAR", result$interpretation))
+  expect_true(grepl("low-abundance", result$interpretation) ||
+              grepl("evidence", result$interpretation, ignore.case = TRUE))
+})
+
+test_that("compute_dataset_mnar handles insufficient data", {
+  # Only 3 peptides with missing data
+  missingness <- tibble::tibble(
+    na_rate = c(0.5, 0.3, 0.1, 0.0, 0.0),
+    mean_abundance = c(10, 20, 50, 100, 200)
+  )
+
+  result <- compute_dataset_mnar(missingness)
+
+  expect_equal(result$n_peptides, 3)
+  expect_true(is.na(result$correlation))
+  expect_true(is.na(result$p_value))
+  expect_true(grepl("Insufficient", result$interpretation))
+})
+
+test_that("compute_dataset_mnar handles no peptides with missing data", {
+  missingness <- tibble::tibble(
+    na_rate = c(0, 0, 0, 0, 0),
+    mean_abundance = c(10, 20, 50, 100, 200)
+  )
+
+  result <- compute_dataset_mnar(missingness)
+
+  expect_equal(result$n_peptides, 0)
+  expect_true(is.na(result$correlation))
+  expect_true(grepl("Insufficient", result$interpretation))
+})
+
+test_that("compute_dataset_mnar handles NA/NaN in mean_abundance", {
+  missingness <- tibble::tibble(
+    na_rate = c(0.5, 0.3, 0.1, 0.2, 0.4, 0.5),
+    mean_abundance = c(10, NA, 50, NaN, 15, 0)  # NA, NaN, and 0 should be excluded
+  )
+
+  result <- compute_dataset_mnar(missingness)
+
+  # Only 3 valid peptides (10, 50, 15) - excludes NA, NaN, and 0
+  expect_equal(result$n_peptides, 3)
+  expect_true(is.na(result$correlation))  # < 5 peptides
+})
+
+test_that("fit_distributions includes dataset_mnar slot", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:10), each = 10),
+    condition = rep("ctrl", 100),
+    abundance = rlnorm(100, meanlog = 3, sdlog = 1)
+  )
+  # Introduce MNAR pattern
+  threshold <- quantile(test_data$abundance, 0.3)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(100) < 0.5,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+
+  expect_true("dataset_mnar" %in% names(fits))
+  expect_type(fits$dataset_mnar, "list")
+  expect_true(all(c("correlation", "p_value", "n_peptides", "interpretation") %in%
+                    names(fits$dataset_mnar)))
+})
+
+test_that("print.peppwr_fits shows dataset-level MNAR correlation", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:20), each = 10),
+    condition = rep("ctrl", 200),
+    abundance = rlnorm(200, meanlog = 3, sdlog = 1)
+  )
+  # Strong MNAR pattern
+  threshold <- quantile(test_data$abundance, 0.4)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(200) < 0.6,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  output <- capture.output(print(fits))
+
+  # Should mention dataset-level correlation
+  expect_true(any(grepl("Dataset-level", output)))
+  expect_true(any(grepl("Correlation|r =", output)))
+})
+
+test_that("print.peppwr_fits shows low power note for small N", {
+  set.seed(42)
+  # Small N per peptide (only 6 observations each)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:10), each = 6),
+    condition = rep("ctrl", 60),
+    abundance = rlnorm(60, meanlog = 3, sdlog = 1)
+  )
+  # Introduce some missing values
+  test_data$abundance <- ifelse(runif(60) < 0.2, NA, test_data$abundance)
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  output <- capture.output(print(fits))
+
+  # Should show note about low power
+  expect_true(any(grepl("Low power|Note:", output)))
+})
+
+test_that("summary.peppwr_fits includes dataset_mnar metrics", {
+  set.seed(42)
+  test_data <- tibble::tibble(
+    peptide = rep(paste0("pep", 1:15), each = 10),
+    condition = rep("ctrl", 150),
+    abundance = rlnorm(150, meanlog = 3, sdlog = 1)
+  )
+  # Introduce MNAR pattern
+  threshold <- quantile(test_data$abundance, 0.3)
+  test_data$abundance <- ifelse(
+    test_data$abundance < threshold & runif(150) < 0.5,
+    NA, test_data$abundance
+  )
+
+  fits <- fit_distributions(test_data, "peptide", "condition", "abundance")
+  summ <- summary(fits)
+
+  expect_true("missingness" %in% names(summ))
+  expect_true("dataset_mnar_correlation" %in% names(summ$missingness))
+  expect_true("dataset_mnar_pvalue" %in% names(summ$missingness))
+  expect_true("dataset_mnar_interpretation" %in% names(summ$missingness))
+})
+
+test_that("interpret_dataset_mnar provides correct interpretations", {
+  # Strong negative correlation (strong MNAR)
+  interp1 <- interpret_dataset_mnar(-0.6, 0.001, 20)
+  expect_true(grepl("Strong evidence", interp1))
+  expect_true(grepl("low-abundance", interp1))
+
+  # Weak negative correlation
+  interp2 <- interpret_dataset_mnar(-0.2, 0.1, 20)
+  expect_true(grepl("Weak evidence", interp2))
+
+  # No correlation
+  interp3 <- interpret_dataset_mnar(0.05, 0.8, 20)
+  expect_true(grepl("No evidence", interp3))
+
+  # Positive correlation (unusual)
+  interp4 <- interpret_dataset_mnar(0.4, 0.05, 20)
+  expect_true(grepl("unusual", interp4, ignore.case = TRUE))
+})

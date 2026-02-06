@@ -98,12 +98,16 @@ fit_distributions <- function(data, id, group, value, distributions = "continuou
     missingness
   )
 
+  # Compute dataset-level MNAR metric
+  dataset_mnar <- compute_dataset_mnar(missingness)
+
   new_peppwr_fits(
     data = nested,
     fits = nested$fits,
     best = best_fits,
     call = the_call,
-    missingness = missingness
+    missingness = missingness,
+    dataset_mnar = dataset_mnar
   )
 }
 
@@ -246,6 +250,24 @@ get_mnar_peptides <- function(fits, threshold = 2) {
 #' of observed values should be (n+1)/2. Under MNAR with low values
 #' missing, the mean rank will be higher.
 #'
+#' @section Per-Peptide vs Dataset-Level MNAR:
+#' This function computes a **per-peptide (within-peptide)** MNAR score,
+#' testing whether low values within a single peptide are more likely to be
+#' missing. This is distinct from **dataset-level (between-peptide)** MNAR,
+#' which tests whether low-abundance peptides have more missing values overall.
+#'
+#' For dataset-level MNAR, see [compute_dataset_mnar()].
+#'
+#' @section Power Considerations:
+#' The per-peptide MNAR score requires substantial observations (N > 15) for
+
+#' reliable detection. With typical proteomics sample sizes (N = 3-6 per group),
+#' this score has very low power. You may see "0 of N peptides with MNAR"
+#' even when clear MNAR patterns exist at the dataset level.
+#'
+#' For small sample sizes, rely on the dataset-level correlation from
+#' [compute_dataset_mnar()] instead.
+#'
 #' @param values Numeric vector (may contain NAs)
 #'
 #' @return List with:
@@ -254,6 +276,8 @@ get_mnar_peptides <- function(fits, threshold = 2) {
 #'   - na_rate: Proportion missing (0-1)
 #'   - mnar_score: Z-score measuring MNAR pattern. Positive values indicate
 #'     low values are more likely to be missing. Values > 2 suggest MNAR.
+#'
+#' @seealso [compute_dataset_mnar()] for dataset-level MNAR detection
 #'
 #' @export
 compute_missingness <- function(values) {
@@ -289,4 +313,133 @@ compute_missingness <- function(values) {
     na_rate = na_rate,
     mnar_score = mnar_score
   )
+}
+
+#' Compute dataset-level MNAR metric
+#'
+#' Calculates Spearman correlation between log(mean_abundance) and NA rate
+#' across peptides to detect whether low-abundance peptides have more missing
+#' values than high-abundance peptides. This is a "between-peptide" MNAR
+#' metric, distinct from the per-peptide "within-peptide" MNAR score.
+#'
+#' @section Two Types of MNAR:
+#' Mass spectrometry data can exhibit two types of MNAR:
+#'
+#' **Between-peptide (dataset-level):** Low-abundance peptides are more likely
+
+#' to have missing values than high-abundance peptides. This is detected by
+#' correlating mean abundance with NA rate across all peptides.
+#'
+#' **Within-peptide (per-peptide):** Within a single peptide, the missing
+#' observations tend to be the ones with lower true abundance. This is detected
+#' by the `mnar_score` from `compute_missingness()`, which compares observed
+#' rank distributions to what would be expected under MCAR.
+#'
+#' @section Statistical Power Considerations:
+#' The per-peptide MNAR score requires sufficient observations (N > 15) for
+#' reliable detection. With typical proteomics sample sizes (N = 3-6), the
+#' per-peptide score has very low power and will often show "0 of N peptides
+#' with MNAR" even when MNAR exists.
+#'
+#' The dataset-level metric is more reliable at small sample sizes because it
+#' aggregates information across many peptides.
+#'
+#' @param missingness A tibble with columns na_rate and mean_abundance
+#'   (as produced by fit_distributions)
+#'
+#' @return A list with:
+#'   - correlation: Spearman correlation coefficient (negative = MNAR pattern)
+#'   - p_value: p-value for the correlation
+#'   - n_peptides: Number of peptides with missing data used in calculation
+#'   - interpretation: Human-readable interpretation string
+#'
+#' @export
+compute_dataset_mnar <- function(missingness) {
+  # Filter to peptides with missing data and valid mean abundance
+  subset <- missingness[
+    missingness$na_rate > 0 &
+    !is.na(missingness$mean_abundance) &
+    !is.nan(missingness$mean_abundance) &
+    missingness$mean_abundance > 0,
+  ]
+
+  n_peptides <- nrow(subset)
+
+  # Need at least 5 peptides for meaningful correlation
+
+  if (n_peptides < 5) {
+    return(list(
+      correlation = NA_real_,
+      p_value = NA_real_,
+      n_peptides = n_peptides,
+      interpretation = "Insufficient peptides with missing data (< 5)"
+    ))
+  }
+
+  # Compute Spearman correlation between log(mean_abundance) and na_rate
+  cor_test <- stats::cor.test(
+    log(subset$mean_abundance),
+    subset$na_rate,
+    method = "spearman",
+    exact = FALSE
+  )
+
+  correlation <- as.numeric(cor_test$estimate)
+  p_value <- cor_test$p.value
+
+  # Generate interpretation
+  interpretation <- interpret_dataset_mnar(correlation, p_value, n_peptides)
+
+  list(
+    correlation = correlation,
+    p_value = p_value,
+    n_peptides = n_peptides,
+    interpretation = interpretation
+  )
+}
+
+#' Interpret dataset-level MNAR result
+#'
+#' @param correlation Spearman correlation coefficient
+#' @param p_value p-value for the correlation
+#' @param n_peptides Number of peptides in calculation
+#'
+#' @return Interpretation string
+#' @keywords internal
+interpret_dataset_mnar <- function(correlation, p_value, n_peptides) {
+  if (is.na(correlation)) {
+    return("Unable to compute correlation")
+  }
+
+  # Determine strength based on correlation magnitude
+  abs_cor <- abs(correlation)
+  if (abs_cor < 0.1) {
+    strength <- "No evidence"
+  } else if (abs_cor < 0.3) {
+    strength <- "Weak evidence"
+  } else if (abs_cor < 0.5) {
+    strength <- "Moderate evidence"
+  } else {
+    strength <- "Strong evidence"
+  }
+
+  # Direction
+  if (correlation < -0.1) {
+    direction <- "low-abundance peptides have more missing values"
+  } else if (correlation > 0.1) {
+    direction <- "high-abundance peptides have more missing values (unusual)"
+  } else {
+    direction <- "no clear abundance-missingness relationship"
+  }
+
+  # Significance
+  if (!is.na(p_value) && p_value < 0.05) {
+    sig <- sprintf("(p = %.2g)", p_value)
+  } else if (!is.na(p_value)) {
+    sig <- sprintf("(p = %.2g, not significant)", p_value)
+  } else {
+    sig <- ""
+  }
+
+  paste(strength, "of MNAR:", direction, sig)
 }

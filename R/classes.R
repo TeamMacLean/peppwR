@@ -9,17 +9,20 @@
 #' @param best Best-fitting distribution per peptide (character vector)
 #' @param call Original function call
 #' @param missingness Tibble with missingness statistics per peptide (optional)
+#' @param dataset_mnar Dataset-level MNAR metric (optional, from compute_dataset_mnar)
 #'
 #' @return A peppwr_fits object
 #' @export
-new_peppwr_fits <- function(data, fits, best, call, missingness = NULL) {
+new_peppwr_fits <- function(data, fits, best, call, missingness = NULL,
+                            dataset_mnar = NULL) {
   structure(
     list(
       data = data,
       fits = fits,
       best = best,
       call = call,
-      missingness = missingness
+      missingness = missingness,
+      dataset_mnar = dataset_mnar
     ),
     class = "peppwr_fits"
   )
@@ -91,12 +94,29 @@ print.peppwr_fits <- function(x, ...) {
                   total_na, total_obs, 100 * total_na / total_obs))
       cat(sprintf("Peptides with missing data: %d\n", peps_with_na))
 
-      # MNAR summary
+      # Dataset-level MNAR (between-peptide)
+      if (!is.null(x$dataset_mnar) && !is.na(x$dataset_mnar$correlation)) {
+        cat("\nDataset-level MNAR (abundance vs missingness):\n")
+        cat(sprintf("  Correlation: r = %.2f (p = %.2g)\n",
+                    x$dataset_mnar$correlation, x$dataset_mnar$p_value))
+        cat(sprintf("  %s\n", x$dataset_mnar$interpretation))
+      } else if (!is.null(x$dataset_mnar)) {
+        cat("\nDataset-level MNAR: ", x$dataset_mnar$interpretation, "\n", sep = "")
+      }
+
+      # Per-peptide MNAR summary (within-peptide)
       mnar_scores <- x$missingness$mnar_score[!is.na(x$missingness$mnar_score)]
       if (length(mnar_scores) > 0 && peps_with_na > 0) {
-        n_mnar <- sum(mnar_scores > 2, na.rm = TRUE)  # MNAR score > 2 suggests MNAR
-        cat(sprintf("  MNAR pattern: %d of %d peptides with missing data (score > 2)\n",
-                    n_mnar, peps_with_na))
+        n_mnar <- sum(mnar_scores > 2, na.rm = TRUE)
+        cat(sprintf("\nPer-peptide MNAR (within-peptide pattern):\n"))
+        cat(sprintf("  %d of %d peptides with score > 2\n", n_mnar, peps_with_na))
+
+        # Add note about low power with small N
+        median_n <- stats::median(x$missingness$n_total, na.rm = TRUE)
+        if (median_n < 15) {
+          cat(sprintf("  Note: Low power with N~%.0f observations per peptide\n",
+                      median_n))
+        }
       }
     }
   }
@@ -299,6 +319,13 @@ summary.peppwr_fits <- function(object, ...) {
       mean_mnar_score = mean(mnar_scores, na.rm = TRUE),
       n_potential_mnar = sum(mnar_scores > 2, na.rm = TRUE)
     )
+
+    # Add dataset-level MNAR metrics
+    if (!is.null(object$dataset_mnar)) {
+      result$missingness$dataset_mnar_correlation <- object$dataset_mnar$correlation
+      result$missingness$dataset_mnar_pvalue <- object$dataset_mnar$p_value
+      result$missingness$dataset_mnar_interpretation <- object$dataset_mnar$interpretation
+    }
   }
 
   class(result) <- "summary.peppwr_fits"

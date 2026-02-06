@@ -4,7 +4,14 @@
 \alias{new_peppwr_fits}
 \title{Create a new peppwr_fits object}
 \usage{
-new_peppwr_fits(data, fits, best, call, missingness = NULL)
+new_peppwr_fits(
+  data,
+  fits,
+  best,
+  call,
+  missingness = NULL,
+  dataset_mnar = NULL
+)
 }
 \arguments{
 \item{data}{Original data (nested tibble)}
@@ -16,6 +23,8 @@ new_peppwr_fits(data, fits, best, call, missingness = NULL)
 \item{call}{Original function call}
 
 \item{missingness}{Tibble with missingness statistics per peptide (optional)}
+
+\item{dataset_mnar}{Dataset-level MNAR metric (optional, from compute_dataset_mnar)}
 }
 \value{
 A peppwr_fits object

@@ -169,16 +169,42 @@ The `plot_missingness()` function provides three complementary views:
 plot_missingness(fits)
 ```
 
-### Interpreting MNAR Scores
+### Two Types of MNAR
 
-The MNAR score is a z-statistic testing whether missing observations have systematically different (lower) abundance than observed values. Higher scores indicate stronger evidence for informative missingness.
+Mass spectrometry data can exhibit two distinct types of MNAR, and peppwR tracks both:
 
-| MNAR Score | Interpretation |
-|------------|----------------|
-| < 1 | Little evidence for MNAR |
-| 1-2 | Weak evidence |
-| 2-3 | Moderate evidence |
-| > 3 | Strong evidence for MNAR |
+| Type | Question | Detection Method | Reliability at Small N |
+|------|----------|------------------|------------------------|
+| **Between-peptide (dataset-level)** | Are low-abundance peptides more likely to have missing values? | Spearman correlation: log(mean_abundance) vs NA rate | Good - aggregates across many peptides |
+| **Within-peptide (per-peptide)** | Within a single peptide, are low observations more likely missing? | Rank-based z-score comparing observed to expected ranks | Poor - requires N > 15 per peptide |
+
+**Important:** The per-peptide MNAR score requires substantial observations per peptide (N > 15) for reliable detection. With typical proteomics sample sizes (N = 3-6 per group), this score has very low statistical power and often reports "0 of N peptides with MNAR" even when clear MNAR patterns exist at the dataset level.
+
+For small sample sizes, **rely on the dataset-level correlation** shown in the print output and the third panel of `plot_missingness()`.
+
+### Dataset-Level MNAR Correlation
+
+The dataset-level MNAR metric correlates log(mean_abundance) with NA rate across all peptides. A negative correlation indicates that low-abundance peptides have more missing values - the hallmark of detection-limit-driven missingness.
+
+| Correlation (r) | Interpretation |
+|-----------------|----------------|
+| r > -0.1 | No evidence of MNAR |
+| -0.3 < r < -0.1 | Weak evidence of MNAR |
+| -0.5 < r < -0.3 | Moderate evidence of MNAR |
+| r < -0.5 | Strong evidence of MNAR |
+
+### Per-Peptide MNAR Scores
+
+The per-peptide MNAR score is a z-statistic testing whether missing observations within a peptide have systematically lower abundance than observed values. While conceptually useful, **this metric requires N > 15 observations per peptide for reliable detection**.
+
+| MNAR Score | Interpretation | Note |
+|------------|----------------|------|
+| < 1 | Little evidence for MNAR | |
+| 1-2 | Weak evidence | |
+| 2-3 | Moderate evidence | |
+| > 3 | Strong evidence for MNAR | |
+
+With small sample sizes (N < 15), expect most peptides to show "no evidence" even when MNAR exists. This is a power limitation, not evidence against MNAR.
 
 ```{r mnar-peptides}
 # Identify peptides with strong MNAR evidence
@@ -189,6 +215,9 @@ if (nrow(mnar_peptides) > 0) {
   cat("\nTop MNAR peptides:\n")
   print(head(mnar_peptides, 10))
 }
+
+# Note: With small N, the dataset-level correlation (shown in print output)
+# is more reliable than per-peptide scores
 ```
 
 ### What to Do with MNAR Peptides

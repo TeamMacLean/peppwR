@@ -957,6 +957,16 @@ plot_missingness <- function(fits) {
     miss_subset <- miss_data[miss_data$na_rate > 0 & !is.na(miss_data$mean_abundance), ]
 
     if (nrow(miss_subset) > 0) {
+      # Build subtitle with correlation info if available
+      subtitle_text <- "Dataset-level MNAR: abundance vs missingness"
+      if (!is.null(fits$dataset_mnar) && !is.na(fits$dataset_mnar$correlation)) {
+        subtitle_text <- sprintf(
+          "Dataset-level MNAR: r = %.2f (p = %.2g)",
+          fits$dataset_mnar$correlation,
+          fits$dataset_mnar$p_value
+        )
+      }
+
       p3 <- ggplot2::ggplot(miss_subset,
                             ggplot2::aes(x = mean_abundance, y = na_rate)) +
         ggplot2::geom_point(ggplot2::aes(color = mnar_score), alpha = 0.6, size = 2) +
@@ -970,7 +980,7 @@ plot_missingness <- function(fits) {
         ggplot2::labs(
           x = "Mean Abundance (log scale)",
           y = "NA Rate",
-          subtitle = "Negative trend suggests MNAR pattern"
+          subtitle = subtitle_text
         )
 
       # Add trend line if enough points
@@ -982,6 +992,25 @@ plot_missingness <- function(fits) {
           linetype = "dashed",
           formula = y ~ x
         )
+
+        # Add correlation annotation in corner
+        if (!is.null(fits$dataset_mnar) && !is.na(fits$dataset_mnar$correlation)) {
+          # Position annotation in top-right corner
+          x_pos <- max(miss_subset$mean_abundance, na.rm = TRUE) * 0.8
+          y_pos <- max(miss_subset$na_rate, na.rm = TRUE) * 0.9
+
+          cor_label <- sprintf("r = %.2f", fits$dataset_mnar$correlation)
+          p3 <- p3 + ggplot2::annotate(
+            "text",
+            x = x_pos,
+            y = y_pos,
+            label = cor_label,
+            hjust = 1,
+            vjust = 1,
+            fontface = "bold",
+            size = 4
+          )
+        }
       }
 
       # Combine 3 panels
