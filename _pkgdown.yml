@@ -72,7 +72,7 @@ reference:
   desc: Functions for handling missing data
   contents:
   - compute_missingness
-  - get_mnar_peptides
+  - compute_dataset_mnar
 
 - title: Statistical Tests
   desc: Test functions used in power simulations
