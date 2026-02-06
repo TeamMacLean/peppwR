@@ -307,7 +307,7 @@ power_analysis.peppwr_fits <- function(distribution, effect_size = NULL, n_per_g
         peptide_power[i] <- run_power_sim_with_missingness(
           dist_rfunc, params, n_per_group, effect_size,
           na_rate = missingness_data$na_rate[i],
-          mnar_score = missingness_data$mnar_score[i] %||% 0,
+          mnar_score = 0,  # MCAR assumed (per-peptide MNAR detection not reliable)
           alpha = alpha, test = test, n_sim = n_sim
         )
       } else {

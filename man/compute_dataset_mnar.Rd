@@ -22,31 +22,26 @@ A list with:
 \description{
 Calculates Spearman correlation between log(mean_abundance) and NA rate
 across peptides to detect whether low-abundance peptides have more missing
-values than high-abundance peptides. This is a "between-peptide" MNAR
-metric, distinct from the per-peptide "within-peptide" MNAR score.
+values than high-abundance peptides.
 }
-\section{Two Types of MNAR}{
+\section{MNAR Detection}{
 
-Mass spectrometry data can exhibit two types of MNAR:
+MNAR (Missing Not At Random) in mass spectrometry typically manifests as
+low-abundance peptides having higher rates of missing values due to
+detection limits. This function detects this pattern by correlating
+mean abundance with NA rate across all peptides.
 
-\strong{Between-peptide (dataset-level):} Low-abundance peptides are more likely
-to have missing values than high-abundance peptides. This is detected by
-correlating mean abundance with NA rate across all peptides.
-
-\strong{Within-peptide (per-peptide):} Within a single peptide, the missing
-observations tend to be the ones with lower true abundance. This is detected
-by the \code{mnar_score} from \code{compute_missingness()}, which compares observed
-rank distributions to what would be expected under MCAR.
+A negative correlation indicates that low-abundance peptides have more
+missing values - the hallmark of detection-limit-driven MNAR.
 }
 
-\section{Statistical Power Considerations}{
-
-The per-peptide MNAR score requires sufficient observations (N > 15) for
-reliable detection. With typical proteomics sample sizes (N = 3-6), the
-per-peptide score has very low power and will often show "0 of N peptides
-with MNAR" even when MNAR exists.
-
-The dataset-level metric is more reliable at small sample sizes because it
-aggregates information across many peptides.
+\section{Interpretation}{
+\tabular{ll}{
+   Correlation (r) \tab Interpretation \cr
+   r > -0.1 \tab No evidence of MNAR \cr
+   -0.3 < r < -0.1 \tab Weak evidence \cr
+   -0.5 < r < -0.3 \tab Moderate evidence \cr
+   r < -0.5 \tab Strong evidence of MNAR \cr
+}
 }
 

@@ -162,29 +162,17 @@ print(fits)
 The `plot_missingness()` function provides three complementary views:
 
 1. **NA Rate Distribution**: What fraction of observations are missing for each peptide?
-2. **MNAR Score Distribution**: Is there evidence that missingness correlates with abundance?
-3. **Abundance vs NA Rate**: Do low-abundance peptides have more missing values?
+2. **Abundance vs NA Rate**: Do low-abundance peptides have more missing values?
 
-```{r plot-missingness, fig.cap="Missingness patterns across the PRM peptidome. Left: Distribution of NA rates. Middle: MNAR scores (z-statistic; values > 2 suggest informative missingness). Right: Relationship between mean abundance and NA rate.", fig.height=4}
+```{r plot-missingness, fig.cap="Missingness patterns across the PRM peptidome. Left: Distribution of NA rates. Right: Relationship between mean abundance and NA rate.", fig.height=4}
 plot_missingness(fits)
 ```
 
-### Two Types of MNAR
+### MNAR Detection
 
-Mass spectrometry data can exhibit two distinct types of MNAR, and peppwR tracks both:
+MNAR (Missing Not At Random) in mass spectrometry typically occurs when low-abundance peptides fall below the detection limit. peppwR detects this by correlating mean abundance with NA rate across all peptides.
 
-| Type | Question | Detection Method | Reliability at Small N |
-|------|----------|------------------|------------------------|
-| **Between-peptide (dataset-level)** | Are low-abundance peptides more likely to have missing values? | Spearman correlation: log(mean_abundance) vs NA rate | Good - aggregates across many peptides |
-| **Within-peptide (per-peptide)** | Within a single peptide, are low observations more likely missing? | Rank-based z-score comparing observed to expected ranks | Poor - requires N > 15 per peptide |
-
-**Important:** The per-peptide MNAR score requires substantial observations per peptide (N > 15) for reliable detection. With typical proteomics sample sizes (N = 3-6 per group), this score has very low statistical power and often reports "0 of N peptides with MNAR" even when clear MNAR patterns exist at the dataset level.
-
-For small sample sizes, **rely on the dataset-level correlation** shown in the print output and the third panel of `plot_missingness()`.
-
-### Dataset-Level MNAR Correlation
-
-The dataset-level MNAR metric correlates log(mean_abundance) with NA rate across all peptides. A negative correlation indicates that low-abundance peptides have more missing values - the hallmark of detection-limit-driven missingness.
+A negative correlation indicates that low-abundance peptides have more missing values - the hallmark of detection-limit-driven missingness.
 
 | Correlation (r) | Interpretation |
 |-----------------|----------------|
@@ -193,41 +181,14 @@ The dataset-level MNAR metric correlates log(mean_abundance) with NA rate across
 | -0.5 < r < -0.3 | Moderate evidence of MNAR |
 | r < -0.5 | Strong evidence of MNAR |
 
-### Per-Peptide MNAR Scores
+### Implications of MNAR
 
-The per-peptide MNAR score is a z-statistic testing whether missing observations within a peptide have systematically lower abundance than observed values. While conceptually useful, **this metric requires N > 15 observations per peptide for reliable detection**.
+When MNAR is detected, be aware that:
 
-| MNAR Score | Interpretation | Note |
-|------------|----------------|------|
-| < 1 | Little evidence for MNAR | |
-| 1-2 | Weak evidence | |
-| 2-3 | Moderate evidence | |
-| > 3 | Strong evidence for MNAR | |
-
-With small sample sizes (N < 15), expect most peptides to show "no evidence" even when MNAR exists. This is a power limitation, not evidence against MNAR.
-
-```{r mnar-peptides}
-# Identify peptides with strong MNAR evidence
-mnar_peptides <- get_mnar_peptides(fits, threshold = 2)
-
-cat("Peptides with MNAR evidence (z > 2):", nrow(mnar_peptides), "\n")
-if (nrow(mnar_peptides) > 0) {
-  cat("\nTop MNAR peptides:\n")
-  print(head(mnar_peptides, 10))
-}
-
-# Note: With small N, the dataset-level correlation (shown in print output)
-# is more reliable than per-peptide scores
-```
-
-### What to Do with MNAR Peptides
-
-Peptides with high MNAR scores require careful handling:
-
-- Their abundance estimates may be biased upward (low values are missing)
-- Power calculations may be optimistic
-- Consider robust statistical methods
-- Report separately in publications
+- Abundance estimates for low-abundance peptides may be biased upward (since low values are missing)
+- Power calculations may be optimistic for these peptides
+- Consider robust statistical methods that account for non-random missingness
+- Report the MNAR pattern in publications
 
 ## Distribution Fitting Results
 

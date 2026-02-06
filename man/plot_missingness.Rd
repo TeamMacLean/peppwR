@@ -13,26 +13,25 @@ plot_missingness(fits)
 A ggplot object or gtable (combined panels)
 }
 \description{
-Creates a multi-panel visualization of missing data patterns:
+Creates a visualization of missing data patterns with two panels:
 }
 \details{
 \itemize{
 \item \strong{Panel 1}: Distribution of NA rates across peptides
-\item \strong{Panel 2}: Per-peptide MNAR score histogram (scores > 2 suggest within-peptide MNAR)
-\item \strong{Panel 3}: Mean abundance vs NA rate scatter plot showing the \strong{dataset-level
+\item \strong{Panel 2}: Mean abundance vs NA rate scatter plot showing the \strong{dataset-level
 MNAR correlation}. The subtitle displays the Spearman correlation coefficient
 and p-value. A negative correlation indicates that low-abundance peptides have
 more missing values - the hallmark of detection-limit-driven MNAR.
 }
 }
-\section{Dataset-Level vs Per-Peptide MNAR}{
+\section{MNAR Detection}{
 
-Panel 3 shows the \strong{dataset-level} (between-peptide) MNAR pattern, which is
-reliable even with small sample sizes. This is more informative than the
-per-peptide scores in Panel 2 when N < 15 per peptide.
+MNAR (Missing Not At Random) in mass spectrometry typically manifests as
+low-abundance peptides having higher rates of missing values due to
+detection limits. Panel 2 visualizes this relationship and reports the
+correlation coefficient.
 }
 
 \seealso{
-\code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}} for the underlying correlation calculation,
-\code{\link[=compute_missingness]{compute_missingness()}} for per-peptide MNAR scores
+\code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}} for the underlying correlation calculation
 }

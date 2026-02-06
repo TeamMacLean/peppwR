@@ -96,27 +96,12 @@ print.peppwr_fits <- function(x, ...) {
 
       # Dataset-level MNAR (between-peptide)
       if (!is.null(x$dataset_mnar) && !is.na(x$dataset_mnar$correlation)) {
-        cat("\nDataset-level MNAR (abundance vs missingness):\n")
+        cat("\nMNAR detection (abundance vs missingness):\n")
         cat(sprintf("  Correlation: r = %.2f (p = %.2g)\n",
                     x$dataset_mnar$correlation, x$dataset_mnar$p_value))
         cat(sprintf("  %s\n", x$dataset_mnar$interpretation))
       } else if (!is.null(x$dataset_mnar)) {
-        cat("\nDataset-level MNAR: ", x$dataset_mnar$interpretation, "\n", sep = "")
-      }
-
-      # Per-peptide MNAR summary (within-peptide)
-      mnar_scores <- x$missingness$mnar_score[!is.na(x$missingness$mnar_score)]
-      if (length(mnar_scores) > 0 && peps_with_na > 0) {
-        n_mnar <- sum(mnar_scores > 2, na.rm = TRUE)
-        cat(sprintf("\nPer-peptide MNAR (within-peptide pattern):\n"))
-        cat(sprintf("  %d of %d peptides with score > 2\n", n_mnar, peps_with_na))
-
-        # Add note about low power with small N
-        median_n <- stats::median(x$missingness$n_total, na.rm = TRUE)
-        if (median_n < 15) {
-          cat(sprintf("  Note: Low power with N~%.0f observations per peptide\n",
-                      median_n))
-        }
+        cat("\nMNAR detection: ", x$dataset_mnar$interpretation, "\n", sep = "")
       }
     }
   }
@@ -307,7 +292,6 @@ summary.peppwr_fits <- function(object, ...) {
   # Missingness summary
   if (!is.null(object$missingness) && nrow(object$missingness) > 0) {
     na_rates <- object$missingness$na_rate
-    mnar_scores <- object$missingness$mnar_score
 
     result$missingness <- list(
       total_missing = sum(object$missingness$n_missing),
@@ -315,9 +299,7 @@ summary.peppwr_fits <- function(object, ...) {
       mean_na_rate = mean(na_rates, na.rm = TRUE),
       median_na_rate = stats::median(na_rates, na.rm = TRUE),
       max_na_rate = max(na_rates, na.rm = TRUE),
-      n_peptides_with_na = sum(na_rates > 0),
-      mean_mnar_score = mean(mnar_scores, na.rm = TRUE),
-      n_potential_mnar = sum(mnar_scores > 2, na.rm = TRUE)
+      n_peptides_with_na = sum(na_rates > 0)
     )
 
     # Add dataset-level MNAR metrics

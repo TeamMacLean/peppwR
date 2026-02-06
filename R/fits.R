@@ -112,7 +112,6 @@ fit_distributions <- function(data, id, group, value, distributions = "continuou
       n_total = miss_stats$n_total,
       n_missing = miss_stats$n_missing,
       na_rate = miss_stats$na_rate,
-      mnar_score = miss_stats$mnar_score,
       mean_abundance = mean(values, na.rm = TRUE)
     )
   })
@@ -223,75 +222,9 @@ parse_univariateML <- function(fit){
 # Phase C: Missing Data Handling
 # ============================================================================
 
-#' Get peptides showing MNAR pattern
-#'
-#' Returns peptides where the MNAR score exceeds a threshold, indicating
-#' that low values are systematically missing (Missing Not At Random).
-#'
-#' @param fits A peppwr_fits object
-#' @param threshold MNAR score threshold (default 2, corresponds to ~95% confidence)
-#'
-#' @return A tibble with columns:
-#'   - peptide_id: Peptide identifier
-#'   - condition: Group/condition
-#'   - na_rate: Proportion of missing values
-#'   - mnar_score: Z-score for MNAR pattern
-#'   - mean_abundance: Mean of observed values
-#'   Sorted by mnar_score descending. Returns empty tibble if no peptides
-#'   exceed threshold.
-#'
-#' @export
-get_mnar_peptides <- function(fits, threshold = 2) {
-  validate_peppwr_fits(fits)
-
-  if (is.null(fits$missingness)) {
-    stop("Fits object does not contain missingness data")
-  }
-
-  # Get peptide IDs from fits$data
-  id_col <- names(fits$data)[1]
-  group_col <- names(fits$data)[2]
-
-  # Build result tibble
-  result <- tibble::tibble(
-    peptide_id = fits$data[[id_col]],
-    condition = fits$data[[group_col]],
-    na_rate = fits$missingness$na_rate,
-    mnar_score = fits$missingness$mnar_score,
-    mean_abundance = fits$missingness$mean_abundance
-  )
-
-  # Filter to threshold and sort
-  result <- result[!is.na(result$mnar_score) & result$mnar_score > threshold, ]
-  result <- result[order(-result$mnar_score), ]
-
-  result
-}
-
 #' Compute missingness statistics for a vector of values
 #'
-#' Calculates NA rate and MNAR (Missing Not At Random) score.
-#' MNAR detection uses the observation that under MCAR, the mean rank
-#' of observed values should be (n+1)/2. Under MNAR with low values
-#' missing, the mean rank will be higher.
-#'
-#' @section Per-Peptide vs Dataset-Level MNAR:
-#' This function computes a **per-peptide (within-peptide)** MNAR score,
-#' testing whether low values within a single peptide are more likely to be
-#' missing. This is distinct from **dataset-level (between-peptide)** MNAR,
-#' which tests whether low-abundance peptides have more missing values overall.
-#'
-#' For dataset-level MNAR, see [compute_dataset_mnar()].
-#'
-#' @section Power Considerations:
-#' The per-peptide MNAR score requires substantial observations (N > 15) for
-
-#' reliable detection. With typical proteomics sample sizes (N = 3-6 per group),
-#' this score has very low power. You may see "0 of N peptides with MNAR"
-#' even when clear MNAR patterns exist at the dataset level.
-#'
-#' For small sample sizes, rely on the dataset-level correlation from
-#' [compute_dataset_mnar()] instead.
+#' Calculates the number and proportion of missing (NA) values.
 #'
 #' @param values Numeric vector (may contain NAs)
 #'
@@ -299,8 +232,6 @@ get_mnar_peptides <- function(fits, threshold = 2) {
 #'   - n_total: Total number of values
 #'   - n_missing: Number of NA values
 #'   - na_rate: Proportion missing (0-1)
-#'   - mnar_score: Z-score measuring MNAR pattern. Positive values indicate
-#'     low values are more likely to be missing. Values > 2 suggest MNAR.
 #'
 #' @seealso [compute_dataset_mnar()] for dataset-level MNAR detection
 #'
@@ -310,33 +241,10 @@ compute_missingness <- function(values) {
   n_missing <- sum(is.na(values))
   na_rate <- n_missing / n_total
 
-  # MNAR detection
-  observed_values <- values[!is.na(values)]
-  n_obs <- length(observed_values)
-
-  if (n_obs < 2 || n_missing == 0) {
-    # Can't compute MNAR score without both observed and missing
-    mnar_score <- NA_real_
-  } else {
-    # Under MCAR, the expected mean rank of observed values is (n_total + 1) / 2
-    # Under MNAR (low missing), observed values will have higher ranks
-    all_ranks <- rank(c(observed_values, rep(NA, n_missing)), na.last = "keep")
-    observed_ranks <- all_ranks[1:n_obs]
-
-    expected_mean_rank <- (n_total + 1) / 2
-    observed_mean_rank <- mean(observed_ranks, na.rm = TRUE)
-
-    # Standard error of mean rank under MCAR
-    se_rank <- sqrt(n_total * (n_total + 1) / (12 * n_obs))
-
-    mnar_score <- (observed_mean_rank - expected_mean_rank) / se_rank
-  }
-
   list(
     n_total = n_total,
     n_missing = n_missing,
-    na_rate = na_rate,
-    mnar_score = mnar_score
+    na_rate = na_rate
   )
 }
 
@@ -344,30 +252,24 @@ compute_missingness <- function(values) {
 #'
 #' Calculates Spearman correlation between log(mean_abundance) and NA rate
 #' across peptides to detect whether low-abundance peptides have more missing
-#' values than high-abundance peptides. This is a "between-peptide" MNAR
-#' metric, distinct from the per-peptide "within-peptide" MNAR score.
+#' values than high-abundance peptides.
 #'
-#' @section Two Types of MNAR:
-#' Mass spectrometry data can exhibit two types of MNAR:
+#' @section MNAR Detection:
+#' MNAR (Missing Not At Random) in mass spectrometry typically manifests as
+#' low-abundance peptides having higher rates of missing values due to
+#' detection limits. This function detects this pattern by correlating
+#' mean abundance with NA rate across all peptides.
 #'
-#' **Between-peptide (dataset-level):** Low-abundance peptides are more likely
-
-#' to have missing values than high-abundance peptides. This is detected by
-#' correlating mean abundance with NA rate across all peptides.
+#' A negative correlation indicates that low-abundance peptides have more
+#' missing values - the hallmark of detection-limit-driven MNAR.
 #'
-#' **Within-peptide (per-peptide):** Within a single peptide, the missing
-#' observations tend to be the ones with lower true abundance. This is detected
-#' by the `mnar_score` from `compute_missingness()`, which compares observed
-#' rank distributions to what would be expected under MCAR.
-#'
-#' @section Statistical Power Considerations:
-#' The per-peptide MNAR score requires sufficient observations (N > 15) for
-#' reliable detection. With typical proteomics sample sizes (N = 3-6), the
-#' per-peptide score has very low power and will often show "0 of N peptides
-#' with MNAR" even when MNAR exists.
-#'
-#' The dataset-level metric is more reliable at small sample sizes because it
-#' aggregates information across many peptides.
+#' @section Interpretation:
+#' | Correlation (r) | Interpretation |
+#' |-----------------|----------------|
+#' | r > -0.1 | No evidence of MNAR |
+#' | -0.3 < r < -0.1 | Weak evidence |
+#' | -0.5 < r < -0.3 | Moderate evidence |
+#' | r < -0.5 | Strong evidence of MNAR |
 #'
 #' @param missingness A tibble with columns na_rate and mean_abundance
 #'   (as produced by fit_distributions)

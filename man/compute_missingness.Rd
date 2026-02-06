@@ -15,37 +15,11 @@ List with:
 \item n_total: Total number of values
 \item n_missing: Number of NA values
 \item na_rate: Proportion missing (0-1)
-\item mnar_score: Z-score measuring MNAR pattern. Positive values indicate
-low values are more likely to be missing. Values > 2 suggest MNAR.
 }
 }
 \description{
-Calculates NA rate and MNAR (Missing Not At Random) score.
-MNAR detection uses the observation that under MCAR, the mean rank
-of observed values should be (n+1)/2. Under MNAR with low values
-missing, the mean rank will be higher.
+Calculates the number and proportion of missing (NA) values.
 }
-\section{Per-Peptide vs Dataset-Level MNAR}{
-
-This function computes a \strong{per-peptide (within-peptide)} MNAR score,
-testing whether low values within a single peptide are more likely to be
-missing. This is distinct from \strong{dataset-level (between-peptide)} MNAR,
-which tests whether low-abundance peptides have more missing values overall.
-
-For dataset-level MNAR, see \code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}}.
-}
-
-\section{Power Considerations}{
-
-The per-peptide MNAR score requires substantial observations (N > 15) for
-reliable detection. With typical proteomics sample sizes (N = 3-6 per group),
-this score has very low power. You may see "0 of N peptides with MNAR"
-even when clear MNAR patterns exist at the dataset level.
-
-For small sample sizes, rely on the dataset-level correlation from
-\code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}} instead.
-}
-
 \seealso{
 \code{\link[=compute_dataset_mnar]{compute_dataset_mnar()}} for dataset-level MNAR detection
 }
