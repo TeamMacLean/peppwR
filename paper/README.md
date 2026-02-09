@@ -46,8 +46,29 @@ rmarkdown::render("paper.Rmd", output_format = rticles::bioinformatics_article()
 - [x] Outline complete
 - [x] References collected
 - [x] Example application spec complete
-- [ ] supplementary_example.Rmd
-- [ ] paper.Rmd
-- [ ] Figure 1
+- [x] supplementary_example.Rmd
+- [x] paper.Rmd
+- [x] Figure 1 (all panels complete)
 - [ ] Preprint submission
 - [ ] Journal submission
+
+## Rendering
+
+Default (works on any system with LaTeX):
+```r
+rmarkdown::render("paper.Rmd")
+rmarkdown::render("supplementary_example.Rmd")
+```
+
+For journal submission (requires additional LaTeX packages):
+```r
+# Install rticles and required LaTeX packages
+renv::install("rticles")
+tinytex::tlmgr_install(c("preprint", "arxiv"))
+
+# Render for bioRxiv preprint
+rmarkdown::render("paper.Rmd", output_format = rticles::arxiv_article())
+
+# Render for Bioinformatics journal
+rmarkdown::render("paper.Rmd", output_format = rticles::bioinformatics_article())
+```

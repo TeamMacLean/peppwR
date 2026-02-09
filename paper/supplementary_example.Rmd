@@ -1,0 +1,533 @@
+---
+title: "peppwR Example Application: Supplementary Material"
+author: "Dan MacLean"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+  pdf_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6
+)
+```
+
+## 1. Setup
+
+```{r libraries}
+library(peppwR)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(fitdistrplus)
+
+set.seed(42)  # Reproducibility
+```
+
+## 2. Simulate Phosphoproteomics Pilot Data
+
+### 2.1 Define peptide parameters
+
+We simulate 500 peptides with heterogeneous gamma distribution parameters:
+
+- **Shape**: uniform(1.5, 5) — captures low-to-high abundance peptides
+- **Rate**: uniform(0.05, 0.2) — captures variance heterogeneity
+- Results in mean abundances ranging ~7.5 to 100 (realistic intensity range)
+
+```{r peptide-params}
+n_peptides <- 500
+n_pilot <- 6  # samples per condition in pilot
+
+peptide_params <- tibble(
+  peptide = paste0("pep_", sprintf("%04d", 1:n_peptides)),
+  shape = runif(n_peptides, min = 1.5, max = 5),
+  rate = runif(n_peptides, min = 0.05, max = 0.2)
+) |>
+  mutate(
+    theoretical_mean = shape / rate,
+    theoretical_cv = 1 / sqrt(shape)  # CV for gamma
+  )
+
+# Summary of parameter ranges
+peptide_params |>
+  summarise(
+    across(c(shape, rate, theoretical_mean, theoretical_cv),
+           list(min = min, median = median, max = max))
+  ) |>
+  pivot_longer(everything(), names_to = "stat", values_to = "value") |>
+  print(n = 20)
+```
+
+### 2.2 Generate abundance values
+
+```{r generate-abundances}
+pilot_data <- peptide_params |>
+  rowwise() |>
+  mutate(
+    abundance = list(rgamma(n_pilot, shape = shape, rate = rate))
+  ) |>
+  ungroup() |>
+  dplyr::select(peptide, abundance) |>
+  unnest(abundance) |>
+  mutate(
+    sample = rep(paste0("S", 1:n_pilot), n_peptides),
+    condition = "control"
+  )
+
+cat("Pilot data dimensions:", nrow(pilot_data), "rows x", ncol(pilot_data), "columns\n")
+head(pilot_data)
+```
+### 2.3 Introduce MNAR missingness
+
+We introduce missing-not-at-random (MNAR) patterns typical of mass spectrometry data:
+
+- Target ~15% overall missingness
+- Probability of NA inversely related to abundance (rank-based)
+- Low-abundance peptides (bottom quartile) have up to 40% missingness
+- High-abundance peptides have near-zero missingness
+
+```{r introduce-mnar}
+# Calculate per-peptide mean abundance and rank
+peptide_means <- pilot_data |>
+  group_by(peptide) |>
+  summarise(mean_abundance = mean(abundance), .groups = "drop") |>
+  mutate(
+    abundance_rank = rank(mean_abundance) / n(),
+    # Low abundance (rank near 0) = higher missingness; high abundance = near zero
+    p_missing = pmax(0, 0.4 * (1 - abundance_rank)^2)
+  )
+
+pilot_data <- pilot_data |>
+  left_join(peptide_means, by = "peptide") |>
+  mutate(
+    is_missing = runif(n()) < p_missing,
+    abundance = if_else(is_missing, NA_real_, abundance)
+  ) |>
+  dplyr::select(peptide, sample, condition, abundance)
+
+# Report missingness
+overall_missing <- mean(is.na(pilot_data$abundance))
+cat("Overall missingness rate:", round(overall_missing * 100, 1), "%\n")
+```
+
+```{r mnar-visualization, fig.cap="MNAR pattern: low-abundance peptides have higher missingness rates"}
+# Calculate missingness rate per peptide
+missingness_by_peptide <- pilot_data |>
+  group_by(peptide) |>
+  summarise(
+    miss_rate = mean(is.na(abundance)),
+    mean_abundance = mean(abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Correlation between abundance and missingness
+cor_test <- cor.test(missingness_by_peptide$mean_abundance,
+                     missingness_by_peptide$miss_rate,
+                     use = "complete.obs")
+cat("Correlation (abundance vs missingness):", round(cor_test$estimate, 3),
+    "(p =", format.pval(cor_test$p.value, digits = 2), ")\n")
+
+# Plot MNAR pattern
+ggplot(missingness_by_peptide, aes(x = mean_abundance, y = miss_rate * 100)) +
+  geom_point(alpha = 0.4, color = "#BD0026") +
+  geom_smooth(method = "loess", se = TRUE, color = "#31A354") +
+  labs(
+    x = "Mean abundance",
+    y = "Missingness rate (%)",
+    title = "MNAR pattern in simulated data",
+    subtitle = paste0("r = ", round(cor_test$estimate, 3), " — low abundance → more missing")
+  ) +
+  theme_minimal()
+```
+
+## 3. Distribution Fitting
+
+```{r fit-distributions}
+fits <- fit_distributions(
+  pilot_data,
+  id = "peptide",
+  group = "condition",
+  value = "abundance",
+  distributions = "continuous"
+)
+
+print(fits)
+```
+
+```{r fit-summary}
+summary(fits)
+```
+
+### 3.1 Dataset-level MNAR Detection
+
+peppwR automatically detects MNAR (missing-not-at-random) patterns by correlating mean abundance with missingness rate **across peptides**. A negative correlation indicates low-abundance peptides are systematically more likely to be missing—the hallmark of detection-limit-driven MNAR in mass spectrometry.
+
+```{r dataset-mnar}
+# Between-peptide MNAR detection
+fits$dataset_mnar
+```
+
+This dataset-level metric is statistically robust because it leverages information across hundreds of peptides, unlike within-peptide MNAR detection which would require many replicates per peptide.
+
+## 4. Primary Power Analysis
+
+### 4.1 Find required sample size
+
+In per-peptide mode, peppwR calculates power separately for each peptide based on its fitted distribution. Because peptides differ in abundance and variance, they achieve different power levels at the same sample size.
+
+The key metric is: **what proportion of peptides achieve the target power (e.g., 80%) at a given sample size?**
+
+We set two thresholds:
+- `target_power = 0.8`: each peptide needs 80% power to be considered "adequately powered"
+- `proportion_threshold = 0.8`: we want 80% of peptides to meet that criterion
+
+The question becomes: **at what N do 80% of peptides individually achieve 80% power?**
+
+```{r primary-power-analysis, cache=TRUE}
+result_primary <- power_analysis(
+  fits,
+  effect_size = 2,
+
+  target_power = 0.8,
+  proportion_threshold = 0.8,
+  find = "sample_size",
+  test = "wilcoxon",
+  n_sim = 1000
+)
+
+print(result_primary)
+```
+
+**Primary result**: N = `r result_primary$answer` per group required.
+
+## 5. Comparison 1: Per-Peptide vs Homogeneous
+
+### 5.1 Homogeneous (aggregate) approach
+
+Generic power tools pool all data and assume uniform variance across peptides.
+
+```{r homogeneous-approach, cache=TRUE}
+# Pool all non-NA values
+pooled_data <- pilot_data |>
+  filter(!is.na(abundance))
+
+# Fit single gamma to pooled data
+pooled_fit <- fitdistrplus::fitdist(pooled_data$abundance, "gamma")
+pooled_params <- as.list(pooled_fit$estimate)
+
+cat("Pooled gamma parameters:\n")
+cat("  shape =", round(pooled_params$shape, 3), "\n")
+cat("  rate =", round(pooled_params$rate, 3), "\n")
+
+# Power analysis with homogeneous assumption
+result_homogeneous <- power_analysis(
+  "gamma",
+  params = pooled_params,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  test = "wilcoxon",
+  n_sim = 1000
+)
+
+print(result_homogeneous)
+```
+
+### 5.2 Comparison summary
+
+```{r comparison-1-table}
+comparison_1 <- tibble(
+  Approach = c("Homogeneous (pooled)", "Per-peptide (peppwR)"),
+  `Required N` = c(result_homogeneous$answer, result_primary$answer),
+  Description = c(
+    "Single distribution fitted to pooled data",
+    "Distribution fitted per peptide, 80% threshold"
+  )
+)
+
+pct_more <- round((result_primary$answer - result_homogeneous$answer) /
+                    result_homogeneous$answer * 100)
+
+knitr::kable(comparison_1, caption = "Sample size estimates by approach")
+```
+**Key finding**: Per-peptide approach requires **`r pct_more`% more samples** than the homogeneous assumption suggests.
+
+## 6. Comparison 2: Statistical Test Choice
+
+### 6.1 Bayes factor t-test
+
+```{r bayes-comparison, cache=TRUE}
+result_bayes <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  proportion_threshold = 0.8,
+  find = "sample_size",
+  test = "bayes_t",
+  n_sim = 1000
+)
+
+print(result_bayes)
+```
+
+### 6.2 Comparison summary
+
+```{r comparison-2-table}
+comparison_2 <- tibble(
+  Test = c("Wilcoxon rank-sum", "Bayes factor t-test"),
+  `Required N` = c(result_primary$answer, result_bayes$answer),
+  Characteristics = c(
+    "Non-parametric, conservative, no distributional assumptions",
+    "Parametric Bayesian, more efficient when assumptions hold"
+  )
+)
+
+efficiency_gain <- round((result_primary$answer - result_bayes$answer) /
+                           result_primary$answer * 100)
+
+knitr::kable(comparison_2, caption = "Sample size estimates by statistical test")
+```
+
+**Key finding**: Bayes factor t-test is **`r efficiency_gain`% more efficient** than Wilcoxon when parametric assumptions hold.
+
+## 7. Figure 1 Generation
+
+### 7.1 Panel A: Workflow diagram
+
+```{r panel-a-diagram}
+library(DiagrammeR)
+
+workflow_graph <- grViz("
+  digraph workflow {
+    graph [rankdir=TB, bgcolor='transparent', fontname='Helvetica', nodesep=0.4, ranksep=0.5]
+    node [shape=box, style='rounded,filled', fontname='Helvetica', fontsize=14,
+          width=2.2, height=0.6, penwidth=2]
+    edge [fontname='Helvetica', fontsize=11, penwidth=1.5]
+
+    # Input
+    pilot [label='Pilot Data', fillcolor='#FEE5D9', color='#BD0026']
+
+    # Functions
+    fit [label='fit_distributions()', fillcolor='#FCBBA1', color='#BD0026', fontname='Courier']
+    power [label='power_analysis()', fillcolor='#FC9272', color='#BD0026', fontname='Courier']
+
+    # Output
+    result [label='Sample Size | Power | Effect Size', fillcolor='#FEB24C', color='#BD0026']
+
+    # Edges
+    pilot -> fit
+    fit -> power [label='fits']
+    power -> result
+  }
+")
+
+# Convert to ggplot-compatible object
+panel_a <- ggdraw() +
+  draw_image(
+    DiagrammeRsvg::export_svg(workflow_graph) |>
+      charToRaw() |>
+      rsvg::rsvg_png(width = 1200, height = 1400),
+    scale = 0.95
+  ) +
+  draw_label("A) peppwR workflow", x = 0.5, y = 0.98, size = 10, fontface = "bold")
+```
+
+### 7.2 Panel B: Power heterogeneity histogram
+
+```{r panel-b-data, cache=TRUE}
+# Run power analysis at fixed N=6 to get per-peptide power
+result_n6 <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  test = "wilcoxon",
+  n_sim = 1000
+)
+```
+
+```{r panel-b-plot}
+# Extract per-peptide power
+power_at_n6 <- data.frame(power = result_n6$simulations$peptide_power)
+
+panel_b <- ggplot(power_at_n6, aes(x = power * 100)) +
+  geom_histogram(
+    binwidth = 5,
+    fill = "#FEB24C",
+    color = "white",
+    boundary = 0
+  ) +
+  geom_vline(xintercept = 80, linetype = "dashed", color = "#BD0026", linewidth = 0.8) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(
+    x = "Power (%)",
+    y = "Number of peptides",
+    title = "B) Per-peptide power at N=6"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
+
+panel_b
+```
+
+**Observation**: Power varies dramatically across peptides — this heterogeneity is why per-peptide analysis matters.
+
+### 7.3 Panel C: Power curve with test comparison
+
+```{r panel-c-data}
+# Extract power curves from find="sample_size" results
+curve_wilcoxon <- result_primary$simulations$power_curve |>
+  mutate(pct_powered = proportion_powered * 100, test = "Wilcoxon")
+
+curve_bayes <- result_bayes$simulations$power_curve |>
+  mutate(pct_powered = proportion_powered * 100, test = "Bayes factor")
+
+curve_data <- bind_rows(curve_wilcoxon, curve_bayes)
+```
+
+```{r panel-c-plot}
+panel_c <- ggplot(curve_data, aes(x = n_per_group, y = pct_powered,
+                                   color = test, linetype = test)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  geom_hline(yintercept = 80, linetype = "dotted", color = "gray40") +
+  scale_color_manual(values = c("Wilcoxon" = "#BD0026", "Bayes factor" = "#31A354")) +
+  scale_linetype_manual(values = c("Wilcoxon" = "solid", "Bayes factor" = "dashed")) +
+  scale_x_continuous(breaks = seq(3, 15, 2)) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(
+    x = "Sample size per group",
+    y = "% peptides with power >= 80%",
+    title = "C) Power curve by statistical test",
+    color = "Test",
+    linetype = "Test"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = c(0.75, 0.25),
+    panel.grid.minor = element_blank()
+  )
+
+panel_c
+```
+
+**Interpretation**: The y-axis shows what proportion of peptides (out of 500) individually achieve 80% power at each sample size. The horizontal dotted line at 80% marks our threshold—we want 80% of peptides to be adequately powered. Bayes factor crosses this threshold at N=10; Wilcoxon requires N=20.
+
+### 7.4 Panel D: Power heatmap
+
+```{r panel-d-data, cache=TRUE}
+effect_sizes <- c(1.5, 2, 2.5, 3)
+sample_sizes <- 4:12
+
+# Run power analysis for each combination
+heatmap_results <- list()
+
+for (es in effect_sizes) {
+  for (n in sample_sizes) {
+    result <- power_analysis(
+      fits,
+      effect_size = es,
+      n_per_group = n,
+      find = "power",
+      test = "wilcoxon",
+      n_sim = 500
+    )
+
+    pct_powered <- mean(result$simulations$peptide_power >= 0.8, na.rm = TRUE) * 100
+
+    heatmap_results[[length(heatmap_results) + 1]] <- tibble(
+      effect_size = es,
+      n_per_group = n,
+      pct_powered = pct_powered
+    )
+  }
+}
+
+heatmap_data <- bind_rows(heatmap_results)
+```
+
+```{r panel-d-plot}
+panel_d <- ggplot(heatmap_data, aes(x = factor(effect_size), y = factor(n_per_group),
+                                     fill = pct_powered)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = round(pct_powered)), size = 3, color = "black") +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1, limits = c(0, 100)) +
+  labs(
+    x = "Effect size (fold-change)",
+    y = "Sample size per group",
+    title = "D) Power lookup table",
+    fill = "% powered"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
+
+panel_d
+```
+
+### 7.5 Combine into Figure 1
+
+```{r figure-1-combined, fig.width=8, fig.height=7}
+figure_1 <- plot_grid(
+  panel_a, panel_b,
+  panel_c, panel_d,
+  nrow = 2,
+  align = "hv"
+)
+
+figure_1
+```
+
+```{r save-figure-1}
+ggsave("figure_1.png", figure_1, width = 8, height = 7, dpi = 300)
+ggsave("figure_1.pdf", figure_1, width = 8, height = 7)
+
+cat("Figure 1 saved to figure_1.png and figure_1.pdf\n
+")
+```
+
+## 8. Results Summary
+
+```{r results-summary}
+results_summary <- tibble(
+  Analysis = c(
+    "Per-peptide, Wilcoxon",
+    "Homogeneous, Wilcoxon",
+    "Per-peptide, Bayes factor"
+  ),
+  `Required N` = c(
+    result_primary$answer,
+    result_homogeneous$answer,
+    result_bayes$answer
+  )
+)
+
+knitr::kable(results_summary, caption = "Summary of sample size estimates")
+```
+
+### Key Messages
+
+1. **Per-peptide heterogeneity matters**: Power varies dramatically across peptides. The per-peptide approach (N = `r result_primary$answer`) gives targeted estimates for achieving 80% power in 80% of peptides.
+
+2. **Naive pooling inflates variance**: The homogeneous approach (N = `r result_homogeneous$answer`) mixes peptides with different means, artificially inflating variance and potentially leading to different sample size recommendations.
+
+3. **Test choice affects power**: The Bayes factor t-test (N = `r result_bayes$answer`) is `r efficiency_gain`% more efficient than Wilcoxon (N = `r result_primary$answer`) when parametric assumptions hold.
+
+4. **Dataset-level MNAR detection**: peppwR detects MNAR patterns by correlating abundance with missingness across peptides, providing diagnostic information about the pilot data.
+
+## 9. Session Info
+
+```{r session-info}
+sessionInfo()
+```
