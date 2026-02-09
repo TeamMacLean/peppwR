@@ -110,10 +110,10 @@ knitr::kable(
 
 | Peptides | Time (s) | Memory (MB) | Time/peptide (ms) |
 |---------:|---------:|------------:|------------------:|
-|      100 |     3.24 |      101.30 |             32.43 |
-|      500 |    16.14 |        9.77 |             32.28 |
-|     1000 |    32.66 |       19.53 |             32.66 |
-|     2000 |    64.10 |       39.05 |             32.05 |
+|      100 |     3.25 |      101.30 |             32.54 |
+|      500 |    16.19 |        9.77 |             32.37 |
+|     1000 |    32.48 |       19.53 |             32.48 |
+|     2000 |    63.67 |       39.05 |             31.84 |
 
 Distribution fitting scaling
 
@@ -177,9 +177,9 @@ knitr::kable(
 
 | n_sim | Time (s) |
 |------:|---------:|
-|   500 |    0.050 |
-|  1000 |    0.101 |
-|  2000 |    0.199 |
+|   500 |    0.049 |
+|  1000 |    0.099 |
+|  2000 |    0.197 |
 
 Aggregate mode timing by n_sim
 
@@ -298,9 +298,9 @@ knitr::kable(
 
 | Peptides | Time (s) | Time/peptide (ms) |
 |---------:|---------:|------------------:|
-|      100 |     3.72 |             37.21 |
-|      500 |    18.67 |             37.34 |
-|     1000 |    33.45 |             33.45 |
+|      100 |     3.71 |             37.08 |
+|      500 |    18.53 |             37.05 |
+|     1000 |    33.20 |             33.20 |
 
 Per-peptide mode scaling by peptide count (n_sim=500)
 
@@ -335,9 +335,9 @@ knitr::kable(
 
 | n_sim | Time (s) |
 |------:|---------:|
-|   250 |     9.38 |
-|   500 |    17.94 |
-|  1000 |    36.07 |
+|   250 |     9.40 |
+|   500 |    17.89 |
+|  1000 |    35.95 |
 
 Per-peptide mode scaling by n_sim (500 peptides)
 
@@ -431,10 +431,10 @@ knitr::kable(
 
 | Test        | Time (s) | Relative Speed |
 |:------------|---------:|---------------:|
-| wilcoxon    |     0.05 |           3.01 |
-| bootstrap_t |    16.31 |         896.13 |
+| wilcoxon    |     0.05 |           2.86 |
+| bootstrap_t |    16.36 |         859.86 |
 | bayes_t     |     0.02 |           1.00 |
-| rankprod    |     8.44 |         463.78 |
+| rankprod    |     8.47 |         444.97 |
 
 Statistical test speed comparison (n_sim=500)
 
@@ -506,8 +506,8 @@ knitr::kable(
 
 | Mode                | Time (s) |
 |:--------------------|---------:|
-| Without missingness |     5.44 |
-| With missingness    |     5.75 |
+| Without missingness |     5.52 |
+| With missingness    |     5.83 |
 
 Missingness-aware simulation overhead
 
@@ -548,8 +548,8 @@ knitr::kable(
 
 | Mode                 | Time (s) |
 |:---------------------|---------:|
-| Per-peptide (no FDR) |     3.66 |
-| FDR-adjusted         |     4.18 |
+| Per-peptide (no FDR) |     3.65 |
+| FDR-adjusted         |     4.21 |
 
 FDR mode vs per-peptide mode timing
 
@@ -588,9 +588,9 @@ knitr::kable(
 
 | Peptides | Time (s) |
 |---------:|---------:|
-|      100 |     0.42 |
-|      500 |     2.11 |
-|     1000 |     3.92 |
+|      100 |     0.44 |
+|      500 |     2.15 |
+|     1000 |     4.02 |
 
 FDR mode scaling by peptide count (n_sim=50)
 
@@ -622,9 +622,9 @@ knitr::kable(
 
 | Plot Type          | Time (s) |
 |:-------------------|---------:|
-| Density overlay    |    0.063 |
-| QQ plots           |    0.041 |
-| Param distribution |    0.767 |
+| Density overlay    |    0.064 |
+| QQ plots           |    0.040 |
+| Param distribution |    0.759 |
 
 Diagnostic plot generation times
 
@@ -654,7 +654,7 @@ knitr::kable(
 
 | Plot Type                          | Time (s) |
 |:-----------------------------------|---------:|
-| Power heatmap (5x5 grid, n_sim=50) |     0.18 |
+| Power heatmap (5x5 grid, n_sim=50) |     0.17 |
 
 Power heatmap generation time
 
@@ -696,7 +696,7 @@ sessionInfo()
 #> [10] evaluate_1.0.5      grid_4.5.2          fastmap_1.2.0      
 #> [13] jsonlite_2.0.0      Matrix_1.7-4        purrr_1.2.1        
 #> [16] scales_1.4.0        gbutils_0.5.1       codetools_0.2-20   
-#> [19] textshaping_1.0.4   jquerylib_0.1.4     Rdpack_2.6.5       
+#> [19] textshaping_1.0.4   jquerylib_0.1.4     Rdpack_2.6.6       
 #> [22] cli_3.6.5           timeSeries_4052.112 rlang_1.1.7        
 #> [25] rbibutils_2.4.1     intervals_0.15.5    withr_3.0.2        
 #> [28] cachem_1.1.0        yaml_2.3.12         cvar_0.6           

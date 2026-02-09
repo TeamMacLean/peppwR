@@ -640,7 +640,7 @@ sessionInfo()
     ## [10] evaluate_1.0.5      grid_4.5.2          RColorBrewer_1.1-3 
     ## [13] fastmap_1.2.0       Matrix_1.7-4        jsonlite_2.0.0     
     ## [16] purrr_1.2.1         scales_1.4.0        gbutils_0.5.1      
-    ## [19] textshaping_1.0.4   jquerylib_0.1.4     Rdpack_2.6.5       
+    ## [19] textshaping_1.0.4   jquerylib_0.1.4     Rdpack_2.6.6       
     ## [22] cli_3.6.5           timeSeries_4052.112 rlang_1.1.7        
     ## [25] rbibutils_2.4.1     intervals_0.15.5    withr_3.0.2        
     ## [28] cachem_1.1.0        yaml_2.3.12         cvar_0.6           

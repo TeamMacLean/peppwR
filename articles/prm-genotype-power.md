@@ -738,7 +738,7 @@ sessionInfo()
     ## [13] fastmap_1.2.0       Matrix_1.7-4        jsonlite_2.0.0     
     ## [16] mgcv_1.9-3          purrr_1.2.1         scales_1.4.0       
     ## [19] gbutils_0.5.1       textshaping_1.0.4   jquerylib_0.1.4    
-    ## [22] Rdpack_2.6.5        cli_3.6.5           timeSeries_4052.112
+    ## [22] Rdpack_2.6.6        cli_3.6.5           timeSeries_4052.112
     ## [25] rlang_1.1.7         rbibutils_2.4.1     splines_4.5.2      
     ## [28] cowplot_1.2.0       intervals_0.15.5    withr_3.0.2        
     ## [31] cachem_1.1.0        yaml_2.3.12         cvar_0.6           
