@@ -1,0 +1,458 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={peppwR: Simulation-based power analysis for phosphoproteomics experiments},
+  pdfauthor={Dan MacLean, The Sainsbury Laboratory, Norwich Research Park, Norwich NR4 7UH, UK},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{peppwR: Simulation-based power analysis for phosphoproteomics
+experiments}
+\author{Dan MacLean, The Sainsbury Laboratory, Norwich Research Park,
+Norwich NR4 7UH, UK}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\textbf{Background:} Phosphoproteomics experiments require careful
+experimental design to ensure adequate statistical power, yet no
+dedicated tools exist for power analysis that account for the unique
+statistical properties of peptide-level quantification data.
+
+\textbf{Results:} We present peppwR, an R package for simulation-based
+power analysis tailored to phosphoproteomics. peppwR fits distributions
+to pilot data on a per-peptide basis, capturing the heterogeneity in
+abundance and variance across the peptidome. It supports multiple
+statistical tests (Wilcoxon, bootstrap-t, Bayes factor), tracks
+missingness patterns common in mass spectrometry data, and provides
+FDR-aware power calculations. Users can determine required sample sizes,
+estimate power for planned experiments, or identify minimum detectable
+effect sizes.
+
+\textbf{Availability:} peppwR is freely available from GitHub
+(\url{https://github.com/TeamMacLean/peppwR}) with documentation at
+\url{https://teammaclean.github.io/peppwR/}.
+\end{abstract}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figure_1.pdf}
+\caption{\textbf{Figure 1. peppwR workflow and example results.} (A)
+Two-stage workflow: fit distributions to pilot data, then run power
+simulations. (B) Distribution of per-peptide power at N=6 samples per
+group for detecting 2-fold changes. The dashed line indicates 80\% power
+threshold. Power varies dramatically across peptides due to differences
+in abundance, variance, and missingness. (C) Power curves comparing
+Wilcoxon and Bayes factor tests. Y-axis shows the proportion of peptides
+that individually achieve 80\% power at each sample size. Bayes factor
+reaches the 80\% threshold (dotted line) at N=10 versus N=20 for
+Wilcoxon. (D) Power lookup table across sample sizes and effect sizes.
+Values indicate the percentage of peptides achieving 80\% power for each
+combination.}
+\end{figure}
+
+\section{Introduction}\label{introduction}
+
+Statistical power---the probability of detecting a true effect when one
+exists---is fundamental to experimental design. Under-powered
+experiments waste resources and risk missing genuine biological signals,
+while over-powered experiments are inefficient (Cohen 1988; Button et
+al. 2013). Power analysis is standard practice in clinical trials and
+genomics, yet remains neglected in proteomics despite the field's
+increasing quantitative sophistication.
+
+Generic power analysis tools fail to capture the unique statistical
+properties of mass spectrometry-based proteomics data. First, peptides
+exhibit substantial heterogeneity: abundance levels span orders of
+magnitude, and variance differs dramatically across the peptidome (Olsen
+et al. 2006; Humphrey, Azimifar, and Mann 2015). Second, abundance
+distributions are typically right-skewed rather than normal, better
+described by gamma or lognormal distributions. Third, missing values
+follow non-random patterns---low-abundance peptides are systematically
+more likely to be undetected, creating missing-not-at-random (MNAR) data
+(Webb-Robertson et al. 2015; Lazar et al. 2016). Fourth,
+phosphoproteomics experiments simultaneously test thousands of peptides,
+requiring consideration of multiple testing correction.
+
+Existing tools address these challenges incompletely. Perseus (Tyanova
+et al. 2016), the most widely-used proteomics analysis platform,
+provides comprehensive statistical analysis but lacks power analysis
+functionality. The clippda package (Nyangoma et al. 2012) was designed
+for SELDI-TOF peak data and assumes homogeneous variance across
+features. MultiPower (Tarazona et al. 2020) focuses on multi-omics
+integration, requiring multiple data types. G*Power (Faul et al. 2007)
+is a general-purpose tool that assumes normality and lacks
+proteomics-specific features.
+
+We present peppwR, an R package that addresses these limitations through
+per-peptide distribution fitting, simulation-based power estimation, and
+missingness-aware calculations. peppwR answers three key experimental
+design questions: ``What sample size do I need?'', ``What power will I
+achieve?'', and ``What is the minimum detectable effect size?''
+
+\section{Implementation}\label{implementation}
+
+\subsection{Workflow}\label{workflow}
+
+peppwR implements a two-stage workflow (Figure 1A). First,
+\texttt{fit\_distributions()} models the abundance distribution for each
+peptide in pilot data, selecting the best-fitting distribution from
+gamma, lognormal, normal, and inverse Gaussian candidates using AIC.
+Second, \texttt{power\_analysis()} runs Monte Carlo simulations drawing
+from these fitted distributions to estimate power.
+
+Two operational modes accommodate different use cases. In
+\textbf{aggregate mode}, users specify a single distribution and
+parameters, enabling power calculations without pilot data. In
+\textbf{per-peptide mode}, peppwR leverages pilot data to model
+heterogeneity across the peptidome, reporting the proportion of peptides
+achieving target power at each sample size.
+
+\subsection{Distribution fitting}\label{distribution-fitting}
+
+For each peptide, peppwR fits candidate distributions using maximum
+likelihood estimation via the fitdistrplus (Delignette-Muller and Dutang
+2015) and univariateML packages. The best-fitting distribution is
+selected by minimum AIC. When fitting fails (e.g., insufficient
+non-missing observations), users can choose to exclude the peptide, fall
+back to empirical bootstrap resampling, or use a moment-matched
+lognormal distribution.
+
+\subsection{Simulation engine}\label{simulation-engine}
+
+Power is estimated via Monte Carlo simulation. For each peptide and each
+candidate sample size:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Draw \emph{n} samples from the fitted control distribution
+\item
+  Draw \emph{n} samples from a treatment distribution scaled by the
+  specified effect size
+\item
+  Apply the selected statistical test
+\item
+  Record whether the null hypothesis is rejected
+\item
+  Repeat for \emph{n\textsubscript{sim}} iterations
+\end{enumerate}
+
+Power is the proportion of iterations achieving statistical
+significance. In per-peptide mode, peppwR reports the proportion of
+peptides exceeding target power at each sample size.
+
+\subsection{Statistical tests}\label{statistical-tests}
+
+peppwR supports three statistical tests. The \textbf{Wilcoxon rank-sum
+test} (Wilcoxon 1945) (default) is non-parametric and robust to
+distributional assumptions. The \textbf{bootstrap-t test} (Efron and
+Tibshirani 1994) handles non-normality through resampling. The
+\textbf{Bayes factor t-test} (Rouder et al. 2009) provides a Bayesian
+approach that quantifies evidence strength rather than dichotomous
+rejection, offering improved efficiency when parametric assumptions
+hold.
+
+\subsection{Missing data handling}\label{missing-data-handling}
+
+peppwR tracks missingness at two levels. Per-peptide, it records the
+proportion of missing values. At the dataset level, it detects MNAR
+(missing-not-at-random) patterns by correlating mean abundance with
+missingness rate across peptides---a negative correlation indicates that
+low-abundance peptides are systematically more likely to be missing, the
+hallmark of detection-limit-driven MNAR common in mass spectrometry
+(Webb-Robertson et al. 2015). When
+\texttt{include\_missingness\ =\ TRUE}, simulations incorporate observed
+per-peptide NA rates, providing power estimates that account for
+expected data loss.
+
+\subsection{FDR-aware power}\label{fdr-aware-power}
+
+For whole-peptidome studies, peppwR can simulate complete experiments
+with Benjamini-Hochberg FDR correction (Benjamini and Hochberg 1995).
+Setting \texttt{apply\_fdr\ =\ TRUE} runs simulations across all
+peptides simultaneously, reporting the proportion of true positives
+discovered at the target FDR threshold.
+
+\section{Example Application}\label{example-application}
+
+We demonstrate peppwR using simulated phosphoproteomics data mimicking
+typical pilot study characteristics: 500 peptides with heterogeneous
+gamma-distributed abundances and \textasciitilde13\% missingness with a
+realistic MNAR pattern (see Supplementary Material for complete code).
+
+\subsection{Per-peptide power
+analysis}\label{per-peptide-power-analysis}
+
+Using \texttt{fit\_distributions()} followed by
+\texttt{power\_analysis()} with \texttt{find\ =\ "sample\_size"}, we
+determined sample size requirements for detecting 2-fold changes using
+the Wilcoxon test. Because each peptide has its own distribution
+parameters, power is calculated separately for each peptide via
+simulation. We then ask: at what sample size do 80\% of peptides
+individually achieve 80\% power? This threshold-based approach
+acknowledges that not all peptides will be equally detectable. The
+answer: N = 20 samples per group.
+
+\subsection{Power heterogeneity}\label{power-heterogeneity}
+
+Figure 1B illustrates the central insight motivating per-peptide
+analysis: at N = 6 samples per group, power varies dramatically across
+peptides, ranging from near-zero to over 90\%. This heterogeneity arises
+from differences in abundance, variance, and missingness. A single
+``average'' power estimate would obscure this crucial variability and
+potentially mislead experimental design decisions.
+
+\subsection{Effect of statistical test
+choice}\label{effect-of-statistical-test-choice}
+
+Comparing Wilcoxon and Bayes factor tests reveals substantial
+differences in sample size requirements (Figure 1C). The Bayes factor
+t-test achieves the 80\% threshold at N = 10, compared to N = 20 for
+Wilcoxon---a 50\% reduction in required samples. This efficiency gain
+reflects the Bayes factor's parametric assumptions, which are reasonable
+when the underlying distributions are well-characterized by pilot data.
+Users should match their power analysis to their planned statistical
+approach.
+
+\subsection{Power lookup table}\label{power-lookup-table}
+
+Figure 1D presents a practical lookup table showing the proportion of
+peptides achieving 80\% power across combinations of sample size and
+effect size. At N = 12 with 3-fold changes, 94\% of peptides achieve
+adequate power; at N = 4 with 1.5-fold changes, only 1\% do. Such tables
+enable researchers to make informed trade-offs between detectable effect
+sizes and experimental costs.
+
+\section{Discussion}\label{discussion}
+
+peppwR provides the first dedicated power analysis tool for
+phosphoproteomics that accounts for per-peptide heterogeneity,
+non-normal distributions, and missingness patterns. The simulation-based
+approach accommodates the complex statistical properties of mass
+spectrometry data that violate assumptions of traditional power
+calculations.
+
+Our example analysis demonstrates that power varies substantially across
+the peptidome, and that analytical choices---particularly the
+statistical test---meaningfully impact sample size requirements. By
+providing per-peptide power estimates, peppwR enables researchers to set
+realistic expectations about which peptides will be detectable at their
+planned sample size.
+
+\textbf{Limitations.} Computational cost scales linearly with peptide
+count and number of simulations; typical analyses complete within
+minutes on modern hardware. Per-peptide mode requires pilot data from
+the same experimental system; when unavailable, aggregate mode with
+reasonable distributional assumptions provides useful guidance.
+
+\textbf{Future directions.} Integration with the pepdiff package for
+differential abundance analysis would provide an end-to-end workflow
+from experimental design through analysis. Extension to TMT and iTRAQ
+labeling schemes, which have different variance structures, represents a
+natural next step.
+
+\section{Funding}\label{funding}
+
+This work was supported by the Gatsby Charitable Foundation.
+
+\section{Conflict of Interest}\label{conflict-of-interest}
+
+None declared.
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-benjamini1995fdr}
+Benjamini, Yoav, and Yosef Hochberg. 1995. {``Controlling the False
+Discovery Rate: A Practical and Powerful Approach to Multiple
+Testing.''} \emph{Journal of the Royal Statistical Society: Series B
+(Methodological)} 57 (1): 289--300.
+\url{https://doi.org/10.1111/j.2517-6161.1995.tb02031.x}.
+
+\bibitem[\citeproctext]{ref-button2013power}
+Button, Katherine S, John PA Ioannidis, Claire Mokrysz, Brian A Nosek,
+Jonathan Flint, Emma SJ Robinson, and Marcus R Munafò. 2013. {``Power
+Failure: Why Small Sample Size Undermines the Reliability of
+Neuroscience.''} \emph{Nature Reviews Neuroscience} 14 (5): 365--76.
+\url{https://doi.org/10.1038/nrn3475}.
+
+\bibitem[\citeproctext]{ref-cohen1988power}
+Cohen, Jacob. 1988. {``Statistical Power Analysis for the Behavioral
+Sciences.''} \url{https://doi.org/10.4324/9780203771587}.
+
+\bibitem[\citeproctext]{ref-delignette2015fitdistrplus}
+Delignette-Muller, Marie Laure, and Christophe Dutang. 2015.
+{``{fitdistrplus}: An {R} Package for Fitting Distributions.''}
+\emph{Journal of Statistical Software} 64 (4): 1--34.
+\url{https://doi.org/10.18637/jss.v064.i04}.
+
+\bibitem[\citeproctext]{ref-efron1994bootstrap}
+Efron, Bradley, and Robert J. Tibshirani. 1994. \emph{An Introduction to
+the Bootstrap}. 1st ed. Chapman; Hall/CRC.
+\url{https://doi.org/10.1201/9780429246593}.
+
+\bibitem[\citeproctext]{ref-gpower}
+Faul, Franz, Edgar Erdfelder, Albert-Georg Lang, and Axel Buchner. 2007.
+{``{G*Power} 3: A Flexible Statistical Power Analysis Program for the
+Social, Behavioral, and Biomedical Sciences.''} \emph{Behavior Research
+Methods} 39 (2): 175--91. \url{https://doi.org/10.3758/bf03193146}.
+
+\bibitem[\citeproctext]{ref-humphrey2015phosphoproteomics}
+Humphrey, Sean J, S Barzin Azimifar, and Matthias Mann. 2015.
+{``High-Throughput Phosphoproteomics Reveals in Vivo Insulin Signaling
+Dynamics.''} \emph{Nature Biotechnology} 33 (9): 990--95.
+\url{https://doi.org/10.1038/nbt.3327}.
+
+\bibitem[\citeproctext]{ref-lazar2016mnar}
+Lazar, Cosmin, Laurent Gatto, Myriam Ferro, Christophe Bruley, and
+Thomas Burger. 2016. {``Accounting for the Multiple Natures of Missing
+Values in Label-Free Quantitative Proteomics Data Sets to Compare
+Imputation Strategies.''} \emph{Journal of Proteome Research} 15 (4):
+1116--25. \url{https://doi.org/10.1021/acs.jproteome.5b00981}.
+
+\bibitem[\citeproctext]{ref-nyangoma2012clippda}
+Nyangoma, Stephen O, Stuart I Collins, Douglas G Altman, Philip Johnson,
+and Lucinda Billingham. 2012. {``Sample Size Calculations for Designing
+Clinical Proteomic Profiling Studies Using Mass Spectrometry.''}
+\emph{Statistical Applications in Genetics and Molecular Biology} 11
+(3). \url{https://doi.org/10.1515/1544-6115.1686}.
+
+\bibitem[\citeproctext]{ref-olsen2006phosphoproteomics}
+Olsen, Jesper V, Blagoy Blagoev, Florian Gnad, Boris Macek, Chanchal
+Kumar, Peter Mortensen, and Matthias Mann. 2006. {``Global, in Vivo, and
+Site-Specific Phosphorylation Dynamics in Signaling Networks.''}
+\emph{Cell} 127 (3): 635--48.
+\url{https://doi.org/10.1016/j.cell.2006.09.026}.
+
+\bibitem[\citeproctext]{ref-rouder2009bayest}
+Rouder, Jeffrey N, Paul L Speckman, Dongchu Sun, Richard D Morey, and
+Geoffrey Iverson. 2009. {``Bayesian t Tests for Accepting and Rejecting
+the Null Hypothesis.''} \emph{Psychonomic Bulletin \& Review} 16 (2):
+225--37. \url{https://doi.org/10.3758/PBR.16.2.225}.
+
+\bibitem[\citeproctext]{ref-tarazona2020multipower}
+Tarazona, Sonia, Leandro Balzano-Nogueira, David Gómez-Cabrero, Andreas
+Schmidt, Sara C Madeira, and Ana Conesa. 2020. {``Harmonization of
+Quality Metrics and Power Calculation in Multi-Omic Studies.''}
+\emph{Nature Communications} 11 (1): 3092.
+\url{https://doi.org/10.1038/s41467-020-16937-8}.
+
+\bibitem[\citeproctext]{ref-tyanova2016perseus}
+Tyanova, Stefka, Tikira Temu, Pavel Sinitcyn, Arthur Carlson, Marco Y
+Hein, Tamar Geiger, Matthias Mann, and Jürgen Cox. 2016. {``The
+{Perseus} Computational Platform for Comprehensive Analysis of
+(Prote)omics Data.''} \emph{Nature Methods} 13 (9): 731--40.
+\url{https://doi.org/10.1038/nmeth.3901}.
+
+\bibitem[\citeproctext]{ref-webb2015mnar}
+Webb-Robertson, Bobbie-Jo M, Holli K Wiber, Melissa M Matzke, Jemima N
+Samuel, Karin D Rodland, Thomas RW Clauss, and Joel G Pounds. 2015.
+{``Review, Evaluation, and Discussion of the Challenges of Missing Value
+Imputation for Mass Spectrometry-Based Label-Free Global Proteomics.''}
+\emph{Journal of Proteome Research} 14 (5): 1993--2001.
+\url{https://doi.org/10.1021/pr501138h}.
+
+\bibitem[\citeproctext]{ref-wilcoxon1945}
+Wilcoxon, Frank. 1945. {``Individual Comparisons by Ranking Methods.''}
+\emph{Biometrics Bulletin} 1 (6): 80--83.
+\url{https://doi.org/10.2307/3001968}.
+
+\end{CSLReferences}
+
+\end{document}

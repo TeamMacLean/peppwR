@@ -1,9 +1,9 @@
 Package: peppwR
 Title: Power Analysis For Phosphopeptide Abundance Hypothesis Test
 Version: 0.1.0
-Authors@R: 
-    person("Dan", "MacLean", , "dan.maclean@tsl.ac.uk", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-1032-0887"))
+Author: Dan MacLean [aut, cre]
+Maintainer: Dan MacLean <dan.maclean@tsl.ac.uk>
+Authors@R: person("Dan", "MacLean", email = "dan.maclean@tsl.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1032-0887"))
 Description: Estimate best fit distributions and do power analysis for hypothesis tests on phosphopeptide abundance data.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -11,6 +11,8 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: https://teammaclean.github.io/peppwR/, https://github.com/TeamMacLean/peppwR
 BugReports: https://github.com/TeamMacLean/peppwR/issues
+Depends:
+    R (>= 4.1.0)
 Imports:
     cowplot,
     dplyr,
