@@ -190,14 +190,26 @@
 3. **Implementation Accuracy Check:** Verify current paper claims against actual function behavior
 4. **Code Integration Testing:** Test R chunk execution within JSS template framework
 
-**Decision Points for User:**
-- Are there discrepancies between current paper descriptions and actual implementation?
-- Which mathematical details need formal notation vs. prose explanation?
-- Should any implementation details be simplified for JSS audience?
-- Are there aspects of the code that need additional explanation or justification?
-- Should we include code snippets directly in the methods section?
+**JSS Mathematical Standards Research (Completed 2026-03-25):**
 
-**Proceed to main task only after user approval of investigation findings and accuracy verification.**
+Based on research of recent JSS articles and editorial policies, JSS expects:
+- **Implementation-focused approach**: "How the software works" not "why the mathematics works"
+- **Key formulas with framework explanation**: Minimal derivations, no pedagogical content
+- **Sophisticated audience assumptions**: Statistical literacy expected, no basic concept explanations
+- **Algorithm emphasis**: Clear description of computational approaches over theoretical development
+- **Compact mathematical treatment**: Essential formulas with references to established methods
+
+**APPROVED USER DECISIONS:**
+1. **Distribution Coverage**: Option C (4 primary + others as additional)
+2. **Technical Accuracy**: Option C (focus on definitively implemented core functionality)
+3. **Mathematical Detail**: Option B (key formulas with framework explanation per JSS standards)
+
+**Decision Points for User:**
+- ✅ Mathematical depth level determined (Option B per JSS research)
+- ✅ Implementation focus confirmed (core functionality emphasis)
+- ✅ Distribution coverage scope approved (4 primary + additional)
+
+**Proceed to main task with approved parameters: Option B mathematical treatment, JSS algorithm-focused approach.**
 
 **Current Content Source:** `paper/paper.Rmd` lines 33-68 (Implementation section)
 
