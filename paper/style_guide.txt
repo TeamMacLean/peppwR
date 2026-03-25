@@ -1,0 +1,218 @@
+Style Guide
+In addition to the general instructions for manuscripts, we require all submissions to be formatted using LaTeX and the JSS style files (linked below along with the templates). It is recommended to keep the LaTeX code as simple as possible, i.e., avoid inclusion of packages/commands that are not necessary. We ask you to pay special attention to the frequently asked questions (FAQ).
+
+To facilitate authoring manuscripts in JSS style, we provide several templates on this page. Specifically, a short demo article is available using either plain LaTeX or in combined R/LaTeX. For outlining the typical structure of a JSS article some brief text snippets are employed that have been inspired by doi:10.18637/jss.v027.i08 (Zeileis et al. 2008), discussing count data regression in R.
+
+For authors of R software we recommend to write an R/LaTeX document (.Rnw) using Sweave or knitr. From this the LaTeX document (.tex) can be obtained by weaving/knitting along with the R replication code (.R) by tangling.
+
+LaTeX
+When using plain LaTeX, you may start from the following article template: jss-article-tex.zip (including all necessary style files). The source file article.tex can be edited in any text editor or dedicated LaTeX editor (including RStudio). To produce the manuscript pdfLaTeX should be used for which dedicated editors usually have a “Compile PDF” button or something similar. On the command line texi2pdf is convenient:
+
+texi2pdf article.tex
+The corresponding references are in the BibTeX bibliography ref.bib. The replication code article.R has to be prepared separately and should ideally include comments that make it easy to match it to the manuscript.
+
+Code Snippets
+Code snippet contributions are produced in the same way as articles. You only have to switch the from \documentclass[article]{jss} to \documentclass[codesnippet]{jss} in the first line of the LaTeX document.
+
+Software and Book Reviews
+For software and book reviews, LaTeX templates are provided in jss-review-tex.zip (including all necessary style files). The procedure to generate PDF output does not change from the above LaTeX section.
+
+R/LaTeX via Sweave or knitr
+For producing a JSS article with R/Latex, please start from the following template: jss-article-rnw.zip (including all necessary style files). The source files for the JSS contribution are the article.Rnw manuscript and the ref.bib bibliography in BibTeX format. To produce the PDF manuscript the article must first be weaved:
+
+Sweave("article.Rnw")
+yielding article.tex along with the graphics file (here article-visualization.pdf). This LaTeX file can be compiled in the “usual” way to the PDF using pdfLaTeX, i.e., using the shell, some LaTeX editor (see also above), or simply with R:
+
+library("tools")
+texi2pdf("article.tex")
+An alternative route for RStudio users is to use the “Compile PDF” button directly for the article.Rnw. However, make sure not to use concordance mode: Tools > Global Options > Sweave > Uncheck: Always enable Rnw concordance.
+
+The replication code can be obtained by tangling:
+
+Stangle("article.Rnw")
+yielding article.R. However, editing the comments of this .R file typically makes it more accessible to the readers/reviewers.
+
+If knitr is used to prepare the article.Rnw file, the render_sweave() hook should be used to ensure JSS style code formatting. The weaving and tangling can then by done by knit() and purl(), respectively.
+
+Frequently Asked Questions
+What are the most important style guidelines in JSS?
+What are the capitalization rules in JSS? What is title style and sentence style?
+How to cite software?
+How to cite R packages?
+What are the different \cite, \citet, \citep commands about?
+How should abbrevations be formatted?
+How to format figure/table captions?
+How should code be formatted in the manuscript?
+What is a good pen-to-paper ratio for my graphics?
+Some of my graphics files are very large, what should I do?
+How should my R package reflect that a manuscript about it was published in JSS?
+How can I turn my JSS paper into an R package vignette?
+Which naming conventions are used for software, journal, and publisher names in JSS?
+My LaTeX paper does not compile when there is JSS markup in section titles, what should I do?
+Compiling my LaTeX paper fails with an error at \begin{document}, what went wrong?
+Miscellaneous
+What are the most important style guidelines in JSS?
+The items below provide a quick style checklist for the most important style guidelines in JSS. More details can be found in the JSS style manual (jss.pdf) and in the other FAQ items.
+
+The manuscript can be compiled by pdfLaTeX.
+\proglang, \pkg and \code have been used for highlighting throughout the paper (including titles and references), except where explicitly escaped.
+References are provided in a .bib BibTeX database and included in the text by \cite, \citep, \citet, etc.
+Titles and headers are formatted as described in the JSS manual:
+\title in title style,
+all titles in the BibTeX file in title style.
+\section, \subsection, etc. in sentence style,
+annotations of figures/tables (including captions) in sentence style
+Figures, tables and equations are marked with a \label and referred to by \ref, e.g., Figure~\ref{...}.
+Software packages are \cite{}d properly.
+What are the capitalization rules in JSS? What is title style and sentence style?
+In English there are basically two styles of capitalization in titles, typically referred to as “sentence style” (or “sentence case”) and “title style” (or “title case”). Although there are few strict rules, the subsequent set of guidelines should be helpful.
+
+Sentence style: Only the first word in a title is capitalized, as is the first word after a colon or a hyphen. Of course, proper names remain in upper case. A simple example would be
+A fancy topic: Implementation in Java
+
+Title style: All principal words should be capitalized. This includes the first and last words of a headline, and all nouns, pronouns, adjectives, verbs, adverbs, and subordinating conjunctions (if, because, as, that, etc.). Do capitalize the first word after a colon. Articles (a, an, the), coordinating conjunctions (and, but, or, nor, for), and prepositions of any length, are to remain lowercased. However, if any of these are the first or last word of the headline, they should be capitalized. If you have an abbreviation in your headline that is normally lowercase, it should be left lowercase, particularly abbreviations for units of measure. Two part words separated by a hyphen should have both words capitalized. Examples:
+
+Come Join Us for a Celebration
+Caring for Your Houseplants
+We're Getting Ready for an Early Spring
+The Forecast for Summer: Hot!
+As the Wind Blows
+Spraying Schedule Posted on Office Memo Board
+Remember to Observe All Parking Rules
+What Are They Fighting For?
+A New Record: 37-in. Snow Fall Accumulation
+Tick-Tock: It's Daylight Savings Time Again!
+
+How to cite software?
+Many software packages tell their users how they want to be cited, i.e., there may be a pointer on the webpage or in the manual to a suitable publication (book, journal article, technical reports, etc.). If there is no recommended citation, please cite the corresponding manual or webpage. An example is given below for SAS/STAT 9.1.
+
+@Manual{SAS-STAT,
+  author  = {{\proglang{SAS} Institute Inc.}},
+  title   = {\proglang{SAS/STAT} Software, Version~9.1},
+  year    = {2003},
+  address = {Cary, NC},
+  url     = {https://www.sas.com/}
+}
+How to cite R packages?
+Please check if there is an official citation for the package. If so, this can be seen on the associated CRAN webpage, i.e., https://CRAN.R-project.org/package=foo or queried in R (if the package is installed) via citation("foo"). If there is no citation, please use a CRAN style reference as exemplified for the rJava package below.
+
+In any case, please make sure that the BibTeX is valid, that the title is in title style and that \proglang/\pkg/\code are used where appropriate.
+
+@Manual{rJava,
+  title  = {\pkg{rJava}: Low-Level \proglang{R} to \proglang{Java} Interface},
+  author = {Simon Urbanek},
+  year   = {2009},
+  note   = {\proglang{R}~package version~0.8-1},
+  url    = {https://CRAN.R-project.org/package=rJava},
+}
+What are the different \cite, \citet, \citep commands about?
+BibTeX can process citations differently and provides different commands for that. In particular, these are necessary if comments such as page references etc. should be added in brackets.
+
+\cite{...} and \citet{...} yield the usual Author (Year). \citep{...} yields (Author Year).
+
+These can be modified to incorporate further text, e.g., \citet[p.~123]{...} yields Author (Year, p. 123). \citep[see][for further details]{...} yields (see Author Year for further details).
+
+\citealp might be useful for further flexibility, see standard LaTeX/BibTeX manuals for details.
+
+Never use brackets-within-brackets constructs like (\cite{...}).
+
+How should abbrevations be formatted?
+Abbreviations should be spelled in upper-case letters without additional formatting (i.e., without periods, without small caps, italics, etc.). All abbreviations should be introduced with their expansion where the expansion should not be capitalized. (Exceptions are, of course, when the expansion contains proper names or the first word is the first word of a sentence.) Examples would include:
+
+support vector machine (SVM)
+MCMC (Markov chain Monte Carlo)
+
+How to format figure/table captions?
+All captions should appear below the corresponding figure/table. The captions should be in sentence style and end with a period. No additional formatting (such as \emph, \bf or \it) should be used for the caption.
+
+All table row/column headers should also be in sentence style. There should not be further footnote-style annotations in tables; these should all be placed in the caption.
+
+How should code be formatted in the manuscript?
+Code should preferably be presented in the usual text flow. It should have enough spaces to facilitate reading. Please include spaces before and after operators and after commas (unless spaces have syntactical meaning). An example would be to use
+
+y = a + b * x
+and not
+
+y=a+b*x
+The spacing should be used both for code that appears inline in the text and for code in verbatim code chunks.
+
+The code presented in the manuscript should not contain comments within the verbatim code. Instead the comments should be made in the normal LaTeX text.
+
+\code{...} can be used for code chunks that should appear inline. Various options are available for verbatim code chunks:
+
+The {Code} environment.
+The {CodeInput}/{CodeOutput} environments.
+For R packages the usual Sweave environments can be used. See Section 2.4 in the style manual (jss.pdf) for more details and examples.
+In all cases, code input/output must fit within the normal textwidth of the manuscript. Thus, code input should have appropriate line breaks and code output should preferably be generated with a suitable width (or otherwise edited).
+
+What is a good pen-to-paper ratio for my graphics?
+JSS papers should be created in such a way that they are not only easy to read when printed on paper but also easy to read on screen. Hence, graphics should have a pen-to-paper ratio that makes them easy to read in both media. In particular, this means that annotations should not be too large or too small. As a rough guidance, graphics annotation should be a about the size of the figure caption or a little bit smaller.
+
+A simple way of emulating increased/decreased font size in vector graphics (such as .pdf) is to just plot on a smaller/larger plotting device. When font size is kept fixed and the size of the figure as included in LaTeX is kept fixed, this will render the fonts relatively larger/smaller. (Note that a larger device will lead to relatively smaller annotation.)
+
+Some of my graphics files are very large, what should I do?
+This typically occurs when vector graphics (typically .pdf) are used for graphics with a very large amount of points or lines, e.g., in maps, heatmaps, or scatterplots with a very large amount of points. If a vector graphic is too large (i.e., larger than a few hundred kilobytes and takes a moment to load in PDF viewers), a raster graphic version of it should also be provided (.jpg or .png). It should be assured that all annotation in the raster graphic is still sufficiently easy to read (and not “pixelated”).
+
+In R, this can typically be achieved by using the png() device instead of the pdf() device. Suppose the original graphic was created by
+
+pdf(..., height = H, width = W)
+Then a useful starting point for a png() version is
+
+png(..., height = H, width = W, units = "in", res = 144)
+although higher resolutions may be needed for some graphics.
+
+How should my R package reflect that a manuscript about it was published in JSS?
+You should enhance the R package in three ways:
+
+Include a reference for the JSS paper in the \references{} section of the relevant .Rd pages.
+Include a CITATION file in inst/CITATION within the package. A suitable file is provided by the JSS editors when the final manuscript is ready for publication.
+Turn the JSS manuscript into a package vignette. For details see the next FAQ item.
+How can I turn my JSS paper into an R package vignette?
+For authors that publish their R packages in JSS we recommend:
+
+Use the JSS paper as the basis for a package vignette. If you have not done so already, use Sweave-style code chunks for all input/output and graphics. See the Sweave manual for more details.
+Turn off the JSS header and footer by using the nojss option \documentclass[nojss]{jss}
+Cite the JSS paper in the vignette (in the abstract or intro).
+By doing so, the vignette is also visibly distinct from the JSS paper and you can easily extend/improve/correct the vignette in the future, keeping it up to date. For an example, see
+
+vignette("sandwich", package = "sandwich")
+Note that you do not need to include the JSS LaTeX style files in your package. They are shipped with R and installed on all relevant R servers (CRAN, R-Forge, …).
+
+The preferred layout can be obtained by setting
+
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+invisibly in a code chunk at the beginning. (Note, however, that even though widthwas set the input/output might still be modified because width is not respected by all R functions.)
+
+Which naming conventions are used for software, journal, and publisher names in JSS?
+Software:
+
+Fortran (not: FORTRAN)
+Java (not: JAVA, java)
+MATLAB (not: Matlab, matlab)
+S-PLUS (not: Splus, S-Plus)
+Journals:
+
+The American Statistician (not: American Statistician)
+The Annals of Statistics (not: Annals of Statistics)
+Journal of the Royal Statistical Society B (not: Journal of the Royal Statistical Society, Series B)
+Publishers:
+
+Springer-Verlag (not: Springer)
+John Wiley & Sons (not: Wiley, John Wiley & Sons Inc.)
+My LaTeX paper does not compile when there is JSS markup in section titles, what should I do?
+If you want to use markup in section headers you will usually have to escape it for the PDF bookmarks by giving the text for the bookmark explicitly without markup, e.g.,
+
+\section[Calling C++ from R]{Calling \proglang{C++} from \proglang{R}}
+Compiling my LaTeX paper fails with an error at \begin{document}, what went wrong?
+The reason is almost surely that some of the declarations in the header have not been made properly. For example, \Plainauthor, \Plaintitle or \Plainkeywords might be missing or still containing markup.
+
+Miscellaneous
+Below is a list of miscellaneous style conventions used in JSS:
+
+For referring to subsections, do not use Subsection x.y, just Section x.y.
+When using e.g. and i.e. add a comma after the period to keep LaTeX from interpreting them as the end of a sentence, i.e.: e.g., and i.e., .
+House style is to use $p$~value, $t$~statistic$, etc. (without hyphen).
+\top should be used as the transpose symbol, e.g., X^\top.
+For R-related manuscripts: The first argument of data() and library() should always be quoted, e.g., library("foo").
+For books with an edition, this should be indicated as 2nd, 3rd, etc.
+To refer to equations, one can use either Equation~\ref{...} (with capitalization) or (\ref{...}) with the former being preferred if the number of equation references is not too large.
