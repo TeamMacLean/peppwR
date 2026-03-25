@@ -15,6 +15,28 @@
 
 **Objective:** Convert current R Markdown structure to JSS-compliant LaTeX workflow
 
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- External dependencies: JSS website availability and download links
+- LaTeX environment: `pdfLaTeX`, `Sweave`/`knitr` setup requirements
+- Bibliography conversion complexity from generic to JSS markup format
+- LaTeX compilation issues: packages, paths, fonts
+
+**Pre-Task Investigation (Report findings to user):**
+1. **Verify JSS Template Access:** Check https://www.jstatsoft.org/style for current download links
+2. **Environment Assessment:** Test current LaTeX installation and identify missing components
+3. **Bibliography Analysis:** Review `paper/references.bib` and identify JSS markup conversion challenges
+4. **Compilation Test:** Attempt basic JSS template compilation to identify environment issues
+
+**Decision Points for User:**
+- If JSS download fails, should we use alternative sources or wait?
+- What LaTeX packages should be installed if missing?
+- How should bibliography conversion errors be handled?
+- Should we proceed with partial setup if some components fail?
+
+**Proceed to main task only after user approval of investigation findings.**
+
 **Specific Actions:**
 1. **Download JSS Templates**
    - Get `jss-article-rnw.zip` from https://www.jstatsoft.org/style
@@ -65,6 +87,37 @@
 **Estimated Time:** 1-2 days
 
 **Objective:** Transform current 400-word introduction into comprehensive 800-1200 word JSS-standard introduction
+
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- Literature gap: Current `references.bib` may lack comprehensive proteomics power analysis citations
+- Mathematical foundation: Statistical power theory depth required for JSS audience
+- Tool comparison: Detailed feature analysis of competing tools (Perseus, clippda, MultiPower, G*Power)
+- Word count expansion: Quality vs. quantity balance for 2-3x content increase
+
+**Pre-Task Research (Report findings to user):**
+1. **Literature Review:** Conduct comprehensive search for:
+   - Statistical power analysis theory papers (Cohen 1988, Button et al. 2013, etc.)
+   - Proteomics experimental design literature
+   - Mass spectrometry missing data patterns (MNAR) research
+   - Existing power analysis tools in proteomics/omics
+2. **Citation Gap Analysis:** Compare current `paper/references.bib` against comprehensive literature and identify missing key references
+3. **Tool Feature Analysis:** Research capabilities and limitations of:
+   - Perseus: https://maxquant.org/perseus/
+   - clippda: Available documentation and papers
+   - MultiPower: Multi-omics integration requirements
+   - G*Power: Generic power analysis limitations for proteomics
+4. **Mathematical Framework Research:** Identify key statistical concepts needing explanation for JSS audience
+
+**Decision Points for User:**
+- Should we add [X specific citations] found during literature review?
+- How deep should mathematical foundation section be for JSS audience?
+- Which competing tools are most important to compare in detail?
+- Should introduction target 800 words (conservative) or 1200 words (comprehensive)?
+- Any specific proteomics domain knowledge gaps to address?
+
+**Proceed to main task only after user approval of research findings and scope decisions.**
 
 **Current Content Source:** `paper/paper.Rmd` lines 23-31 (Introduction section)
 
@@ -118,6 +171,33 @@
 **Estimated Time:** 2-3 days
 
 **Objective:** Expand current 600-word implementation overview into comprehensive 1500-2000 word methods section
+
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- Implementation knowledge: Deep understanding of actual R code required
+- Mathematical notation: LaTeX math formatting complexity
+- Technical accuracy: All claims must match actual implementation exactly
+- Code integration: R chunks must execute correctly within JSS template
+
+**Pre-Task Investigation (Report findings to user):**
+1. **Code Architecture Analysis:** Read and understand:
+   - `R/fits.R` - Distribution fitting implementation details
+   - `R/power.R` - Power analysis engine mechanics
+   - `R/simulation.R` - Monte Carlo methodology
+   - `R/classes.R` - S3 class system design
+2. **Mathematical Framework Verification:** Test mathematical formulas and notation against actual code behavior
+3. **Implementation Accuracy Check:** Verify current paper claims against actual function behavior
+4. **Code Integration Testing:** Test R chunk execution within JSS template framework
+
+**Decision Points for User:**
+- Are there discrepancies between current paper descriptions and actual implementation?
+- Which mathematical details need formal notation vs. prose explanation?
+- Should any implementation details be simplified for JSS audience?
+- Are there aspects of the code that need additional explanation or justification?
+- Should we include code snippets directly in the methods section?
+
+**Proceed to main task only after user approval of investigation findings and accuracy verification.**
 
 **Current Content Source:** `paper/paper.Rmd` lines 33-68 (Implementation section)
 
@@ -182,6 +262,40 @@
 
 **Objective:** Transform current 450-word example into comprehensive 1000-1500 word applications section
 
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- New analysis required: Validation study (3.1) doesn't currently exist
+- Data dependencies: Real data examples may need preprocessing or access issues
+- Integration testing: Examples with external tools might fail
+- Reproducibility requirements: High bar for completely reproducible examples
+
+**Pre-Task Investigation (Report findings to user):**
+1. **Data Asset Review:** Examine availability and usability of:
+   - `sample_data/dda_data.csv` - Format and completeness
+   - `sample_data/prm_data.csv` - Alternative dataset characteristics
+   - Existing vignette data processing steps
+2. **Vignette Content Analysis:** Review existing content in:
+   - `vignettes/articles/dda-time-course-power.Rmd`
+   - `vignettes/articles/prm-genotype-power.Rmd`
+   - Assess what can be directly adapted vs. needs new development
+3. **Validation Study Scope:** Investigate requirements for:
+   - Ground truth validation with simulated data
+   - Computational requirements and complexity
+   - Integration with existing simulation framework
+4. **Integration Testing:** Test workflow connections with:
+   - Common proteomics data formats
+   - Export capabilities for downstream analysis
+
+**Decision Points for User:**
+- Should validation study (3.1) be developed from scratch or simplified?
+- Are current data examples sufficient or do we need additional datasets?
+- What level of integration testing is required with external tools?
+- Should we prioritize DDA or PRM examples if timeline is constrained?
+- How comprehensive should the ground truth validation be?
+
+**Proceed to main task only after user approval of investigation findings and scope decisions.**
+
 **Current Content Source:** `paper/paper.Rmd` lines 70-88 (Example Application section)
 
 **Required Subsections:**
@@ -237,9 +351,46 @@
 ### Task 3.1: Benchmarking and Validation Section Creation
 **Agent Type:** `general-purpose` (analysis/benchmarking)
 **Dependencies:** Task 2.3 complete
-**Estimated Time:** 3-4 days
+**Estimated Time:** 3-4 days (HIGHLY VARIABLE - see planning phase)
 
 **Objective:** Create entirely new 1000-word section demonstrating peppwR's advantages through systematic comparison
+
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- NEW DEVELOPMENT: Entirely new content requiring significant analysis and coding
+- Tool access: Comparison tools may be difficult to install/run in current environment
+- Methodology design: Fair, rigorous comparison methodology needs development
+- Statistical analysis: Proper significance testing and confidence intervals required
+- Timeline risk: Could significantly exceed 3-4 day estimate
+
+**Pre-Task Investigation (Report findings to user):**
+1. **Tool Availability Assessment:** Attempt to install and test:
+   - Perseus: Download and basic functionality test
+   - clippda: CRAN availability and installation
+   - MultiPower: Installation requirements and dependencies
+   - G*Power: Accessibility for comparison studies
+2. **Benchmarking Methodology Research:** Investigate standard practices for software comparison in:
+   - JSS articles with tool comparisons
+   - Bioinformatics benchmarking papers
+   - Statistical software validation studies
+3. **Computational Requirements Assessment:** Estimate:
+   - Time needed for systematic performance testing
+   - Data requirements for fair comparison
+   - Statistical analysis complexity
+4. **Alternative Approach Evaluation:** Research feasibility of:
+   - Literature-based comparison instead of empirical
+   - Focused comparison with 1-2 tools instead of comprehensive
+   - Performance-only vs. accuracy comparison
+
+**CRITICAL Decision Points for User:**
+- Should we proceed with full empirical benchmarking or literature-based comparison?
+- Which tools are highest priority if we can't compare all?
+- What is acceptable timeline if full benchmarking takes 1-2 weeks?
+- Should this section be optional for initial submission, added in revision?
+- What level of statistical rigor is required for tool comparison?
+
+**⚠️ HIGH RISK TASK: Proceed to main task only after user approval of investigation findings and explicit scope decisions. Consider making optional if investigation reveals major barriers.**
 
 **Content Foundation:** `vignettes/articles/benchmarking.Rmd` (performance analysis starting point)
 
@@ -296,6 +447,41 @@
 **Estimated Time:** 2-3 days
 
 **Objective:** Create comprehensive figure set supporting JSS article content
+
+**PREPARATION AND PLANNING (Complete BEFORE main task):**
+
+**Potential Difficulties to Investigate:**
+- Multiple new figures: 4 new figures plus table formatting is substantial work
+- JSS formatting requirements: Vector format, font embedding, color accessibility
+- Data dependencies: Figures depend on analysis from previous tasks completing successfully
+- LaTeX integration: Figure referencing and sizing often problematic
+
+**Pre-Task Investigation (Report findings to user):**
+1. **Current Figure Assessment:** Review existing `paper/figure_1.pdf`:
+   - JSS compliance check (resolution, fonts, formatting)
+   - Determine what updates are needed
+2. **Data Availability Check:** Verify data sources for new figures:
+   - Results from benchmarking analysis (Task 3.1)
+   - Distribution fitting examples for diagnostics
+   - Real data application results from enhanced examples
+3. **JSS Figure Requirements Research:** Review JSS style requirements for:
+   - Vector format specifications (PDF with embedded fonts)
+   - Color accessibility guidelines
+   - Caption formatting (sentence style, periods)
+   - Figure sizing and resolution standards
+4. **LaTeX Integration Testing:** Test figure inclusion in JSS template:
+   - Label and reference system
+   - Multi-panel figure formatting
+   - Table formatting within JSS class
+
+**Decision Points for User:**
+- Which new figures are highest priority if timeline is constrained?
+- Should we use PNG fallback if PDF generation fails?
+- How should figures depend on results from potentially delayed benchmarking (Task 3.1)?
+- What level of color accessibility is required?
+- Should tables be created as LaTeX or included as figure images?
+
+**Proceed to main task only after user approval of investigation findings and priority decisions.**
 
 **Current Assets:** `paper/figure_1.pdf` (existing multi-panel figure)
 
