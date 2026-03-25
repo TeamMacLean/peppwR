@@ -1,0 +1,313 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\title{Mathematical Notation Guide for peppwR Methods}
+\author{Explanatory Guide}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+
+This guide explains all mathematical formulas and notation used in the Methods section of the peppwR JSS article. Each formula is presented with plain-language explanations of what the symbols mean, how to read the notation, what the formula does conceptually, and why it's used in the peppwR context.
+
+\section{Statistical Framework Section}
+
+\subsection{Formula 1: Statistical Power Definition}
+
+\textbf{Mathematical notation:}
+\[P(\text{reject } H_0 | H_1 \text{ true}) = 1 - \beta\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $P(\cdot)$ = probability of something happening
+\item $H_0$ = null hypothesis (no difference between groups)
+\item $H_1$ = alternative hypothesis (there is a difference between groups)
+\item $\beta$ = Type II error rate (probability of missing a real effect)
+\item $|$ = "given that" or "conditional on"
+\end{itemize}
+
+\textbf{How to read it:} "Power equals the probability of rejecting the null hypothesis, given that the alternative hypothesis is true, which equals 1 minus beta"
+
+\textbf{What it does:} Defines statistical power as the chance of correctly detecting a real effect when one actually exists
+
+\textbf{Why peppwR uses it:} This is the fundamental concept that peppwR calculates through simulation - the probability that your experiment will successfully detect a real biological effect
+
+\subsection{Formula 2: Hypothesis Testing Framework}
+
+\textbf{Mathematical notation:}
+\[H_0: \mu_{\text{treatment}} = \mu_{\text{control}} \quad \text{vs} \quad H_1: \mu_{\text{treatment}} \neq \mu_{\text{control}}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\mu_{\text{treatment}}$ = mean abundance in the treatment group
+\item $\mu_{\text{control}}$ = mean abundance in the control group
+\item $=$ = equals (no difference)
+\item $\neq$ = not equals (there is a difference)
+\end{itemize}
+
+\textbf{How to read it:} "Null hypothesis: treatment mean equals control mean, versus alternative hypothesis: treatment mean does not equal control mean"
+
+\textbf{What it does:} Sets up the statistical question we're trying to answer - is there a difference between groups?
+
+\textbf{Why peppwR uses it:} This is the standard framework for comparing peptide abundances between experimental conditions
+
+\subsection{Formula 3: Sample Size Determination}
+
+\textbf{Mathematical notation:}
+\[n^* = \min\{n : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $n^*$ = optimal sample size
+\item $\min\{\cdot\}$ = minimum value that satisfies the condition
+\item $n$ = sample size (number of samples per group)
+\item $\delta$ = effect size (how big the difference is)
+\item $\pi_{\text{target}}$ = target power level (usually 0.8 for 80\% power)
+\item $\geq$ = greater than or equal to
+\end{itemize}
+
+\textbf{How to read it:} "n-star equals the minimum n such that the probability of rejecting the null hypothesis, given delta and n, is greater than or equal to the target power"
+
+\textbf{What it does:} Finds the smallest sample size that will give you your desired statistical power
+
+\textbf{Why peppwR uses it:} This answers the key question "How many samples do I need?" for your experiment
+
+\subsection{Formula 4: Power Estimation}
+
+\textbf{Mathematical notation:}
+\[\pi(n, \delta) = P(\text{reject } H_0 | \delta, n)\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\pi(n, \delta)$ = power as a function of sample size and effect size
+\item $P(\cdot)$ = probability
+\item The rest as defined above
+\end{itemize}
+
+\textbf{How to read it:} "Pi of n and delta equals the probability of rejecting the null hypothesis given delta and n"
+
+\textbf{What it does:} Calculates the statistical power for a given sample size and effect size
+
+\textbf{Why peppwR uses it:} This answers "What power will my planned experiment have?"
+
+\subsection{Formula 5: Minimum Detectable Effect Size}
+
+\textbf{Mathematical notation:}
+\[\delta^* = \min\{\delta : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\delta^*$ = minimum detectable effect size
+\item Other symbols as defined previously
+\end{itemize}
+
+\textbf{How to read it:} "Delta-star equals the minimum delta such that the probability of rejecting the null hypothesis, given delta and n, is greater than or equal to target power"
+
+\textbf{What it does:} Finds the smallest biological effect you can reliably detect with your sample size
+
+\textbf{Why peppwR uses it:} This answers "What's the smallest effect I can detect?" given your experimental constraints
+
+\subsection{Formula 6: Peptidome-wide Power}
+
+\textbf{Mathematical notation:}
+\[P_{\text{peptidome}}(n, \delta, \pi_{\text{target}}) = \frac{1}{K}\sum_{i=1}^{K} \mathbf{1}[\pi_i(n, \delta) \geq \pi_{\text{target}}]\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $P_{\text{peptidome}}$ = proportion of peptides achieving target power
+\item $K$ = total number of peptides
+\item $\sum_{i=1}^{K}$ = sum from peptide 1 to peptide K
+\item $\mathbf{1}[\cdot]$ = indicator function (equals 1 if condition is true, 0 if false)
+\item $\pi_i(n, \delta)$ = power for peptide i
+\end{itemize}
+
+\textbf{How to read it:} "Peptidome power equals one over K times the sum of indicator functions for whether each peptide's power exceeds the target"
+
+\textbf{What it does:} Calculates the fraction of peptides that will achieve your target power level
+
+\textbf{Why peppwR uses it:} Since different peptides have different properties, this tells you what percentage of your peptides will be detectable
+
+\subsection{Formula 7: FDR Control (Benjamini-Hochberg)}
+
+\textbf{Mathematical notation:}
+\[k^* = \max\left\{i : p_{(i)} \leq \frac{i \cdot \alpha}{m}\right\}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $k^*$ = cutoff index for rejecting hypotheses
+\item $\max\{\cdot\}$ = maximum value satisfying the condition
+\item $p_{(i)}$ = i-th smallest p-value (ordered from smallest to largest)
+\item $\alpha$ = significance level (usually 0.05)
+\item $m$ = total number of statistical tests performed
+\end{itemize}
+
+\textbf{How to read it:} "k-star equals the maximum i such that the i-th ordered p-value is less than or equal to i times alpha divided by m"
+
+\textbf{What it does:} Determines which p-values to call significant when testing many peptides simultaneously
+
+\textbf{Why peppwR uses it:} When testing thousands of peptides, you need to adjust for multiple comparisons to avoid false discoveries
+
+\section{Distribution Fitting Section}
+
+\subsection{Formula 8: Maximum Likelihood Estimation}
+
+\textbf{Mathematical notation:}
+\[\hat{\theta}_{k,i} = \arg\max_{\theta_k} \sum_{j=1}^{n_i} \log f_k(x_{ij} | \theta_k)\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\hat{\theta}_{k,i}$ = estimated parameters for distribution k and peptide i
+\item $\arg\max$ = "the argument that maximizes" - find the parameter values that make the expression biggest
+\item $\theta_k$ = parameters of distribution k
+\item $\sum_{j=1}^{n_i}$ = sum over all j from 1 to $n_i$ (all observations for peptide i)
+\item $\log$ = natural logarithm
+\item $f_k(x_{ij} | \theta_k)$ = probability density function for distribution k
+\item $x_{ij}$ = j-th observation for peptide i
+\end{itemize}
+
+\textbf{How to read it:} "Theta-hat k,i equals the argument that maximizes the sum of log probability densities"
+
+\textbf{What it does:} Finds the distribution parameters that make the observed data most likely
+
+\textbf{Why peppwR uses it:} This is how we fit mathematical distributions (like gamma or lognormal) to each peptide's abundance data
+
+\subsection{Formula 9: Model Selection (AIC)}
+
+\textbf{Mathematical notation:}
+\[\hat{k}_i = \arg\min_k \left\{-2 \sum_{j=1}^{n_i} \log f_k(x_{ij} | \hat{\theta}_{k,i}) + 2p_k\right\}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\hat{k}_i$ = best distribution choice for peptide i
+\item $\arg\min$ = "the argument that minimizes" - find the k that makes the expression smallest
+\item $-2$ = constant multiplier in AIC formula
+\item $2p_k$ = penalty term where $p_k$ is the number of parameters in distribution k
+\end{itemize}
+
+\textbf{How to read it:} "k-hat i equals the argument that minimizes negative two times the log-likelihood plus two times the number of parameters"
+
+\textbf{What it does:} Chooses the best distribution for each peptide, balancing goodness of fit against complexity
+
+\textbf{Why peppwR uses it:} AIC helps select whether gamma, lognormal, normal, or inverse Gaussian best describes each peptide's data
+
+\section{Simulation Engine Section}
+
+\subsection{Formula 10: Monte Carlo Power Estimation}
+
+\textbf{Mathematical notation:}
+\[\hat{\pi}_i(n, \delta) = \frac{1}{n_{\text{sim}}} \sum_{j=1}^{n_{\text{sim}}} R^{(j)}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\hat{\pi}_i(n, \delta)$ = estimated power for peptide i
+\item $n_{\text{sim}}$ = number of simulations (usually 1000)
+\item $R^{(j)}$ = result of simulation j (1 if significant, 0 if not)
+\item $\sum_{j=1}^{n_{\text{sim}}}$ = sum over all simulations
+\end{itemize}
+
+\textbf{How to read it:} "Pi-hat i equals one over n-sim times the sum of all simulation results"
+
+\textbf{What it does:} Estimates power by running many simulated experiments and counting how often they detect the effect
+
+\textbf{Why peppwR uses it:} Since analytical power calculations are impossible for complex proteomics data, simulation provides accurate estimates
+
+\subsection{Formula 11: Monte Carlo Standard Error}
+
+\textbf{Mathematical notation:}
+\[\text{SE}(\hat{\pi}_i) = \sqrt{\frac{\hat{\pi}_i(1-\hat{\pi}_i)}{n_{\text{sim}}}}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\text{SE}(\hat{\pi}_i)$ = standard error of the power estimate
+\item $\sqrt{\cdot}$ = square root
+\item $(1-\hat{\pi}_i)$ = one minus the power estimate
+\end{itemize}
+
+\textbf{How to read it:} "Standard error of pi-hat equals the square root of pi-hat times one minus pi-hat, divided by the number of simulations"
+
+\textbf{What it does:} Calculates the uncertainty in our power estimate due to simulation randomness
+
+\textbf{Why peppwR uses it:} This tells you how precise your power estimate is - more simulations give lower standard error
+
+\section{Missing Data Handling Section}
+
+\subsection{Formula 12: Mean Abundance Calculation}
+
+\textbf{Mathematical notation:}
+\[\bar{x}_i = \frac{1}{n_{\text{obs},i}} \sum_{j: x_{ij} \neq \text{NA}} x_{ij}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\bar{x}_i$ = mean abundance for peptide i
+\item $n_{\text{obs},i}$ = number of observed (non-missing) values for peptide i
+\item $\sum_{j: x_{ij} \neq \text{NA}}$ = sum over only the non-missing observations
+\item $\text{NA}$ = missing value (Not Available)
+\end{itemize}
+
+\textbf{How to read it:} "x-bar i equals one over n-observed,i times the sum of all non-missing x values"
+
+\textbf{What it does:} Calculates the average abundance for a peptide, excluding missing values
+
+\textbf{Why peppwR uses it:} Missing data is common in proteomics, so we calculate means from available data only
+
+\subsection{Formula 13: Missingness Rate}
+
+\textbf{Mathematical notation:}
+\[r_i = \frac{n_{\text{missing},i}}{n_{\text{total},i}}\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $r_i$ = missingness rate for peptide i
+\item $n_{\text{missing},i}$ = number of missing values for peptide i
+\item $n_{\text{total},i}$ = total number of samples for peptide i
+\end{itemize}
+
+\textbf{How to read it:} "r i equals the number of missing values divided by the total number of values"
+
+\textbf{What it does:} Calculates what fraction of data is missing for each peptide
+
+\textbf{Why peppwR uses it:} Different peptides have different amounts of missing data, which affects power calculations
+
+\subsection{Formula 14: Missing Data in Simulations}
+
+\textbf{Mathematical notation:}
+\[\lfloor n \cdot r_i \rfloor\]
+
+\textbf{What the symbols mean:}
+\begin{itemize}
+\item $\lfloor \cdot \rfloor$ = floor function (rounds down to nearest integer)
+\item $n$ = sample size
+\item $r_i$ = missingness rate for peptide i
+\end{itemize}
+
+\textbf{How to read it:} "Floor of n times r i"
+
+\textbf{What it does:} Calculates how many observations to randomly remove from simulated data
+
+\textbf{Why peppwR uses it:} This recreates realistic missing data patterns in power simulations
+
+\section{Summary}
+
+This guide covers all major mathematical notation in the peppwR Methods section. The formulas fall into four main categories:
+
+\begin{enumerate}
+\item \textbf{Statistical Framework:} Defines power, hypothesis tests, and optimization problems
+\item \textbf{Distribution Fitting:} Uses maximum likelihood and AIC for model selection
+\item \textbf{Simulation Engine:} Estimates power through Monte Carlo simulation
+\item \textbf{Missing Data:} Characterizes and incorporates missingness patterns
+\end{enumerate}
+
+The mathematical notation enables precise description of peppwR's algorithms while the simulations handle the complexity that makes analytical solutions impossible for proteomics data.
+
+\end{document}

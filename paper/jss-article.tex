@@ -6,6 +6,7 @@
 \usepackage{lmodern}
 \usepackage{pifont}
 \usepackage{graphicx}
+\usepackage{amsmath}
 
 %% new custom commands
 \newcommand{\checkmark}{\ding{51}}
@@ -110,19 +111,7 @@ Tool & \begin{tabular}[c]{@{}c@{}}Proteomics\\Focus\end{tabular} & \begin{tabula
 
 \section{Methods and Implementation} \label{sec:methods}
 
-\subsection{Workflow}
-
-\pkg{peppwR} implements a two-stage workflow (Figure~\ref{fig:workflow}). First,
-\fct{fit\_distributions} models the abundance distribution for each peptide in
-pilot data, selecting the best-fitting distribution from gamma, lognormal,
-normal, and inverse Gaussian candidates using AIC. Second, \fct{power\_analysis}
-runs Monte Carlo simulations drawing from these fitted distributions to estimate power.
-
-Two operational modes accommodate different use cases. In \emph{aggregate mode},
-users specify a single distribution and parameters, enabling power calculations
-without pilot data. In \emph{per-peptide mode}, \pkg{peppwR} leverages pilot
-data to model heterogeneity across the peptidome, reporting the proportion of
-peptides achieving target power at each sample size.
+\pkg{peppwR} implements simulation-based power analysis through a modular framework that addresses the unique statistical challenges of phosphoproteomics data. The package operates in two complementary modes: aggregate analysis for preliminary design decisions without pilot data, and per-peptide analysis that leverages pilot data to provide detailed, peptide-specific power estimates across the heterogeneous peptidome.
 
 \begin{figure}[ht]
 \centering
@@ -131,59 +120,153 @@ peptides achieving target power at each sample size.
 \label{fig:workflow}
 \end{figure}
 
-\subsection{Distribution fitting}
+\subsection{Statistical Framework}
 
-For each peptide, \pkg{peppwR} fits candidate distributions using maximum
-likelihood estimation via the \pkg{fitdistrplus} \citep{delignette2015fitdistrplus}
-and \pkg{univariateML} packages. The best-fitting distribution is selected by
-minimum AIC. When fitting fails (e.g., insufficient non-missing observations),
-users can choose to exclude the peptide, fall back to empirical bootstrap
-resampling, or use a moment-matched lognormal distribution.
+Statistical power, defined as $P(\text{reject } H_0 | H_1 \text{ true}) = 1 - \beta$ (where $\beta$ is the Type II error rate), provides the theoretical foundation for experimental design decisions. For a given statistical test with significance level $\alpha$, power depends on the effect size $\delta$, sample size $n$, and the underlying population distributions. In the context of proteomics experiments comparing two groups, we test the null hypothesis $H_0: \mu_{\text{treatment}} = \mu_{\text{control}}$ against the alternative $H_1: \mu_{\text{treatment}} \neq \mu_{\text{control}}$.
 
-\subsection{Simulation engine}
+\pkg{peppwR} accommodates three fundamental experimental design questions through constrained optimization. When \code{find = "sample\_size"}, the package determines the minimum $n$ required to achieve target power $\pi_{\text{target}}$:
+\begin{equation}
+n^* = \min\{n : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}
+\end{equation}
 
-Power is estimated via Monte Carlo simulation. For each peptide and each
-candidate sample size:
+When \code{find = "power"}, it estimates the expected power for a fixed sample size:
+\begin{equation}
+\pi(n, \delta) = P(\text{reject } H_0 | \delta, n)
+\end{equation}
+
+When \code{find = "effect\_size"}, it identifies the minimum detectable effect size:
+\begin{equation}
+\delta^* = \min\{\delta : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}
+\end{equation}
+
+The effect size is parameterized as a multiplicative factor $\delta$ such that treatment group abundances are scaled by $\delta$ relative to control abundances. This multiplicative parameterization naturally accommodates the log-scale nature of mass spectrometry quantification, where biological effects typically manifest as fold-changes rather than additive differences.
+
+In per-peptide mode, power calculations are performed independently for each peptide $i$ with fitted distribution parameters $\theta_i$, yielding peptide-specific power estimates $\pi_i(n, \delta)$. The package then reports the proportion of peptides achieving target power:
+\begin{equation}
+P_{\text{peptidome}}(n, \delta, \pi_{\text{target}}) = \frac{1}{K}\sum_{i=1}^{K} \mathbf{1}[\pi_i(n, \delta) \geq \pi_{\text{target}}]
+\end{equation}
+where $K$ is the total number of peptides and $\mathbf{1}[\cdot]$ is the indicator function.
+
+For FDR-aware analysis, power is evaluated after Benjamini-Hochberg correction. Let $p_{(1)} \leq p_{(2)} \leq \ldots \leq p_{(m)}$ denote the ordered p-values from $m$ tests. The FDR-controlling procedure rejects all hypotheses $H_{(i)}$ for $i \leq k^*$, where:
+\begin{equation}
+k^* = \max\left\{i : p_{(i)} \leq \frac{i \cdot \alpha}{m}\right\}
+\end{equation}
+
+Power under FDR correction becomes the expected proportion of true positives among discoveries, accounting for the adaptive threshold imposed by the multiple testing procedure.
+
+\subsection{Distribution Fitting}
+
+\pkg{peppwR} models peptide abundance distributions using maximum likelihood estimation across multiple parametric families. The core distributions supported are gamma ($\text{Gamma}(\alpha, \beta)$), lognormal ($\text{LogNormal}(\mu, \sigma^2)$), normal ($\text{Normal}(\mu, \sigma^2)$), and inverse Gaussian ($\text{InverseGaussian}(\mu, \lambda)$). These distributions capture the right-skewed, positive-valued nature of mass spectrometry intensities while accommodating varying degrees of skewness and heteroscedasticity observed across the peptidome.
+
+For each peptide $i$ with observed abundances $\mathbf{x}_i = \{x_{i1}, x_{i2}, \ldots, x_{in_i}\}$, the package fits each candidate distribution with probability density function $f_k(x | \theta_k)$ by maximizing the log-likelihood:
+\begin{equation}
+\hat{\theta}_{k,i} = \arg\max_{\theta_k} \sum_{j=1}^{n_i} \log f_k(x_{ij} | \theta_k)
+\end{equation}
+
+Model selection employs the Akaike Information Criterion (AIC), selecting the distribution with minimum AIC score:
+\begin{equation}
+\hat{k}_i = \arg\min_k \left\{-2 \sum_{j=1}^{n_i} \log f_k(x_{ij} | \hat{\theta}_{k,i}) + 2p_k\right\}
+\end{equation}
+where $p_k$ is the number of parameters in distribution $k$.
+
+The gamma distribution, parameterized by shape $\alpha > 0$ and rate $\beta > 0$, provides flexibility in modeling right-skewed abundance data with controlled variance-to-mean relationships. The lognormal distribution naturally accommodates multiplicative biological processes underlying protein expression, while the inverse Gaussian distribution offers an intermediate option between gamma and lognormal with distinct tail behavior. Additional candidate distributions including Weibull, exponential, and beta (for transformed data) are available through the \pkg{univariateML} interface.
+
+Parameter estimation leverages the \pkg{fitdistrplus} package for standard distributions and \pkg{univariateML} for specialized cases. Both packages implement numerically stable algorithms with appropriate handling of boundary conditions and convergence diagnostics. When maximum likelihood estimation fails due to insufficient data, extreme parameter estimates, or numerical instability, \pkg{peppwR} provides three fallback strategies controlled by the \code{on\_fit\_failure} argument.
+
+The \code{"exclude"} strategy removes problematic peptides from analysis, reporting the exclusion count for transparency. The \code{"empirical"} strategy substitutes parametric distributions with empirical bootstrap resampling from observed values, preserving the exact empirical distribution at the cost of reduced statistical efficiency. The \code{"lognormal"} strategy fits a moment-matched lognormal distribution using method-of-moments estimates, providing a robust fallback when maximum likelihood fails but ensuring all peptides remain in analysis.
+
+Distribution fitting diagnostics include goodness-of-fit statistics (Kolmogorov-Smirnov, Anderson-Darling), QQ plots comparing theoretical and empirical quantiles, and density overlay plots visualizing the fitted distribution against observed data histograms. These diagnostics enable users to assess the adequacy of distributional assumptions and identify peptides where parametric modeling may be inappropriate.
+
+\subsection{Simulation Engine}
+
+Power estimation employs Monte Carlo simulation to accommodate the complex statistical properties of proteomics data that preclude analytical power calculations. The simulation framework generates synthetic datasets under specified experimental conditions, applies statistical tests, and estimates power as the proportion of simulations achieving statistical significance.
+
+For each peptide $i$ with fitted distribution $f_i(\cdot | \hat{\theta}_i)$ and each candidate sample size $n$, the simulation algorithm proceeds as follows:
 
 \begin{enumerate}
-\item Draw $n$ samples from the fitted control distribution
-\item Draw $n$ samples from a treatment distribution scaled by the specified effect size
-\item Apply the selected statistical test
-\item Record whether the null hypothesis is rejected
-\item Repeat for $n_{\mathrm{sim}}$ iterations
+\item Generate $n$ control group samples: $X_{i,\text{control}}^{(s)} \sim f_i(\cdot | \hat{\theta}_i)$ for $s = 1, \ldots, n$
+\item Generate $n$ treatment group samples: $X_{i,\text{treatment}}^{(s)} \sim f_i(\cdot | \delta \cdot \hat{\theta}_i)$ for $s = 1, \ldots, n$, where $\delta$ represents the multiplicative effect size
+\item Apply missing data patterns if \code{include\_missingness = TRUE}, randomly removing observations according to the peptide-specific missingness rate $r_i$
+\item Compute the test statistic and p-value using the specified statistical test
+\item Record rejection outcome: $R^{(j)} = \mathbf{1}[p^{(j)} \leq \alpha]$ for simulation $j$
+\item Repeat for $n_{\text{sim}}$ independent simulations
 \end{enumerate}
 
-Power is the proportion of iterations achieving statistical significance. In
-per-peptide mode, \pkg{peppwR} reports the proportion of peptides exceeding
-target power at each sample size.
+Power is estimated as:
+\begin{equation}
+\hat{\pi}_i(n, \delta) = \frac{1}{n_{\text{sim}}} \sum_{j=1}^{n_{\text{sim}}} R^{(j)}
+\end{equation}
+with Monte Carlo standard error $\text{SE}(\hat{\pi}_i) = \sqrt{\frac{\hat{\pi}_i(1-\hat{\pi}_i)}{n_{\text{sim}}}}$.
 
-\subsection{Statistical tests}
+The treatment effect parameterization accommodates different effect size interpretations. For location-scale families, the effect size $\delta$ scales the location parameter (mean for normal, rate parameter for gamma, location parameter for lognormal). This multiplicative scaling preserves the distributional shape while shifting the central tendency, consistent with biological interpretation of fold-changes in proteomics.
 
-\pkg{peppwR} supports three statistical tests. The \emph{Wilcoxon rank-sum test}
-\citep{wilcoxon1945} (default) is non-parametric and robust to distributional
-assumptions. The \emph{bootstrap-$t$ test} \citep{efron1994bootstrap} handles
-non-normality through resampling. The \emph{Bayes factor $t$-test}
-\citep{rouder2009bayest} provides a Bayesian approach that quantifies evidence
-strength rather than dichotomous rejection, offering improved efficiency when
-parametric assumptions hold.
+Convergence diagnostics monitor the stability of power estimates across simulation batches. The default $n_{\text{sim}} = 1000$ iterations provides adequate precision for most applications (Monte Carlo standard error $< 0.016$), but can be increased for higher precision requirements. Early stopping criteria can halt simulations when power estimates stabilize within specified tolerance bounds, improving computational efficiency for high-precision applications.
 
-\subsection{Missing data handling}
+The simulation engine supports vectorized operations across peptides and sample sizes, enabling efficient computation of power curves and sample size determinations. Parallel processing capabilities allow distribution across multiple CPU cores when analyzing large peptidomes, with linear scaling up to the number of available cores.
 
-\pkg{peppwR} tracks missingness at two levels. Per-peptide, it records the
-proportion of missing values. At the dataset level, it detects MNAR
-(missing-not-at-random) patterns by correlating mean abundance with missingness
-rate across peptides---a negative correlation indicates that low-abundance
-peptides are systematically more likely to be missing, the hallmark of
-detection-limit-driven MNAR common in mass spectrometry \citep{webb2015mnar}.
-When \code{include\_missingness = TRUE}, simulations incorporate observed
-per-peptide NA rates, providing power estimates that account for expected data loss.
+For FDR-aware simulations, the engine generates complete experiments across all peptides simultaneously, applies the Benjamini-Hochberg procedure to the resulting p-value vectors, and computes power as the proportion of true positives among discoveries. This approach correctly accounts for the dependence structure introduced by multiple testing correction, providing realistic power estimates for high-throughput experiments.
 
-\subsection{FDR-aware power}
+\subsection{Missing Data Handling}
 
-For whole-peptidome studies, \pkg{peppwR} can simulate complete experiments
-with Benjamini-Hochberg FDR correction \citep{benjamini1995fdr}. Setting
-\code{apply\_fdr = TRUE} runs simulations across all peptides simultaneously,
-reporting the proportion of true positives discovered at the target FDR threshold.
+\pkg{peppwR} incorporates missing data mechanisms specific to mass spectrometry-based proteomics, where detection limits create systematic patterns of missing-not-at-random (MNAR) data. The package implements a two-level approach to characterizing and incorporating missingness patterns into power calculations.
+
+At the dataset level, \pkg{peppwR} detects MNAR patterns by computing the Spearman correlation between peptide-level mean abundances and missingness rates. A significant negative correlation ($\rho < -0.3$, $p < 0.05$) indicates that low-abundance peptides are systematically more likely to be missing---the signature of detection-limit-driven MNAR common in discovery proteomics \citep{webb2015mnar}. This dataset-level diagnostic provides users with quantitative evidence for MNAR mechanisms and informs the interpretation of power analysis results.
+
+The MNAR detection algorithm computes peptide-specific summary statistics:
+\begin{align}
+\bar{x}_i &= \frac{1}{n_{\text{obs},i}} \sum_{j: x_{ij} \neq \text{NA}} x_{ij} \\
+r_i &= \frac{n_{\text{missing},i}}{n_{\text{total},i}}
+\end{align}
+where $\bar{x}_i$ is the mean abundance for peptide $i$ (excluding missing values), $r_i$ is the missingness rate, $n_{\text{obs},i}$ is the number of observed values, and $n_{\text{missing},i}$ is the number of missing values.
+
+At the peptide level, the package records the observed missingness rate $r_i$ for each peptide during the distribution fitting phase. When \code{include\_missingness = TRUE} is specified in power analysis, simulations incorporate these peptide-specific NA rates by randomly removing observations from generated samples with probability $r_i$. This approach preserves the heterogeneous pattern of data loss across peptides while maintaining the stochastic nature of missing data generation.
+
+The missing data incorporation algorithm modifies the standard simulation procedure:
+\begin{enumerate}
+\item Generate complete control and treatment samples as described above
+\item For each peptide $i$, randomly select $\lfloor n \cdot r_i \rfloor$ observations for removal from each group
+\item Apply the specified statistical test to the resulting incomplete data
+\item Record the test outcome, including cases where insufficient data remains for testing
+\end{enumerate}
+
+When missingness results in insufficient data for statistical testing (typically when fewer than 3 observations remain in either group), the peptide is excluded from that simulation iteration. The proportion of successful tests is reported alongside power estimates, providing transparency about the impact of missing data on statistical inference.
+
+This missingness-aware simulation provides realistic power estimates that account for expected data loss, enabling more accurate sample size determinations for experiments anticipated to have substantial missing values. Users can compare power estimates with and without missingness incorporation to quantify the impact of incomplete data on experimental design requirements.
+
+\subsection{Software Architecture}
+
+\pkg{peppwR} implements a modular S3 object-oriented architecture that promotes extensibility, maintainability, and consistent user experience across diverse analysis workflows. The package defines two primary S3 classes---\class{peppwr\_fits} and \class{peppwr\_power}---each equipped with specialized methods for printing, plotting, and summarization.
+
+The \class{peppwr\_fits} class encapsulates distribution fitting results, storing fitted parameters, goodness-of-fit statistics, and metadata for each peptide. The class structure includes:
+\begin{itemize}
+\item \code{fits}: List of fitted distribution objects for each peptide
+\item \code{best\_distributions}: Vector indicating the selected distribution for each peptide
+\item \code{fit\_diagnostics}: Matrix of AIC scores across distributions and peptides
+\item \code{missingness\_summary}: Peptide-level missingness rates and MNAR diagnostic statistics
+\item \code{metadata}: Experimental design information and fitting configuration
+\end{itemize}
+
+The \class{peppwr\_power} class stores power analysis results with associated simulation parameters:
+\begin{itemize}
+\item \code{power\_estimates}: Matrix of power values across sample sizes and peptides
+\item \code{sample\_sizes}: Vector of evaluated sample sizes
+\item \code{effect\_size}: Tested effect size magnitude
+\item \code{test\_method}: Statistical test employed
+\item \code{simulation\_params}: Monte Carlo simulation configuration
+\item \code{summary\_statistics}: Aggregated results across peptides
+\end{itemize}
+
+Method dispatch provides intuitive interfaces for common operations. The \code{print()} methods deliver concise summaries appropriate for interactive analysis, while \code{summary()} methods provide detailed statistical output including confidence intervals, fit diagnostics, and convergence assessments. The \code{plot()} methods generate diagnostic visualizations tailored to each class, supporting both base \proglang{R} graphics and \pkg{ggplot2} aesthetics.
+
+The modular design separates core functionality into distinct components: distribution fitting (\fct{fit\_distributions}), power analysis (\fct{power\_analysis}), simulation engine (\fct{run\_power\_simulation}), statistical tests (\fct{wilcoxon\_test}, \fct{bootstrap\_t\_test}, \fct{bayes\_t\_test}), and visualization (\fct{plot.peppwr\_fits}, \fct{plot.peppwr\_power}). This separation enables independent testing, debugging, and extension of individual components.
+
+Error handling follows defensive programming principles with comprehensive input validation, informative error messages, and graceful degradation when possible. The package validates experimental design matrices, distribution parameter bounds, simulation convergence, and statistical test assumptions, providing specific guidance for resolving common issues.
+
+Extensibility features include generic interfaces for adding new distributions (\fct{register\_distribution}), statistical tests (\fct{register\_test}), and effect size parameterizations. The plugin architecture allows users to incorporate domain-specific distributions or novel statistical approaches without modifying core package code.
+
+Performance optimization employs vectorized operations throughout the codebase, minimizing expensive loops and leveraging \proglang{R}'s optimized linear algebra routines. Memory management strategies include lazy evaluation of simulation results and optional disk-based storage for large-scale analyses. Profiling hooks enable users to monitor computational performance and identify bottlenecks in custom analyses.
+
+Integration with the broader \proglang{R} ecosystem follows established conventions. The package imports tidyverse functions with explicit namespacing (\code{dplyr::filter}, \code{ggplot2::ggplot}) to avoid conflicts while maintaining readable code. Dependencies are minimized to essential packages: \pkg{fitdistrplus} and \pkg{univariateML} for distribution fitting, \pkg{dplyr} and \pkg{tidyr} for data manipulation, and \pkg{ggplot2} for visualization. Optional dependencies (\pkg{parallel}, \pkg{bench}) enable advanced features without imposing unnecessary overhead on basic functionality.
 
 %% -- Example Application ------------------------------------------------------
 
