@@ -360,98 +360,100 @@ Based on research of recent JSS articles and editorial policies, JSS expects:
 
 ## Phase 3: New Content Development
 
-### Task 3.1: Benchmarking and Validation Section Creation
-**Agent Type:** `general-purpose` (analysis/benchmarking)
+### Task 3.1: Tool Comparison and Methodological Validation Section
+**Agent Type:** `general-purpose` (literature review/validation)
 **Dependencies:** Task 2.3 complete
-**Estimated Time:** 3-4 days (HIGHLY VARIABLE - see planning phase)
+**Estimated Time:** 3-4 days ✅ **SCOPE CONFIRMED via JSS Standards Research**
 
-**Objective:** Create entirely new 1000-word section demonstrating peppwR's advantages through systematic comparison
+**Objective:** Create JSS-standard tool comparison section (2-3 pages) using literature-based approach with complementary positioning
 
-**PREPARATION AND PLANNING (Complete BEFORE main task):**
+**✅ RESEARCH COMPLETE:** JSS standards analysis confirms literature-based comparison is standard practice. Empirical benchmarking not required unless performance is key differentiator.
 
-**Potential Difficulties to Investigate:**
-- NEW DEVELOPMENT: Entirely new content requiring significant analysis and coding
-- Tool access: Comparison tools may be difficult to install/run in current environment
-- Methodology design: Fair, rigorous comparison methodology needs development
-- Statistical analysis: Proper significance testing and confidence intervals required
-- Timeline risk: Could significantly exceed 3-4 day estimate
+**PREPARATION AND PLANNING (STREAMLINED - lower risk):**
+
+**Approach Confirmed by JSS Research:**
+- **Literature-based comparison** with capability matrix (standard JSS practice)
+- **Complementary positioning** rather than competitive (JSS preference)
+- **Focus on unique capabilities** rather than performance claims
+- **Methodological validation** through simulation studies (accuracy focus)
 
 **Pre-Task Investigation (Report findings to user):**
-1. **Tool Availability Assessment:** Attempt to install and test:
-   - Perseus: Download and basic functionality test
-   - clippda: CRAN availability and installation
-   - MultiPower: Installation requirements and dependencies
-   - G*Power: Accessibility for comparison studies
-2. **Benchmarking Methodology Research:** Investigate standard practices for software comparison in:
-   - JSS articles with tool comparisons
-   - Bioinformatics benchmarking papers
-   - Statistical software validation studies
-3. **Computational Requirements Assessment:** Estimate:
-   - Time needed for systematic performance testing
-   - Data requirements for fair comparison
-   - Statistical analysis complexity
-4. **Alternative Approach Evaluation:** Research feasibility of:
-   - Literature-based comparison instead of empirical
-   - Focused comparison with 1-2 tools instead of comprehensive
-   - Performance-only vs. accuracy comparison
-
-**CRITICAL Decision Points for User:**
-- Should we proceed with full empirical benchmarking or literature-based comparison?
-- Which tools are highest priority if we can't compare all?
-- What is acceptable timeline if full benchmarking takes 1-2 weeks?
-- Should this section be optional for initial submission, added in revision?
-- What level of statistical rigor is required for tool comparison?
-
-**⚠️ HIGH RISK TASK: Proceed to main task only after user approval of investigation findings and explicit scope decisions. Consider making optional if investigation reveals major barriers.**
-
-**Content Foundation:** `vignettes/articles/benchmarking.Rmd` (performance analysis starting point)
-
-**Required Subsections:**
-
-1. **4.1 Tool Comparison** (300-400 words)
-   - Head-to-head comparison with available alternatives
-   - Create comparison matrix table (features, assumptions, outputs)
-   - Quantitative accuracy assessment where possible
-   - Limitations of existing tools for proteomics data
-
-2. **4.2 Performance Analysis** (200-300 words)
-   - **Reference:** `vignettes/articles/benchmarking.Rmd`
-   - Runtime scaling with peptide count and simulation iterations
-   - Memory usage characteristics
-   - Computational complexity analysis
-   - Performance recommendations for different dataset sizes
-
-3. **4.3 Accuracy Assessment** (300-400 words)
-   - Simulation studies with known ground truth parameters
-   - Power estimation accuracy across parameter ranges
-   - Comparison with theoretical calculations where available
+1. **Tool Landscape Survey:** Research current power analysis tools for:
+   - General R packages: pwr, WebPower, simr, skpr
+   - Proteomics-specific: MSstats, MSstatsTMT
+   - Desktop applications: G*Power (conceptual reference only)
+   - Domain positioning: where does peppwR fit?
+2. **Capability Matrix Development:** Document feature comparison focusing on:
+   - Per-peptide analysis capabilities
+   - Missingness handling approaches
+   - FDR-aware power analysis
+   - Phosphoproteomics-specific design
+3. **Validation Study Scope:** Plan simulation studies demonstrating:
+   - Method accuracy across parameter ranges
    - Edge case behavior documentation
+   - Convergence properties validation
 
-4. **4.4 Edge Case Testing** (200-300 words)
-   - Behavior with extreme parameters (very high/low variance)
-   - Small sample size performance
-   - High missingness scenarios
-   - Convergence properties of simulations
+**Decision Points for User:**
+- Which tools are most important for capability comparison?
+- Should we include desktop applications (G*Power) or focus on R ecosystem?
+- What level of detail for methodological validation studies?
 
-**Development Requirements:**
-- Implement comparison studies if not already available
-- Generate benchmark datasets for consistent comparison
-- Create new analysis scripts for accuracy validation
-- Develop performance profiling code
+**📊 MEDIUM RISK TASK: Literature-focused approach with clear JSS precedents. Research phase confirms feasible scope.**
 
-**Quality Standards:**
-- All benchmarking methodologies clearly described
-- Results presented with confidence intervals
-- Fair comparison conditions for all tools
-- Performance recommendations actionable
-- Statistical significance testing of differences
+**Content Foundation:**
+- JSS research findings on tool comparison standards
+- `vignettes/articles/benchmarking.Rmd` (performance validation component)
+- skpr package JSS paper as structural template
 
-**Completion Criteria:**
-- [ ] Word count: 1000 words
-- [ ] Comprehensive tool comparison completed
-- [ ] Performance benchmarking results included
-- [ ] Accuracy validation demonstrates reliability
-- [ ] Edge case behavior documented
+**Required Subsections (JSS-Standard Structure):**
+
+1. **4.1 Power Analysis Landscape** (400-500 words)
+   - Brief survey of existing R packages (pwr, WebPower, simr)
+   - Domain-specific tools overview (MSstats, MSstatsTMT)
+   - Desktop applications context (G*Power conceptual reference)
+   - Gap identification: phosphoproteomics-specific needs
+
+2. **4.2 Capability Comparison** (400-500 words)
+   - **Feature matrix table:** peppwR vs existing tools
+   - Focus on unique capabilities:
+     * Per-peptide analysis with distribution fitting
+     * Missingness handling and MNAR detection
+     * FDR-aware power analysis
+     * Phosphoproteomics workflow integration
+   - Complementary positioning narrative (not competitive)
+
+3. **4.3 Methodological Validation** (600-700 words)
+   - **Reference:** `vignettes/articles/benchmarking.Rmd` foundation
+   - Simulation studies with known ground truth
+   - Power estimation accuracy across parameter ranges
+   - Edge case behavior (extreme parameters, small samples)
+   - Convergence properties and computational performance
+
+4. **4.4 Integration with pepdiff Workflow** (300-400 words)
+   - Position within broader phosphoproteomics analysis pipeline
+   - Connection to companion package for actual analysis
+   - Experimental design → data collection → analysis workflow
+
+**Development Requirements (Reduced Scope):**
+- Literature review of existing tool capabilities
+- Feature comparison matrix development
+- Validation studies using existing benchmarking.Rmd
+- No new tool installation or empirical comparison needed
+
+**Quality Standards (JSS-Aligned):**
+- Complementary rather than competitive positioning
+- Capability-focused comparison matrix
+- Literature-based tool assessment (JSS standard practice)
+- Methodological validation with simulation studies
+- Professional integration with existing sections
+
+**Completion Criteria (Updated):**
+- [ ] Word count: 1,800-2,100 words (JSS-standard 2-3 pages)
+- [ ] Literature-based tool landscape survey completed
+- [ ] Capability comparison matrix created
+- [ ] Methodological validation studies documented
+- [ ] Complementary positioning narrative developed
+- [ ] Integration with broader workflow described
 
 ### Task 3.2: Figure and Table Development
 **Agent Type:** `general-purpose` (visualization)
@@ -473,9 +475,10 @@ Based on research of recent JSS articles and editorial policies, JSS expects:
    - JSS compliance check (resolution, fonts, formatting)
    - Determine what updates are needed
 2. **Data Availability Check:** Verify data sources for new figures:
-   - Results from benchmarking analysis (Task 3.1)
+   - Results from methodological validation studies (Task 3.1)
    - Distribution fitting examples for diagnostics
    - Real data application results from enhanced examples
+   - **NOTE:** Phase 2 already created Figures 2-4, may reduce new figure requirements
 3. **JSS Figure Requirements Research:** Review JSS style requirements for:
    - Vector format specifications (PDF with embedded fonts)
    - Color accessibility guidelines

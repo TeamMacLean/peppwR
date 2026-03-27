@@ -1,9 +1,9 @@
 Package: peppwR
-Title: Power Analysis For Phosphopeptide Abundance Hypothesis Test
+Title: Power Analysis for Phosphopeptide Abundance Hypothesis Test
 Version: 0.1.0
 Author: Dan MacLean [aut, cre]
 Maintainer: Dan MacLean <dan.maclean@tsl.ac.uk>
-Authors@R: person("Dan", "MacLean", email = "dan.maclean@tsl.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1032-0887"))
+Authors@R: person("Dan", "MacLean", email = "dan.maclean@tsl.ac.uk", role = c("aut", "cre"))
 Description: Estimate best fit distributions and do power analysis for hypothesis tests on phosphopeptide abundance data.
 License: MIT + file LICENSE
 Encoding: UTF-8

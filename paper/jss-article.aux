@@ -33,13 +33,14 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overview of the {\fontseries  {m}\fontseries  {b}\selectfont  peppwR} workflow showing the two-stage process: distribution fitting followed by power analysis via Monte Carlo simulation.}}{4}{figure.1}\protected@file@percent }
 \newlabel{fig:workflow}{{1}{4}{Overview of the \pkg {peppwR} workflow showing the two-stage process: distribution fitting followed by power analysis via Monte Carlo simulation}{figure.1}{}}
 \citation{webb2015mnar}
-\newlabel{sec:example}{{3}{9}{}{section.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Distribution of statistical power across peptides at N=6 samples per group, demonstrating substantial heterogeneity in detectability. This variability motivates the per-peptide approach rather than relying on average power estimates.}}{11}{figure.2}\protected@file@percent }
-\newlabel{fig:power-distribution}{{2}{11}{Distribution of statistical power across peptides at N=6 samples per group, demonstrating substantial heterogeneity in detectability. This variability motivates the per-peptide approach rather than relying on average power estimates}{figure.2}{}}
-\newlabel{sec:discussion}{{4}{11}{}{section.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Comparison of sample size requirements between Wilcoxon rank-sum test and Bayes factor t-test. The Bayes factor approach achieves target power with substantially fewer samples when parametric assumptions are reasonable.}}{12}{figure.3}\protected@file@percent }
-\newlabel{fig:test-comparison}{{3}{12}{Comparison of sample size requirements between Wilcoxon rank-sum test and Bayes factor t-test. The Bayes factor approach achieves target power with substantially fewer samples when parametric assumptions are reasonable}{figure.3}{}}
-\newlabel{sec:summary}{{5}{12}{}{section.5}{}}
+\newlabel{sec:examples}{{3}{9}{}{section.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Validation and method comparison results. \textbf  {(A)} Ground truth validation showing excellent concordance between theoretical and empirical power estimates (MAE < 0.02, R² = 0.98). \textbf  {(B)} Statistical test comparison for DDA data (N=3, 2-fold effect) demonstrating superior performance of Bayes factor tests over traditional approaches. \textbf  {(C)} Edge case robustness testing showing graceful degradation under challenging conditions including high missingness rates.}}{10}{figure.2}\protected@file@percent }
+\newlabel{fig:validation}{{2}{10}{Validation and method comparison results. \textbf {(A)} Ground truth validation showing excellent concordance between theoretical and empirical power estimates (MAE < 0.02, R² = 0.98). \textbf {(B)} Statistical test comparison for DDA data (N=3, 2-fold effect) demonstrating superior performance of Bayes factor tests over traditional approaches. \textbf {(C)} Edge case robustness testing showing graceful degradation under challenging conditions including high missingness rates}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces DDA phosphoproteomics case study results (Arabidopsis time-course, n=2,228 peptides). \textbf  {(A)} Distribution fitting identified gamma and lognormal as dominant models, with substantial heterogeneity across peptides. \textbf  {(B)} Power heatmap reveals the experimental design space, with the transition from under-powered (<50\%) to well-powered (>80\%) regions clearly delineated. \textbf  {(C)} Sample size requirements for 80\% of peptides to achieve 80\% power: Wilcoxon tests require N=12 per group while Bayes factor tests achieve the same threshold at N=8.}}{12}{figure.3}\protected@file@percent }
+\newlabel{fig:dda-results}{{3}{12}{DDA phosphoproteomics case study results (Arabidopsis time-course, n=2,228 peptides). \textbf {(A)} Distribution fitting identified gamma and lognormal as dominant models, with substantial heterogeneity across peptides. \textbf {(B)} Power heatmap reveals the experimental design space, with the transition from under-powered (<50\%) to well-powered (>80\%) regions clearly delineated. \textbf {(C)} Sample size requirements for 80\% of peptides to achieve 80\% power: Wilcoxon tests require N=12 per group while Bayes factor tests achieve the same threshold at N=8}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces PRM targeted proteomics analysis with missing data handling (Magnaporthe oryzae, n=285 peptides). \textbf  {(A)} MNAR pattern detection showing strong negative correlation ($\rho = -0.42$, p < 0.001) between abundance and missingness rate, indicating systematic under-sampling of low-abundance peptides. \textbf  {(B)} Realistic power estimates accounting for missingness show 17\% reduction compared to complete-data scenarios. \textbf  {(C)} FDR-aware analysis with Benjamini-Hochberg correction reduces median power from 45\% to 31\%, reflecting the cost of multiple testing correction in targeted panels.}}{13}{figure.4}\protected@file@percent }
+\newlabel{fig:prm-results}{{4}{13}{PRM targeted proteomics analysis with missing data handling (Magnaporthe oryzae, n=285 peptides). \textbf {(A)} MNAR pattern detection showing strong negative correlation ($\rho = -0.42$, p < 0.001) between abundance and missingness rate, indicating systematic under-sampling of low-abundance peptides. \textbf {(B)} Realistic power estimates accounting for missingness show 17\% reduction compared to complete-data scenarios. \textbf {(C)} FDR-aware analysis with Benjamini-Hochberg correction reduces median power from 45\% to 31\%, reflecting the cost of multiple testing correction in targeted panels}{figure.4}{}}
+\newlabel{sec:discussion}{{4}{14}{}{section.4}{}}
 \bibdata{references}
 \bibcite{bacchetti2002peer}{{1}{2002}{{Bacchetti}}{{}}}
 \bibcite{benjamini1995fdr}{{2}{1995}{{Benjamini and Hochberg}}{{}}}
@@ -50,6 +51,7 @@
 \bibcite{cox2011principles}{{7}{2011}{{Cox \emph  {et~al.}}}{{Cox, Hein, Luber, Paron, Nagaraj, and Mann}}}
 \bibcite{delignette2015fitdistrplus}{{8}{2015}{{Delignette-Muller and Dutang}}{{}}}
 \bibcite{efron1994bootstrap}{{9}{1994}{{Efron and Tibshirani}}{{}}}
+\newlabel{sec:summary}{{5}{15}{}{section.5}{}}
 \bibcite{gpower}{{10}{2007}{{Faul \emph  {et~al.}}}{{Faul, Erdfelder, Lang, and Buchner}}}
 \bibcite{geyer2016review}{{11}{2016}{{Geyer \emph  {et~al.}}}{{Geyer, Kulak, Pichler, Holdt, Teupser, and Mann}}}
 \bibcite{hart2013calculating}{{12}{2013}{{Hart \emph  {et~al.}}}{{Hart, Therneau, Zhang, Poland, and Kocher}}}
@@ -73,4 +75,4 @@
 \bibcite{wilcoxon1945}{{30}{1945}{{Wilcoxon}}{{}}}
 \bibcite{wilkinson2019statistical}{{31}{2019}{{Wilkinson}}{{}}}
 \bibcite{zhang2018multiple}{{32}{2018}{{Zhang \emph  {et~al.}}}{{Zhang, Chambers, and Tabb}}}
-\gdef \@abspage@last{15}
+\gdef \@abspage@last{18}

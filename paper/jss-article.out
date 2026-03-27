@@ -5,9 +5,10 @@
 \BOOKMARK [2][-]{Subsection.2.2.Simulation Engine.2}{\376\377\000S\000i\000m\000u\000l\000a\000t\000i\000o\000n\000\040\000E\000n\000g\000i\000n\000e}{Section.1.Methods and Implementation.1}% 5
 \BOOKMARK [2][-]{Subsection.2.3.Missing Data Handling.2}{\376\377\000M\000i\000s\000s\000i\000n\000g\000\040\000D\000a\000t\000a\000\040\000H\000a\000n\000d\000l\000i\000n\000g}{Section.1.Methods and Implementation.1}% 6
 \BOOKMARK [2][-]{Subsection.2.4.Software Architecture.2}{\376\377\000S\000o\000f\000t\000w\000a\000r\000e\000\040\000A\000r\000c\000h\000i\000t\000e\000c\000t\000u\000r\000e}{Section.1.Methods and Implementation.1}% 7
-\BOOKMARK [1][-]{Section.2.Example Application.1}{\376\377\000E\000x\000a\000m\000p\000l\000e\000\040\000A\000p\000p\000l\000i\000c\000a\000t\000i\000o\000n}{}% 8
-\BOOKMARK [2][-]{Subsection.3.0.Per-peptide power analysis.2}{\376\377\000P\000e\000r\000-\000p\000e\000p\000t\000i\000d\000e\000\040\000p\000o\000w\000e\000r\000\040\000a\000n\000a\000l\000y\000s\000i\000s}{Section.2.Example Application.1}% 9
-\BOOKMARK [2][-]{Subsection.3.1.Power heterogeneity.2}{\376\377\000P\000o\000w\000e\000r\000\040\000h\000e\000t\000e\000r\000o\000g\000e\000n\000e\000i\000t\000y}{Section.2.Example Application.1}% 10
-\BOOKMARK [2][-]{Subsection.3.2.Effect of statistical test choice.2}{\376\377\000E\000f\000f\000e\000c\000t\000\040\000o\000f\000\040\000s\000t\000a\000t\000i\000s\000t\000i\000c\000a\000l\000\040\000t\000e\000s\000t\000\040\000c\000h\000o\000i\000c\000e}{Section.2.Example Application.1}% 11
-\BOOKMARK [1][-]{Section.3.Discussion.1}{\376\377\000D\000i\000s\000c\000u\000s\000s\000i\000o\000n}{}% 12
-\BOOKMARK [1][-]{Section.4.Summary.1}{\376\377\000S\000u\000m\000m\000a\000r\000y}{}% 13
+\BOOKMARK [1][-]{Section.2.Examples.1}{\376\377\000E\000x\000a\000m\000p\000l\000e\000s}{}% 8
+\BOOKMARK [2][-]{Subsection.3.0.Simulated Data Validation.2}{\376\377\000S\000i\000m\000u\000l\000a\000t\000e\000d\000\040\000D\000a\000t\000a\000\040\000V\000a\000l\000i\000d\000a\000t\000i\000o\000n}{Section.2.Examples.1}% 9
+\BOOKMARK [2][-]{Subsection.3.1.DDA Phosphoproteomics Case Study.2}{\376\377\000D\000D\000A\000\040\000P\000h\000o\000s\000p\000h\000o\000p\000r\000o\000t\000e\000o\000m\000i\000c\000s\000\040\000C\000a\000s\000e\000\040\000S\000t\000u\000d\000y}{Section.2.Examples.1}% 10
+\BOOKMARK [2][-]{Subsection.3.2.PRM Time-Course Analysis.2}{\376\377\000P\000R\000M\000\040\000T\000i\000m\000e\000-\000C\000o\000u\000r\000s\000e\000\040\000A\000n\000a\000l\000y\000s\000i\000s}{Section.2.Examples.1}% 11
+\BOOKMARK [2][-]{Subsection.3.3.Integration Examples.2}{\376\377\000I\000n\000t\000e\000g\000r\000a\000t\000i\000o\000n\000\040\000E\000x\000a\000m\000p\000l\000e\000s}{Section.2.Examples.1}% 12
+\BOOKMARK [1][-]{Section.3.Discussion.1}{\376\377\000D\000i\000s\000c\000u\000s\000s\000i\000o\000n}{}% 13
+\BOOKMARK [1][-]{Section.4.Summary.1}{\376\377\000S\000u\000m\000m\000a\000r\000y}{}% 14
