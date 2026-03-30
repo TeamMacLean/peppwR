@@ -69,24 +69,22 @@ estimate power for planned experiments, or identify minimum detectable effect si
 \section{Introduction} \label{sec:intro}
 
 % Statistical Power Foundation
-Statistical power---the probability of correctly rejecting a false null hypothesis---represents one of the most fundamental concepts in experimental design \citep{cohen1988power}. Introduced by \citet{neyman1933} and formalized by \citet{cohen1962}, power analysis provides the theoretical framework for determining appropriate sample sizes, estimating the likelihood of detecting true effects, and identifying minimum detectable effect sizes. The consequences of inadequate power are profound: under-powered studies waste resources and risk missing genuine biological discoveries, while over-powered designs are economically inefficient and may detect biologically trivial effects \citep{button2013power, ioannidis2005power}.
+Statistical power---the probability of correctly rejecting a false null hypothesis---represents one of the most fundamental concepts in experimental design \citep{cohen1988power}. Introduced by \citet{neyman1933} and formalized by \citet{cohen1962}, power analysis provides the theoretical framework for determining appropriate sample sizes, estimating the likelihood of detecting true effects, and identifying minimum detectable effect sizes. The consequences of inadequate power are profound: under-powered studies waste resources and risk missing genuine biological discoveries.
 
-Despite widespread adoption in clinical trials \citep{schulz2005sample} and genomics \citep{hart2013calculating}, power analysis remains systematically neglected in proteomics research. Recent surveys indicate that fewer than 15\% of published proteomics studies report formal power calculations \citep{wilkinson2019statistical}, compared to over 80\% in clinical research \citep{bacchetti2002peer}. This disparity persists despite the field's evolution toward increasingly quantitative approaches and the availability of sophisticated statistical methods for proteomics data analysis \citep{karp2010addressing}.
+Despite some adoption in clinical trials \citep{schulz2005sample}, power analysis remains systematically neglected in proteomics research. Most published proteomics studies do not report formal power calculations, in contrast to higher reporting rates observed in clinical research domains. This disparity persists despite the field's evolution toward increasingly quantitative approaches and the availability of sophisticated statistical methods for proteomics data analysis \citep{karp2010addressing}.
 
 % Proteomics-Specific Challenges
-Mass spectrometry-based proteomics presents unique statistical challenges that violate fundamental assumptions of traditional power analysis. First, peptide abundances exhibit extreme heterogeneity, with concentrations spanning 6-8 orders of magnitude within a single experiment \citep{olsen2006phosphoproteomics, humphrey2015phosphoproteomics}. This heterogeneity extends beyond mean abundances to encompass dramatic differences in variance structure across the peptidome \citep{karp2010addressing, varemo2013modeling}. Second, abundance distributions deviate substantially from normality, typically exhibiting right skewness better characterized by gamma, lognormal, or inverse Gaussian distributions \citep{hultin2005abundance, webb2015mnar}. These distributional properties reflect both biological variation and the multiplicative nature of mass spectrometry quantification processes \citep{cox2011principles}.
+Mass spectrometry-based proteomics presents unique statistical challenges that violate fundamental assumptions of traditional power analysis. Peptide abundances exhibit extreme heterogeneity, with concentrations spanning multiple orders of magnitude within a single experiment \citep{olsen2006phosphoproteomics, humphrey2015phosphoproteomics}. This heterogeneity extends beyond mean abundances to encompass dramatic differences in variance structure across the peptidome \citep{karp2010addressing}. Abundance distributions can deviate substantially from normality, typically exhibiting right skewness that may be better characterized by alternative distributions such as gamma, lognormal, or inverse Gaussian models \citep{webb2015mnar}. These distributional properties reflect both biological variation and the multiplicative nature of mass spectrometry quantification processes.
 
-Third, missing values in proteomics follow systematic, non-random patterns that fundamentally alter statistical inference. Low-abundance peptides are disproportionately affected by detection limits, creating missing-not-at-random (MNAR) data structures \citep{webb2015mnar, lazar2016mnar}. The proportion of missing values can exceed 50\% in discovery proteomics experiments, with missingness rates negatively correlated with abundance levels---a pattern that violates the missing-completely-at-random (MCAR) assumptions underlying most statistical tests \citep{tyanova2016imputation, o2018accounting}. Fourth, phosphoproteomics experiments routinely quantify thousands of peptides simultaneously, necessitating multiple testing corrections that substantially reduce effective statistical power \citep{karp2010addressing, zhang2018multiple}.
+Missing values in proteomics follow systematic, non-random patterns that fundamentally alter statistical inference. Low-abundance peptides are disproportionately affected by detection limits, creating missing-not-at-random (MNAR) data structures \citep{webb2015mnar, lazar2016mnar}. The proportion of missing values can exceed 50\% in discovery proteomics experiments \citep{tyanova2016imputation}, with missingness rates negatively correlated with abundance levels---a pattern that violates the missing-completely-at-random (MCAR) assumptions underlying most statistical tests. Fourth, phosphoproteomics experiments routinely quantify thousands of peptides simultaneously, necessitating multiple testing corrections that substantially reduce effective statistical power \citep{karp2010addressing, zhang2018multiple}.
 
 % Existing Tool Analysis
-Current power analysis tools address these proteomics-specific challenges incompletely or not at all (Table~\ref{tab:tool-comparison}). \pkg{Perseus} \citep{tyanova2016perseus}, the dominant analysis platform in proteomics with over 10,000 citations, provides comprehensive statistical analysis including t-tests, ANOVA, and volcano plots, but offers no power analysis functionality. Users must rely on generic tools or ad-hoc approaches for experimental design decisions. \pkg{MSstats} \citep{chang2012msstats} provides sophisticated variance component modeling through linear mixed models but restricts power analysis to protein-level aggregates using variance components estimated from fitted models, lacking the granular per-peptide heterogeneity assessment needed for phosphoproteomics experimental design. The \pkg{clippda} package \citep{nyangoma2012clippda} represents the only dedicated proteomics power analysis tool, but was specifically designed for SELDI-TOF peak data with strong assumptions of homogeneous variance across features---assumptions that poorly reflect modern LC-MS/MS data characteristics.
+Current power analysis tools address these proteomics-specific challenges incompletely or not at all (Table~\ref{tab:tool-comparison}). \pkg{Perseus} \citep{tyanova2016perseus}, a widely-used analysis platform in proteomics, provides comprehensive statistical analysis including t-tests, ANOVA, and volcano plots, but offers no power analysis functionality. Users must rely on generic tools or ad-hoc approaches for experimental design decisions. \pkg{MSstats} \citep{chang2012msstats} provides sophisticated variance component modeling through linear mixed models and supports analysis at both peptide and protein levels, but utilizes aggregate variance components from fitted models rather than individual per-peptide distribution modeling needed for comprehensive phosphoproteomics experimental design. The \pkg{clippda} package \citep{nyangoma2012clippda} was specifically designed for SELDI-TOF peak data and incorporates routines for handling data heterogeneities, but remains primarily focused on older mass spectrometry platforms rather than modern LC-MS/MS phosphoproteomics applications. \pkg{G*Power} \citep{gpower}, while widely used across scientific disciplines with over 30,000 citations, assumes normality and homogeneous variance, making it inappropriate for proteomics applications where data violate these assumptions. \pkg{MultiPower} \citep{tarazona2020multipower} addresses power analysis in multi-omics contexts and is designed for integrative analysis across multiple platforms (genomics, transcriptomics, metabolomics), with limited focus on the specific statistical challenges of proteomics-only experiments. The tool focuses on pathway-level analysis rather than individual protein or peptide quantification.
 
-\pkg{G*Power} \citep{gpower}, while widely used across scientific disciplines with over 30,000 citations, assumes normality and homogeneous variance, making it inappropriate for proteomics applications. Its power calculations for t-tests and ANOVA fundamentally misestimate required sample sizes when applied to non-normal, heterogeneous proteomics data. \pkg{MultiPower} \citep{tarazona2020multipower} addresses power analysis in multi-omics contexts but requires simultaneous data from multiple platforms (genomics, transcriptomics, metabolomics), limiting its applicability to proteomics-only experiments. \pkg{PowerAtlas} \citep{sham2020power} focuses on pathway-level analysis rather than individual protein or peptide quantification.
-
-While existing tools excel in their respective domains---\pkg{Perseus} for comprehensive proteomics analysis, \pkg{MSstats} for protein-level statistical modeling, and \pkg{G*Power} for classical statistical designs---none adequately addresses the unique experimental design challenges in phosphoproteomics. The absence of tools that combine per-peptide distribution modeling with realistic missing data patterns and FDR-aware calculations has led researchers to either skip power analysis entirely or apply inappropriate methods, potentially contributing to the reproducibility challenges observed in proteomics research \citep{wilkinson2019statistical, collins2020multi}. This methodological gap is particularly problematic given the high costs associated with proteomics experiments and the limited sample availability in many clinical contexts \citep{geyer2016review}.
+The absence of tools that combine per-peptide distribution modeling with realistic missing data patterns and FDR-aware calculations has led researchers to either skip power analysis entirely or apply inappropriate methods, potentially contributing to reproducibility issues and missed conclusions. This methodological gap is particularly problematic given the high costs associated with proteomics experiments and the limited sample availability in many contexts.
 
 % peppwR Positioning
-We present \pkg{peppwR}, an \proglang{R} package that directly addresses these limitations through simulation-based power analysis tailored specifically to mass spectrometry proteomics data. \pkg{peppwR} implements per-peptide distribution fitting to capture abundance heterogeneity, supports multiple statistical tests appropriate for non-normal data, incorporates realistic missing data patterns, and provides FDR-aware power calculations for high-throughput experiments. The package operates in two complementary modes: aggregate analysis for preliminary design decisions without pilot data, and per-peptide analysis that leverages pilot data to provide detailed, peptide-specific power estimates.
+\pkg{peppwR} is an \proglang{R} package that directly addresses these limitations through simulation-based power analysis tailored specifically to mass spectrometry proteomics data. \pkg{peppwR} implements per-peptide distribution fitting to capture abundance heterogeneity, supports multiple statistical tests appropriate for non-normal data, incorporates realistic missing data patterns, and provides FDR-aware power calculations for high-throughput experiments. The package operates in two complementary modes: aggregate analysis for preliminary design decisions without pilot data, and per-peptide analysis that leverages pilot data to provide detailed, peptide-specific power estimates.
 
 \pkg{peppwR} answers the three fundamental experimental design questions: ``What sample size do I need to achieve target power?'', ``What statistical power will my planned experiment achieve?'', and ``What is the minimum detectable effect size given my sample size constraints?'' By addressing the unique statistical properties of proteomics data, \pkg{peppwR} enables more informed experimental design decisions and contributes to improving the reproducibility and efficiency of proteomics research.
 
@@ -99,7 +97,7 @@ We present \pkg{peppwR}, an \proglang{R} package that directly addresses these l
 Tool & \begin{tabular}[c]{@{}c@{}}Proteomics\\Focus\end{tabular} & \begin{tabular}[c]{@{}c@{}}Per-feature\\Modeling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Non-normal\\Distributions\end{tabular} & \begin{tabular}[c]{@{}c@{}}Missing Data\\Handling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Multiple\\Testing\end{tabular} & \begin{tabular}[c]{@{}c@{}}Statistical\\Tests\end{tabular} \\
 \hline
 \pkg{peppwR} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \begin{tabular}[c]{@{}c@{}}Wilcoxon, Bootstrap-$t$\\Bayes Factor\end{tabular} \\
-\pkg{MSstats} & \checkmark & \texttimes\footnote{Protein-level variance components} & \checkmark & \checkmark & \checkmark & Linear mixed models \\
+\pkg{MSstats} & \checkmark & \texttimes\footnote{Aggregate variance components} & \checkmark & \checkmark & \checkmark & Linear mixed models \\
 \pkg{Perseus} & \checkmark & \texttimes & \checkmark & \checkmark & \checkmark & \begin{tabular}[c]{@{}c@{}}t-test, ANOVA\\Volcano plots\end{tabular} \\
 \pkg{clippda} & \texttimes\footnote{SELDI-TOF specific} & \texttimes & \texttimes & \texttimes & \texttimes & t-test \\
 \pkg{MultiPower} & \texttimes\footnote{Multi-omics integration} & \checkmark & \texttimes & \texttimes & \checkmark & Various \\
@@ -197,11 +195,10 @@ Power is estimated as:
 \begin{equation}
 \hat{\pi}_i(n, \delta) = \frac{1}{n_{\text{sim}}} \sum_{j=1}^{n_{\text{sim}}} R^{(j)}
 \end{equation}
-with Monte Carlo standard error $\text{SE}(\hat{\pi}_i) = \sqrt{\frac{\hat{\pi}_i(1-\hat{\pi}_i)}{n_{\text{sim}}}}$.
 
 The treatment effect parameterization accommodates different effect size interpretations. For location-scale families, the effect size $\delta$ scales the location parameter (mean for normal, rate parameter for gamma, location parameter for lognormal). This multiplicative scaling preserves the distributional shape while shifting the central tendency, consistent with biological interpretation of fold-changes in proteomics.
 
-Convergence diagnostics monitor the stability of power estimates across simulation batches. The default $n_{\text{sim}} = 1000$ iterations provides adequate precision for most applications (Monte Carlo standard error $< 0.016$), but can be increased for higher precision requirements. Early stopping criteria can halt simulations when power estimates stabilize within specified tolerance bounds, improving computational efficiency for high-precision applications.
+The default $n_{\text{sim}} = 1000$ simulations provides adequate precision for most applications, but can be increased for higher precision requirements.
 
 The simulation engine supports vectorized operations across peptides and sample sizes, enabling efficient computation of power curves and sample size determinations. Parallel processing capabilities allow distribution across multiple CPU cores when analyzing large peptidomes, with linear scaling up to the number of available cores.
 
@@ -236,63 +233,37 @@ This missingness-aware simulation provides realistic power estimates that accoun
 
 \subsection{Software Architecture}
 
-\pkg{peppwR} implements a modular S3 object-oriented architecture that promotes extensibility, maintainability, and consistent user experience across diverse analysis workflows. The package defines two primary S3 classes---\class{peppwr\_fits} and \class{peppwr\_power}---each equipped with specialized methods for printing, plotting, and summarization.
+\pkg{peppwR} implements an S3 object-oriented architecture with two primary classes: \class{peppwr\_fits} and \class{peppwr\_power}, each equipped with specialized methods for printing, plotting, and summarization.
 
 The \class{peppwr\_fits} class encapsulates distribution fitting results, storing fitted parameters, goodness-of-fit statistics, and metadata for each peptide. The class structure includes:
 \begin{itemize}
-\item \code{fits}: List of fitted distribution objects for each peptide
-\item \code{best\_distributions}: Vector indicating the selected distribution for each peptide
-\item \code{fit\_diagnostics}: Matrix of AIC scores across distributions and peptides
-\item \code{missingness\_summary}: Peptide-level missingness rates and MNAR diagnostic statistics
-\item \code{metadata}: Experimental design information and fitting configuration
+\item \code{data}: Original input data as nested tibble
+\item \code{fits}: List of fit result tibbles per peptide containing distribution names, log-likelihood values, and AIC scores
+\item \code{best}: Character vector indicating the best-fitting distribution for each peptide
+\item \code{call}: Original function call for reproducibility
+\item \code{missingness}: Tibble with peptide-level missingness rates and diagnostic statistics (optional)
+\item \code{dataset\_mnar}: Dataset-level MNAR correlation metric and interpretation (optional)
 \end{itemize}
 
 The \class{peppwr\_power} class stores power analysis results with associated simulation parameters:
 \begin{itemize}
-\item \code{power\_estimates}: Matrix of power values across sample sizes and peptides
-\item \code{sample\_sizes}: Vector of evaluated sample sizes
-\item \code{effect\_size}: Tested effect size magnitude
-\item \code{test\_method}: Statistical test employed
-\item \code{simulation\_params}: Monte Carlo simulation configuration
-\item \code{summary\_statistics}: Aggregated results across peptides
+\item \code{mode}: Analysis mode ("aggregate" or "per\_peptide")
+\item \code{question}: The solved question ("power", "sample\_size", or "effect\_size")
+\item \code{answer}: The computed result value
+\item \code{simulations}: List containing simulation results and configuration details
+\item \code{params}: List of input parameters used in the analysis
+\item \code{call}: Original function call for reproducibility
 \end{itemize}
 
-Method dispatch provides intuitive interfaces for common operations. The \code{print()} methods deliver concise summaries appropriate for interactive analysis, while \code{summary()} methods provide detailed statistical output including confidence intervals, fit diagnostics, and convergence assessments. The \code{plot()} methods generate diagnostic visualizations tailored to each class, supporting both base \proglang{R} graphics and \pkg{ggplot2} aesthetics.
+Method dispatch provides intuitive interfaces for common operations. The \code{print()} methods deliver concise summaries appropriate for interactive analysis, while \code{summary()} methods provide detailed statistical output including confidence intervals and fit diagnostics. The \code{plot()} methods generate diagnostic visualizations tailored to each class.
 
-The modular design separates core functionality into distinct components: distribution fitting (\fct{fit\_distributions}), power analysis (\fct{power\_analysis}), simulation engine (\fct{run\_power\_simulation}), statistical tests (\fct{wilcoxon\_test}, \fct{bootstrap\_t\_test}, \fct{bayes\_t\_test}), and visualization (\fct{plot.peppwr\_fits}, \fct{plot.peppwr\_power}). This separation enables independent testing, debugging, and extension of individual components.
-
-Error handling follows defensive programming principles with comprehensive input validation, informative error messages, and graceful degradation when possible. The package validates experimental design matrices, distribution parameter bounds, simulation convergence, and statistical test assumptions, providing specific guidance for resolving common issues.
-
-Extensibility features include generic interfaces for adding new distributions (\fct{register\_distribution}), statistical tests (\fct{register\_test}), and effect size parameterizations. The plugin architecture allows users to incorporate domain-specific distributions or novel statistical approaches without modifying core package code.
-
-Performance optimization employs vectorized operations throughout the codebase, minimizing expensive loops and leveraging \proglang{R}'s optimized linear algebra routines. Memory management strategies include lazy evaluation of simulation results and optional disk-based storage for large-scale analyses. Profiling hooks enable users to monitor computational performance and identify bottlenecks in custom analyses.
-
-Integration with the broader \proglang{R} ecosystem follows established conventions. The package imports tidyverse functions with explicit namespacing (\code{dplyr::filter}, \code{ggplot2::ggplot}) to avoid conflicts while maintaining readable code. Dependencies are minimized to essential packages: \pkg{fitdistrplus} and \pkg{univariateML} for distribution fitting, \pkg{dplyr} and \pkg{tidyr} for data manipulation, and \pkg{ggplot2} for visualization. Optional dependencies (\pkg{parallel}, \pkg{bench}) enable advanced features without imposing unnecessary overhead on basic functionality.
+The design separates core functionality into distinct components: distribution fitting (\fct{fit\_distributions}), power analysis (\fct{power\_analysis}), simulation engine (\fct{run\_power\_sim}), statistical tests (\fct{test\_wilcoxon}, \fct{test\_bootstrap\_t}, \fct{test\_bayes\_t}), and visualization (\fct{plot.peppwr\_fits}, \fct{plot.peppwr\_power}). This modular architecture enables flexible extension while maintaining clear separation of concerns.
 
 %% -- Examples -----------------------------------------------------------------
 
 \section{Examples} \label{sec:examples}
 
 This section demonstrates \pkg{peppwR} capabilities through comprehensive validation studies and real-world phosphoproteomics case studies. We present four complementary analyses: validation against theoretical expectations, detailed analysis of DDA time-course experiments, PRM targeted analysis with missing data handling, and integration workflows with companion analysis tools.
-
-\subsection{Simulated Data Validation}
-
-\pkg{peppwR} validation employs controlled simulations where ground truth power is known analytically, enabling direct comparison between theoretical and empirical estimates. We generated 1,000 peptides with known gamma distributions ($\alpha = 2, \beta = 0.1$) and systematically varied effect sizes from 1.2-fold to 3-fold changes and sample sizes from $N=3$ to $N=15$ per group.
-
-For the theoretical benchmark, analytical power calculations used the exact distributions under null and alternative hypotheses. Consider a gamma-distributed peptide with parameters $(\alpha, \beta)$ under control conditions and $(\alpha, \delta \cdot \beta)$ under treatment with effect size $\delta$. The Wilcoxon rank-sum test power can be calculated as $P(\text{AUC} > \text{critical threshold})$ where AUC follows a beta distribution with parameters dependent on the underlying gamma distributions.
-
-\pkg{peppwR} achieved excellent concordance with theoretical expectations across all tested conditions. Mean absolute error between simulated and theoretical power remained below 0.02 (95\% CI: 0.015-0.025) across 50 parameter combinations. The largest discrepancies occurred at extreme effect sizes ($\delta > 5$) where finite sample effects and numerical precision became limiting factors. Importantly, the per-peptide heterogeneity modeling captured realistic variance in power estimates: peptides with identical theoretical parameters showed empirical power distributions with standard deviation 0.03-0.05, reflecting the stochastic nature of small-sample experiments.
-
-Edge case testing validated \pkg{peppwR} robustness under challenging conditions. With 90\% missing data, MNAR correlation detection correctly identified the systematic abundance-missingness relationship ($\rho = -0.87, p < 0.001$). Power estimates appropriately decreased when including missingness simulation, with median reductions of 15-25\% compared to complete-data scenarios. The package gracefully handled distribution fitting failures through configurable fallback strategies: empirical bootstrap maintained 95\% of original power when parametric fitting failed, while moment-matched lognormal approximation preserved 92\% accuracy.
-
-Multiple testing correction validation confirmed FDR-aware power calculations. Simulated experiments with 10,000 peptides (90\% true nulls) achieved target FDR control ($\leq 0.05$) while maintaining expected power levels. The Benjamini-Hochberg procedure correctly reduced power estimates by 20-40\% compared to unadjusted analyses, with the reduction magnitude appropriately dependent on peptidome size and null proportion assumptions. Figure~\ref{fig:validation} summarizes the comprehensive validation results, demonstrating \pkg{peppwR}'s accuracy across diverse experimental conditions and its robustness under challenging data scenarios.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figure_2}
-\caption{Validation and method comparison results. \textbf{(A)} Ground truth validation showing excellent concordance between theoretical and empirical power estimates (MAE < 0.02, R² = 0.98). \textbf{(B)} Statistical test comparison for DDA data (N=3, 2-fold effect) demonstrating superior performance of Bayes factor tests over traditional approaches. \textbf{(C)} Edge case robustness testing showing graceful degradation under challenging conditions including high missingness rates.}
-\label{fig:validation}
-\end{figure}
 
 \subsection{DDA Phosphoproteomics Case Study}
 
@@ -340,21 +311,7 @@ FDR-aware analysis addressed multiple testing considerations specific to targete
 \label{fig:prm-results}
 \end{figure}
 
-\subsection{Integration Examples}
-
-\pkg{peppwR} designed workflows integrate seamlessly with established proteomics analysis pipelines, particularly the \pkg{pepdiff} companion package for differential abundance analysis. This integration enables end-to-end experimental design and analysis workflows: power calculations inform experimental design decisions, while subsequent analysis leverages the same distributional assumptions and statistical frameworks established during planning phases.
-
-Data import capabilities accommodate diverse experimental platforms and quantification software. The package accepts standard tabular formats from MaxQuant, Proteome Discoverer, and Skyline with flexible column mapping for peptide identifiers, group assignments, and abundance values. Automated data validation checks identify common formatting issues and provide specific guidance for resolution.
-
-Export functionality enables results integration with downstream analysis tools. Power analysis results export to structured formats compatible with \pkg{pepdiff} for analysis planning, while diagnostic plots integrate with standard reporting workflows using \pkg{ggplot2} graphics that maintain consistent aesthetics with other proteomics visualization tools.
-
-Quality control integration leverages \pkg{peppwR} diagnostic capabilities for pilot study evaluation. Distribution fitting diagnostics identify peptides with poor parametric model fit, suggesting candidates for empirical bootstrap analysis or exclusion from power calculations. Missingness pattern visualization enables data quality assessment and MNAR detection that informs both experimental design decisions and downstream analysis strategies.
-
-The validation framework supports method comparison studies and benchmarking against alternative power analysis approaches. Simulation capabilities enable head-to-head comparisons with generic statistical software, demonstrating the importance of proteomics-specific modeling assumptions. These comparisons consistently show 15-25\% improvements in power estimation accuracy when using \pkg{peppwR} compared to normality-assuming alternatives.
-
-Future integration possibilities include direct connection to experimental data repositories and integration with laboratory information management systems (LIMS) for automated power calculations during study planning. The modular software architecture facilitates these extensions while maintaining backward compatibility with existing workflows.
-
-\emph{Comprehensive workflows}: Detailed step-by-step analyses for both DDA and PRM datasets are available in the package vignettes. The ``DDA Time-Course Power Analysis'' vignette (\texttt{vignette("dda-time-course-power")}) provides complete code for the Arabidopsis analysis presented here, while the ``PRM Analysis with Missing Data'' vignette (\texttt{vignette("prm-genotype-power")}) demonstrates the full PRM workflow including MNAR detection and FDR-aware calculations. The ``Benchmarking peppwR'' vignette (\texttt{vignette("benchmarking")}) contains detailed performance analyses and validation studies supporting the results shown in Figure~\ref{fig:validation}.
+ Detailed step-by-step analyses for both DDA and PRM datasets are available in the package vignettes. The ``DDA Time-Course Power Analysis'' vignette (\texttt{vignette("dda-time-course-power")}) provides complete code for the Arabidopsis analysis presented here, while the ``PRM Analysis with Missing Data'' vignette (\texttt{vignette("prm-genotype-power")}) demonstrates the full PRM workflow including MNAR detection and FDR-aware calculations. The ``Benchmarking peppwR'' vignette (\texttt{vignette("benchmarking")}) contains detailed performance analyses and validation studies supporting the results shown in Figure~\ref{fig:validation}.
 
 %% -- Discussion ---------------------------------------------------------------
 

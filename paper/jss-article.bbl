@@ -1,4 +1,4 @@
-\begin{thebibliography}{32}
+\begin{thebibliography}{19}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -8,23 +8,17 @@
   \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi
 \providecommand{\eprint}[2][]{\url{#2}}
 
-\bibitem[{Bacchetti(2002)}]{bacchetti2002peer}
-Bacchetti P (2002).
-\newblock \enquote{Peer review of statistics in medical research: the other problem.}
-\newblock \emph{BMJ}, \textbf{324}(7348), 1271--1273.
-\newblock \doi{10.1136/bmj.324.7348.1271}.
-
-\bibitem[{Benjamini and Hochberg(1995)}]{benjamini1995fdr}
-Benjamini Y, Hochberg Y (1995).
-\newblock \enquote{Controlling the false discovery rate: a practical and powerful approach to multiple testing.}
-\newblock \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, \textbf{57}(1), 289--300.
-\newblock \doi{10.1111/j.2517-6161.1995.tb02031.x}.
-
 \bibitem[{Button \emph{et~al.}(2013)Button, Ioannidis, Mokrysz, Nosek, Flint, Robinson, and Munaf{\`o}}]{button2013power}
 Button KS, Ioannidis JP, Mokrysz C, Nosek BA, Flint J, Robinson ES, Munaf{\`o} MR (2013).
 \newblock \enquote{Power failure: why small sample size undermines the reliability of neuroscience.}
 \newblock \emph{Nature Reviews Neuroscience}, \textbf{14}(5), 365--376.
 \newblock \doi{10.1038/nrn3475}.
+
+\bibitem[{Chang \emph{et~al.}(2014)Chang, Picotti, Huttenhower, and Vitek}]{chang2012msstats}
+Chang CY, Picotti P, Huttenhower C, Vitek O (2014).
+\newblock \enquote{\pkg{MSstats}: An \proglang{R} Package for Statistical Analysis of Quantitative Mass Spectrometry-based Proteomic Experiments.}
+\newblock \emph{Bioinformatics}, \textbf{30}(17), 2524--2526.
+\newblock \doi{10.1093/bioinformatics/btu305}.
 
 \bibitem[{Cohen(1962)}]{cohen1962}
 Cohen J (1962).
@@ -38,53 +32,17 @@ Cohen J (1988).
 \newblock 2nd edition. Lawrence Erlbaum Associates.
 \newblock \doi{10.4324/9780203771587}.
 
-\bibitem[{Collins \emph{et~al.}(2020)Collins, Hunter, Liu, Schilling, Rosenberger, Bader, Chan, Gibson, Gingras, Held \emph{et~al.}}]{collins2020multi}
-Collins BC, Hunter CL, Liu Y, Schilling B, Rosenberger G, Bader SL, Chan DW, Gibson BW, Gingras AC, Held JM, \emph{et~al.} (2020).
-\newblock \enquote{Multi-laboratory assessment of reproducibility, qualitative and quantitative proteomic analysis of complex samples.}
-\newblock \emph{Nature Communications}, \textbf{8}(1), 1--13.
-\newblock \doi{10.1038/s41467-017-00858-6}.
-
-\bibitem[{Cox \emph{et~al.}(2011)Cox, Hein, Luber, Paron, Nagaraj, and Mann}]{cox2011principles}
-Cox J, Hein MY, Luber CA, Paron I, Nagaraj N, Mann M (2011).
-\newblock \enquote{Principles and practice of quantitative mass spectrometry for molecular and cellular biology.}
-\newblock \emph{Molecular \& Cellular Proteomics}, \textbf{10}(1), M110.007583.
-\newblock \doi{10.1074/mcp.M110.007583}.
-
-\bibitem[{Delignette-Muller and Dutang(2015)}]{delignette2015fitdistrplus}
-Delignette-Muller ML, Dutang C (2015).
-\newblock \enquote{\pkg{fitdistrplus}: An \proglang{R} Package for Fitting Distributions.}
-\newblock \emph{Journal of Statistical Software}, \textbf{64}(4), 1--34.
-\newblock \doi{10.18637/jss.v064.i04}.
-
-\bibitem[{Efron and Tibshirani(1994)}]{efron1994bootstrap}
-Efron B, Tibshirani RJ (1994).
-\newblock \emph{An Introduction to the Bootstrap}.
-\newblock 1st edition. Chapman and Hall/CRC.
-\newblock \doi{10.1201/9780429246593}.
-
 \bibitem[{Faul \emph{et~al.}(2007)Faul, Erdfelder, Lang, and Buchner}]{gpower}
 Faul F, Erdfelder E, Lang AG, Buchner A (2007).
 \newblock \enquote{\pkg{G*Power} 3: A Flexible Statistical Power Analysis Program for the Social, Behavioral, and Biomedical Sciences.}
 \newblock \emph{Behavior Research Methods}, \textbf{39}(2), 175--191.
 \newblock \doi{10.3758/bf03193146}.
 
-\bibitem[{Geyer \emph{et~al.}(2016)Geyer, Kulak, Pichler, Holdt, Teupser, and Mann}]{geyer2016review}
-Geyer PE, Kulak NA, Pichler G, Holdt LM, Teupser D, Mann M (2016).
-\newblock \enquote{Review and perspective: life science applications of scanning ion conductance microscopy.}
-\newblock \emph{Nature}, \textbf{537}(7620), 347--356.
-\newblock \doi{10.1038/nature19949}.
-
 \bibitem[{Hart \emph{et~al.}(2013)Hart, Therneau, Zhang, Poland, and Kocher}]{hart2013calculating}
 Hart SN, Therneau TM, Zhang Y, Poland GA, Kocher JP (2013).
 \newblock \enquote{Calculating sample size estimates for RNA sequencing data.}
 \newblock \emph{Journal of Computational Biology}, \textbf{20}(12), 970--978.
 \newblock \doi{10.1089/cmb.2012.0283}.
-
-\bibitem[{Hultin \emph{et~al.}(2005)Hultin, Hausner, Hultin, and Giorgi}]{hultin2005abundance}
-Hultin LE, Hausner MA, Hultin PM, Giorgi JV (2005).
-\newblock \enquote{Abundance and dynamics of proteins in the human plasma proteome.}
-\newblock \emph{Journal of Proteome Research}, \textbf{4}(4), 1388--1394.
-\newblock \doi{10.1021/pr050064h}.
 
 \bibitem[{Humphrey \emph{et~al.}(2015)Humphrey, Azimifar, and Mann}]{humphrey2015phosphoproteomics}
 Humphrey SJ, Azimifar SB, Mann M (2015).
@@ -123,35 +81,17 @@ Nyangoma SO, Collins SI, Altman DG, Johnson P, Billingham L (2012).
 \newblock \doi{10.1515/1544-6115.1686}.
 \newblock \pkg{clippda} \proglang{R} package available from Bioconductor.
 
-\bibitem[{O'Brien \emph{et~al.}(2018)O'Brien, Gunawardena, and Paulo}]{o2018accounting}
-O'Brien JJ, Gunawardena J, Paulo JA (2018).
-\newblock \enquote{Accounting for missing values in multiplexed quantitative proteomics.}
-\newblock \emph{Nature Methods}, \textbf{15}(11), 881--882.
-\newblock \doi{10.1038/s41592-018-0146-7}.
-
 \bibitem[{Olsen \emph{et~al.}(2006)Olsen, Blagoev, Gnad, Macek, Kumar, Mortensen, and Mann}]{olsen2006phosphoproteomics}
 Olsen JV, Blagoev B, Gnad F, Macek B, Kumar C, Mortensen P, Mann M (2006).
 \newblock \enquote{Global, in vivo, and site-specific phosphorylation dynamics in signaling networks.}
 \newblock \emph{Cell}, \textbf{127}(3), 635--648.
 \newblock \doi{10.1016/j.cell.2006.09.026}.
 
-\bibitem[{Rouder \emph{et~al.}(2009)Rouder, Speckman, Sun, Morey, and Iverson}]{rouder2009bayest}
-Rouder JN, Speckman PL, Sun D, Morey RD, Iverson G (2009).
-\newblock \enquote{Bayesian t tests for accepting and rejecting the null hypothesis.}
-\newblock \emph{Psychonomic Bulletin \& Review}, \textbf{16}(2), 225--237.
-\newblock \doi{10.3758/PBR.16.2.225}.
-
 \bibitem[{Schulz and Grimes(2005)}]{schulz2005sample}
 Schulz KF, Grimes DA (2005).
 \newblock \enquote{Sample size calculations in randomised trials: mandatory and mystical.}
 \newblock \emph{The Lancet}, \textbf{365}(9467), 1348--1353.
 \newblock \doi{10.1016/S0140-6736(05)61034-3}.
-
-\bibitem[{Sham \emph{et~al.}(2020)Sham, Cherny, and Purcell}]{sham2020power}
-Sham PC, Cherny SS, Purcell S (2020).
-\newblock \enquote{\pkg{PowerAtlas}: power analysis for microarray, RNA-seq and proteomics studies.}
-\newblock \emph{Nucleic Acids Research}, \textbf{37}(Web Server issue), W827--W832.
-\newblock \doi{10.1093/nar/gkp296}.
 
 \bibitem[{Tarazona \emph{et~al.}(2020)Tarazona, Balzano-Nogueira, G{\'o}mez-Cabrero, Schmidt, Madeira, and Conesa}]{tarazona2020multipower}
 Tarazona S, Balzano-Nogueira L, G{\'o}mez-Cabrero D, Schmidt A, Madeira SC, Conesa A (2020).
@@ -171,29 +111,11 @@ Tyanova S, Temu T, Sinitcyn P, Carlson A, Hein MY, Geiger T, Mann M, Cox J (2016
 \newblock \emph{Nature Methods}, \textbf{13}(9), 731--740.
 \newblock \doi{10.1038/nmeth.3901}.
 
-\bibitem[{Varemo \emph{et~al.}(2013)Varemo, Henriksen, Scheele, Broholm, Pedersen, Uhlén, Pedersen, and Nielsen}]{varemo2013modeling}
-Varemo L, Henriksen TI, Scheele C, Broholm C, Pedersen M, Uhlén M, Pedersen BK, Nielsen J (2013).
-\newblock \enquote{Modeling the effect of cellular heterogeneity on the cell type-resolved transcriptome.}
-\newblock \emph{Genome Research}, \textbf{23}(12), 2063--2073.
-\newblock \doi{10.1101/gr.155697.113}.
-
 \bibitem[{Webb-Robertson \emph{et~al.}(2015)Webb-Robertson, Wiber, Matzke, Samuel, Rodland, Clauss, and Pounds}]{webb2015mnar}
 Webb-Robertson BJM, Wiber HK, Matzke MM, Samuel JN, Rodland KD, Clauss TR, Pounds JG (2015).
 \newblock \enquote{Review, evaluation, and discussion of the challenges of missing value imputation for mass spectrometry-based label-free global proteomics.}
 \newblock \emph{Journal of Proteome Research}, \textbf{14}(5), 1993--2001.
 \newblock \doi{10.1021/pr501138h}.
-
-\bibitem[{Wilcoxon(1945)}]{wilcoxon1945}
-Wilcoxon F (1945).
-\newblock \enquote{Individual comparisons by ranking methods.}
-\newblock \emph{Biometrics Bulletin}, \textbf{1}(6), 80--83.
-\newblock \doi{10.2307/3001968}.
-
-\bibitem[{Wilkinson(2019)}]{wilkinson2019statistical}
-Wilkinson L (2019).
-\newblock \enquote{Statistical methods in proteomics.}
-\newblock \emph{Methods in Molecular Biology}, \textbf{1893}, 323--357.
-\newblock \doi{10.1007/978-1-4939-8910-2_14}.
 
 \bibitem[{Zhang \emph{et~al.}(2018)Zhang, Chambers, and Tabb}]{zhang2018multiple}
 Zhang B, Chambers MC, Tabb DL (2018).

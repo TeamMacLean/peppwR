@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.4)  27 MAR 2026 11:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.4)  30 MAR 2026 12:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -368,7 +368,7 @@ Package hyperref Info: Link coloring ON on input line 65.
 \@outlinefile=\write4
 \openout4 = `jss-article.out'.
 
-<jsslogo.jpg, id=60, 540.0175pt x 393.47pt>
+<jsslogo.jpg, id=76, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
 Package pdftex.def Info: jsslogo.jpg  used on input line 65.
@@ -417,30 +417,24 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 {/Users/macleand/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc} <./jsslogo.jpg>]
 
-Package natbib Warning: Citation `chang2012msstats' on page 2 undefined on input line 82.
-
-
-
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 2 []
  []
 
 [2]
-Overfull \hbox (2.7842pt too wide) in paragraph at lines 89--90
-[]\T1/lmr/m/n/10.95 We present \T1/lmr/b/n/10.95 pep-pwR\T1/lmr/m/n/10.95 , an \T1/lmss/m/n/10.95 R \T1/lmr/m/n/10.95 pack-age that di-rectly ad-dresses these lim-i-ta-tions through simulation-
- []
-
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 102.
+(Font)              <9> on input line 100.
 
-Overfull \hbox (77.59775pt too wide) in paragraph at lines 97--109
+Overfull \hbox (77.59775pt too wide) in paragraph at lines 95--107
  [][] 
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
+<figure_1.pdf, id=163, 578.16pt x 505.89pt>
+File: figure_1.pdf Graphic file (type pdf)
+<use figure_1.pdf>
+Package pdftex.def Info: figure_1.pdf  used on input line 117.
+(pdftex.def)             Requested size: 265.59494pt x 232.39572pt.
 
 
 
@@ -448,13 +442,8 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 3
  []
 
-[3]
-<figure_1.pdf, id=198, 578.16pt x 505.89pt>
-File: figure_1.pdf Graphic file (type pdf)
-<use figure_1.pdf>
-Package pdftex.def Info: figure_1.pdf  used on input line 119.
-(pdftex.def)             Requested size: 265.59494pt x 232.39572pt.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 128.
+[3{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 126.
  (/Users/macleand/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -464,8 +453,8 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 4 []
  []
 
-[4{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc} <./figure_1.pdf>]
-Overfull \hbox (39.27682pt too wide) in paragraph at lines 160--161
+[4{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc} <./figure_1.pdf>]
+Overfull \hbox (39.27682pt too wide) in paragraph at lines 158--159
 \T1/lmr/m/n/10.95 log-nor-mal ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^[[]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ), nor-mal ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^[[]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ), and in-verse Gaus-sian ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^U\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ).
  []
 
@@ -476,8 +465,8 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 5
  []
 
-[5{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-Overfull \hbox (17.0941pt too wide) in paragraph at lines 179--180
+[5]
+Overfull \hbox (17.0941pt too wide) in paragraph at lines 177--178
 []\T1/lmr/m/n/10.95 Distribution fit-ting di-ag-nos-tics in-clude goodness-of-fit statis-tics (Kolmogorov-Smirnov, Anderson-
  []
 
@@ -496,23 +485,16 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [7]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 243.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 240.
  (/Users/macleand/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-
-
-Overfull \hbox (5.47499pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 8 []
- []
-
-[8{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-Overfull \hbox (80.69443pt too wide) in paragraph at lines 262--263
+Overfull \hbox (80.69443pt too wide) in paragraph at lines 259--260
 \T1/lmr/m/n/10.95 (\T1/lmtt/m/n/10.95 fit_distributions()\T1/lmr/m/n/10.95 ), power anal-y-sis (\T1/lmtt/m/n/10.95 power_analysis()\T1/lmr/m/n/10.95 ), sim-u-la-tion en-gine (\T1/lmtt/m/n/10.95 run_power_simulation()\T1/lmr/m/n/10.95 ),
  []
 
 
-Overfull \hbox (58.52142pt too wide) in paragraph at lines 266--267
+Overfull \hbox (58.52142pt too wide) in paragraph at lines 263--264
 []\T1/lmr/m/n/10.95 Extensibility fea-tures in-clude generic in-ter-faces for adding new dis-tri-bu-tions (\T1/lmtt/m/n/10.95 register_distribution()\T1/lmr/m/n/10.95 ),
  []
 
@@ -520,18 +502,25 @@ Overfull \hbox (58.52142pt too wide) in paragraph at lines 266--267
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 8 []
+ []
+
+[8{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+
+
+Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 9
  []
 
 [9]
-Overfull \hbox (11.82875pt too wide) in paragraph at lines 286--287
+Overfull \hbox (11.82875pt too wide) in paragraph at lines 283--284
 \T1/lmr/m/n/10.95 when in-clud-ing miss-ing-ness sim-u-la-tion, with me-dian re-duc-tions of 15-25% com-pared to complete-
  []
 
-<figure_2.pdf, id=276, 867.24pt x 289.08pt>
+<figure_2.pdf, id=252, 867.24pt x 289.08pt>
 File: figure_2.pdf Graphic file (type pdf)
 <use figure_2.pdf>
-Package pdftex.def Info: figure_2.pdf  used on input line 292.
+Package pdftex.def Info: figure_2.pdf  used on input line 289.
 (pdftex.def)             Requested size: 442.65375pt x 147.55235pt.
 
 
@@ -540,9 +529,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 10 []
  []
 
-[10]
-Underfull \vbox (badness 1194) has occurred while \output is active []
-
+[10 <./figure_2.pdf>]
+<figure_3.pdf, id=272, 867.24pt x 289.08pt>
+File: figure_3.pdf Graphic file (type pdf)
+<use figure_3.pdf>
+Package pdftex.def Info: figure_3.pdf  used on input line 312.
+(pdftex.def)             Requested size: 442.65375pt x 147.55235pt.
 
 
 
@@ -550,12 +542,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 11
  []
 
-[11 <./figure_2.pdf>]
-<figure_3.pdf, id=302, 867.24pt x 289.08pt>
-File: figure_3.pdf Graphic file (type pdf)
-<use figure_3.pdf>
-Package pdftex.def Info: figure_3.pdf  used on input line 315.
-(pdftex.def)             Requested size: 442.65375pt x 147.55235pt.
+[11]
+Underfull \vbox (badness 1194) has occurred while \output is active []
+
 
 
 
@@ -564,13 +553,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12 <./figure_3.pdf>]
-<figure_4.pdf, id=320, 867.24pt x 289.08pt>
+<figure_4.pdf, id=294, 867.24pt x 289.08pt>
 File: figure_4.pdf Graphic file (type pdf)
 <use figure_4.pdf>
-Package pdftex.def Info: figure_4.pdf  used on input line 338.
+Package pdftex.def Info: figure_4.pdf  used on input line 335.
 (pdftex.def)             Requested size: 442.65375pt x 147.55235pt.
 
-Overfull \hbox (5.5789pt too wide) in paragraph at lines 345--346
+Overfull \hbox (5.5789pt too wide) in paragraph at lines 342--343
 []\T1/lmr/b/n/10.95 peppwR \T1/lmr/m/n/10.95 de-signed work-flows in-te-grate seam-lessly with es-tab-lished pro-teomics anal-y-sis pipelines,
  []
 
@@ -582,9 +571,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [13 <./figure_4.pdf>]
-Overfull \hbox (67.58049pt too wide) in paragraph at lines 357--358
+Overfull \hbox (67.58049pt too wide) in paragraph at lines 354--355
 \T1/lmr/m/n/10.95 pre-sented here, while the ``PRM Anal-y-sis with Miss-ing Data'' vi-gnette (\T1/lmtt/m/n/10.95 vignette("prm-genotype-power")\T1/lmr/m/n/10.95 )
  []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
@@ -594,6 +586,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
+Overfull \hbox (0.44524pt too wide) in paragraph at lines 390--391
+\T1/lmr/m/n/10.95 re-quir-ing adop-tion of novel paradigms. Com-pat-i-bil-ity with stan-dard data for-mats (MaxQuant,
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -601,8 +601,8 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [15]
-Overfull \hbox (0.44524pt too wide) in paragraph at lines 393--394
-\T1/lmr/m/n/10.95 re-quir-ing adop-tion of novel paradigms. Com-pat-i-bil-ity with stan-dard data for-mats (MaxQuant,
+Overfull \hbox (5.76762pt too wide) in paragraph at lines 419--423
+\T1/lmr/m/n/10.95 with com-pre-hen-sive doc-u-men-ta-tion at [][]$\T1/lmtt/m/n/10.95 https : / / teammaclean . github . io / peppwR/$[][]\T1/lmr/m/n/10.95 . The pack-
  []
 
 
@@ -612,19 +612,20 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
 
-[16]
-Overfull \hbox (5.76762pt too wide) in paragraph at lines 422--426
-\T1/lmr/m/n/10.95 with com-pre-hen-sive doc-u-men-ta-tion at [][]$\T1/lmtt/m/n/10.95 https : / / teammaclean . github . io / peppwR/$[][]\T1/lmr/m/n/10.95 . The pack-
- []
-
-(./jss-article.bbl
+[16] (./jss-article.bbl
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
-[17]
+[17])
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/m/it' tried instead on input line 435.
+
+Underfull \vbox (badness 2799) has occurred while \output is active []
+
+
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -638,45 +639,22 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 19
  []
 
-[19])
-
-Package natbib Warning: There were undefined citations.
-
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/m/it' tried instead on input line 438.
-
-
-
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 20 []
- []
-
-[20] (./jss-article.aux)
+[19] (./jss-article.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 1
 L3 programming layer <2024-11-02>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `jss-article.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `jss-article.out':
-(rerunfilecheck)             Before: B5954305A4D9CF756000FEEFFD35333D;2596
-(rerunfilecheck)             After:  271AF1D626FBEE916B91F8BACC863DC7;3552.
+Package rerunfilecheck Info: File `jss-article.out' has not changed.
+(rerunfilecheck)             Checksum: 271AF1D626FBEE916B91F8BACC863DC7;3552.
  ) 
 Here is how much of TeX's memory you used:
- 11378 strings out of 475229
- 178838 string characters out of 5765933
- 582330 words of memory out of 5000000
- 33943 multiletter control sequences out of 15000+600000
+ 11318 strings out of 475229
+ 177508 string characters out of 5765933
+ 581525 words of memory out of 5000000
+ 33897 multiletter control sequences out of 15000+600000
  668312 words of font info for 94 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 90i,16n,93p,1163b,608s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,16n,93p,1779b,562s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 pdfTeX warning (dest): name{Hfootnote.3} has been referenced but does not exist, replaced by a fixed one
 
@@ -687,10 +665,10 @@ pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist,
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist, replaced by a fixed one
 
 </Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmb10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on jss-article.pdf (20 pages, 584400 bytes).
+Output written on jss-article.pdf (19 pages, 575079 bytes).
 PDF statistics:
- 561 PDF objects out of 1000 (max. 8388607)
- 477 compressed objects within 5 object streams
- 117 named destinations out of 1000 (max. 500000)
- 138 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 507 PDF objects out of 1000 (max. 8388607)
+ 424 compressed objects within 5 object streams
+ 103 named destinations out of 1000 (max. 500000)
+ 170 words of extra memory for PDF output out of 10000 (max. 10000000)
 
