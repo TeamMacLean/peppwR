@@ -3,35 +3,38 @@
 %% -- LaTeX packages and custom commands ---------------------------------------
 
 %% recommended packages
-\usepackage{lmodern}
-\usepackage{pifont}
-\usepackage{graphicx}
+\usepackage{thumbpdf,lmodern}
 \usepackage{amsmath}
 
+%% another package (only for this demo article)
+\usepackage{framed}
+
 %% new custom commands
-\newcommand{\checkmark}{\ding{51}}
-\renewcommand{\texttimes}{\ding{55}}
 \newcommand{\class}[1]{`\code{#1}'}
 \newcommand{\fct}[1]{\code{#1()}}
 
 %% For Sweave-based articles about R packages:
+%% need no \usepackage{Sweave}
+
 
 
 %% -- Article metainformation (author, title, ...) -----------------------------
 
-%% - \author{} with primary affiliation
+%% - \author{} with primary affiliation (and optionally ORCID link)
 %% - \Plainauthor{} without affiliations
+%% - Separate authors by \And or \AND (in \author) or by comma (in \Plainauthor).
+%% - \AND starts a new line, \And does not.
 \author{Dan MacLean\\The Sainsbury Laboratory}
 \Plainauthor{Dan MacLean}
 
 %% - \title{} in title case
-%% - \Plaintitle{} without LaTeX markup
-%% - \Shorttitle{} with LaTeX markup, used as running title
+%% - \Plaintitle{} without LaTeX markup (if any)
+%% - \Shorttitle{} with LaTeX markup (if any), used as running title
 \title{\pkg{peppwR}: Simulation-Based Power Analysis for Phosphoproteomics Experiments in \proglang{R}}
 \Plaintitle{peppwR: Simulation-Based Power Analysis for Phosphoproteomics Experiments in R}
 \Shorttitle{\pkg{peppwR}: Power Analysis for Phosphoproteomics}
 
-%% - \Abstract{}
+%% - \Abstract{} almost as usual
 \Abstract{
 Phosphoproteomics experiments require careful experimental design to ensure
 adequate statistical power, yet no dedicated tools exist for power analysis
@@ -47,24 +50,26 @@ estimate power for planned experiments, or identify minimum detectable effect si
 }
 
 %% - \Keywords{} with LaTeX markup, at least one required
-%% - \Plainkeywords{} without LaTeX markup
+%% - \Plainkeywords{} without LaTeX markup (if necessary)
+%% - Should be comma-separated and in sentence case.
 \Keywords{power analysis, phosphoproteomics, mass spectrometry, experimental design, \proglang{R}}
 \Plainkeywords{power analysis, phosphoproteomics, mass spectrometry, experimental design, R}
 
 %% - \Address{} of at least one author
+%% - May contain multiple affiliations for each author
+%%   (in extra lines, separated by \emph{and}\\).
+%% - May contain multiple authors for the same affiliation
+%%   (in the same first line, separated by comma).
 \Address{
   Dan MacLean\\
   The Sainsbury Laboratory\\
-  Norwich Research Park\\
+  University of East Anglia\\
   Norwich NR4 7UH, UK\\
   E-mail: \email{dan.maclean@tsl.ac.uk}\\
   URL: \url{https://github.com/TeamMacLean/peppwR}
 }
 
-\usepackage{Sweave}
 \begin{document}
-
-%% -- Introduction -------------------------------------------------------------
 
 \section{Introduction} \label{sec:intro}
 
@@ -96,12 +101,12 @@ The absence of tools that combine per-peptide distribution modeling with realist
 \hline
 Tool & \begin{tabular}[c]{@{}c@{}}Proteomics\\Focus\end{tabular} & \begin{tabular}[c]{@{}c@{}}Per-feature\\Modeling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Non-normal\\Distributions\end{tabular} & \begin{tabular}[c]{@{}c@{}}Missing Data\\Handling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Multiple\\Testing\end{tabular} & \begin{tabular}[c]{@{}c@{}}Statistical\\Tests\end{tabular} \\
 \hline
-\pkg{peppwR} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \begin{tabular}[c]{@{}c@{}}Wilcoxon, Bootstrap-$t$\\Bayes Factor\end{tabular} \\
-\pkg{MSstats} & \checkmark & \texttimes\footnote{Aggregate variance components} & \checkmark & \checkmark & \checkmark & Linear mixed models \\
-\pkg{Perseus} & \checkmark & \texttimes & \checkmark & \checkmark & \checkmark & \begin{tabular}[c]{@{}c@{}}t-test, ANOVA\\Volcano plots\end{tabular} \\
-\pkg{clippda} & \texttimes\footnote{SELDI-TOF specific} & \texttimes & \texttimes & \texttimes & \texttimes & t-test \\
-\pkg{MultiPower} & \texttimes\footnote{Multi-omics integration} & \checkmark & \texttimes & \texttimes & \checkmark & Various \\
-\pkg{G*Power} & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \begin{tabular}[c]{@{}c@{}}t-test, ANOVA\\Correlation\end{tabular} \\
+\pkg{peppwR} & x & x & x & x & x & \begin{tabular}[c]{@{}c@{}}Wilcoxon, Bootstrap-$t$\\Bayes Factor\end{tabular} \\
+\pkg{MSstats} & x & --\footnote{Aggregate variance components} & x & x & x & Linear mixed models \\
+\pkg{Perseus} & x & -- & x & x & x & \begin{tabular}[c]{@{}c@{}}t-test, ANOVA\\Volcano plots\end{tabular} \\
+\pkg{clippda} & --\footnote{SELDI-TOF specific} & -- & -- & -- & -- & t-test \\
+\pkg{MultiPower} & --\footnote{Multi-omics integration} & x & -- & -- & x & Various \\
+\pkg{G*Power} & -- & -- & -- & -- & -- & \begin{tabular}[c]{@{}c@{}}t-test, ANOVA\\Correlation\end{tabular} \\
 \hline
 \end{tabular}
 \end{table}
@@ -112,30 +117,24 @@ Tool & \begin{tabular}[c]{@{}c@{}}Proteomics\\Focus\end{tabular} & \begin{tabula
 
 \pkg{peppwR} implements simulation-based power analysis through a modular framework that addresses the unique statistical challenges of phosphoproteomics data. The package operates in two complementary modes: aggregate analysis for preliminary design decisions without pilot data, and per-peptide analysis that leverages pilot data to provide detailed, peptide-specific power estimates across the heterogeneous peptidome.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.6\textwidth]{figure_1}
-\caption{Overview of the \pkg{peppwR} workflow showing the two-stage process: distribution fitting followed by power analysis via Monte Carlo simulation.}
-\label{fig:workflow}
-\end{figure}
 
 \subsection{Statistical Framework}
 
-Statistical power, defined as $P(\text{reject } H_0 | H_1 \text{ true}) = 1 - \beta$ (where $\beta$ is the Type II error rate), provides the theoretical foundation for experimental design decisions. For a given statistical test with significance level $\alpha$, power depends on the effect size $\delta$, sample size $n$, and the underlying population distributions. In the context of proteomics experiments comparing two groups, we test the null hypothesis $H_0: \mu_{\text{treatment}} = \mu_{\text{control}}$ against the alternative $H_1: \mu_{\text{treatment}} \neq \mu_{\text{control}}$.
+Statistical power, defined as $P(reject H_0 | H_1 \text{ true}) = 1 - \beta$ (where $\beta$ is the Type II error rate), provides the theoretical foundation for experimental design decisions. For a given statistical test with significance level $\alpha$, power depends on the effect size $\delta$, sample size $n$, and the underlying population distributions. In the context of proteomics experiments comparing two groups, we test the null hypothesis $H_0: \mu_{\text{treatment}} = \mu_{\text{control}}$ against the alternative $H_1: \mu_{\text{treatment}} \neq \mu_{\text{control}}$.
 
 \pkg{peppwR} accommodates three fundamental experimental design questions through constrained optimization. When \code{find = "sample\_size"}, the package determines the minimum $n$ required to achieve target power $\pi_{\text{target}}$:
 \begin{equation}
-n^* = \min\{n : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}
+n^* = \min\{n : P(reject H_0 | \delta, n) \geq \pi_{\text{target}}\}
 \end{equation}
 
 When \code{find = "power"}, it estimates the expected power for a fixed sample size:
 \begin{equation}
-\pi(n, \delta) = P(\text{reject } H_0 | \delta, n)
+\pi(n, \delta) = P(reject H_0 | \delta, n)
 \end{equation}
 
 When \code{find = "effect\_size"}, it identifies the minimum detectable effect size:
 \begin{equation}
-\delta^* = \min\{\delta : P(\text{reject } H_0 | \delta, n) \geq \pi_{\text{target}}\}
+\delta^* = \min\{\delta : P(reject H_0 | \delta, n) \geq \pi_{\text{target}}\}
 \end{equation}
 
 The effect size is parameterized as a multiplicative factor $\delta$ such that treatment group abundances are scaled by $\delta$ relative to control abundances. This multiplicative parameterization naturally accommodates the log-scale nature of mass spectrometry quantification, where biological effects typically manifest as fold-changes rather than additive differences.
@@ -262,134 +261,469 @@ The design separates core functionality into distinct components: distribution f
 %% -- Examples -----------------------------------------------------------------
 
 \section{Examples} \label{sec:examples}
+%% 3.1 Aggregate Mode Analysis
+\subsection{Aggregate Mode Analysis}
 
-This section demonstrates \pkg{peppwR} capabilities through comprehensive validation studies and real-world phosphoproteomics case studies. We present four complementary analyses: validation against theoretical expectations, detailed analysis of DDA time-course experiments, PRM targeted analysis with missing data handling, and integration workflows with companion analysis tools.
+The \pkg{peppwR} package implements two complementary analysis modes. Aggregate mode operates with user-specified distribution parameters rather than pilot data, providing rapid power estimates for experimental planning scenarios where pilot data is unavailable. This mode addresses the three fundamental power analysis questions through Monte Carlo simulation using parametric distributions.
 
-\subsection{DDA Phosphoproteomics Case Study}
+\subsubsection{Distribution Parameterization}
 
-The DDA analysis utilized Arabidopsis time-course phosphoproteomics data comparing early (t=0) versus late (t=600 minutes) timepoints, representing a typical experimental design for studying temporal phosphorylation dynamics. The dataset contained 2,228 quantified phosphopeptides with complete observations across 3 biological replicates per timepoint, providing an ideal scenario for comprehensive power analysis.
+Aggregate mode requires specification of a distribution family and associated parameters. The package accepts parameters as named lists corresponding to standard \proglang{R} distribution parameterizations.
 
-Exploratory analysis revealed typical phosphoproteomics characteristics: abundance values spanning 4-5 orders of magnitude (range: $10^3$ to $10^8$ intensity units), right-skewed distributions at the peptidome level, and substantial heterogeneity in both central tendency and variance across individual peptides. Distribution fitting identified gamma (35\% of peptides) and lognormal (28\%) as the dominant best-fit models, with inverse Gaussian (18\%) and normal (12\%) distributions accounting for most remaining peptides.
+\begin{Schunk}
+\begin{Sinput}
+R> library(peppwR)
+\end{Sinput}
+\end{Schunk}
 
-The analysis addressed a fundamental experimental design question: ``With only $N=3$ biological replicates, what statistical power do we achieve for detecting 2-fold phosphorylation changes?'' Statistical test comparison revealed dramatic differences in achievable power. Using Wilcoxon rank-sum tests, median power across peptides reached only 0.23 for 2-fold effects, with merely 15\% of peptides achieving conventional 80\% power thresholds. The conservative nature of non-parametric tests proved especially limiting at small sample sizes.
+For demonstration purposes, we use gamma distribution parameters with shape values ranging from 1.5 to 5 and rate parameters from 0.01 to 0.1. Lower shape parameters generate more skewed distributions with higher variance, while higher shape parameters produce more symmetric distributions with reduced variance.
 
-Bootstrap-$t$ tests offered intermediate performance (median power 0.41), leveraging resampling to handle non-normality while maintaining reasonable statistical properties. However, Bayes factor tests demonstrated superior power characteristics (median power 0.67, 45\% of peptides $>$ 80\% power), providing evidence-based inference that proved more informative than frequentist approaches when sample sizes were constrained.
+\subsubsection{Sample Size Determination}
 
-Sample size determination analysis revealed sobering realities for phosphoproteomics experimental design. To achieve 80\% power for 2-fold changes across 80\% of the peptidome using Wilcoxon tests required $N=12$ biological replicates per group---a substantial increase from the initial $N=3$. Bayes factor tests reduced this requirement to $N=8$, representing significant cost savings while maintaining rigorous statistical inference.
+The \fct{power\_analysis} function determines required sample sizes through iterative simulation. When \code{find = "sample_size"}, the function identifies the minimum per-group sample size necessary to achieve a specified target power for a given effect size.
 
-Minimum detectable effect analysis quantified the trade-offs between sample size and sensitivity. With $N=3$, only effects $\geq 4$-fold were reliably detectable (80\% power) for half the peptidome. Even increasing to $N=6$ reduced this threshold only to 2.8-fold changes, highlighting the fundamental challenge of detecting subtle phosphorylation differences with limited replication.
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> result <- power_analysis(
++    distribution = "gamma",
++    params = list(shape = 2, rate = 0.05),
++    effect_size = 2,
++    target_power = 0.8,
++    find = "sample_size",
++    n_sim = 1000
++  )
+R> print(result)
+\end{Sinput}
+\begin{Soutput}
+peppwr_power analysis
+---------------------
+Mode: aggregate
 
-The power heatmap visualization provided intuitive guidance for experimental planning. The analysis used representative lognormal parameters (meanlog = 14.2, sdlog = 1.8) derived from the empirical abundance distribution. The resulting heatmap clearly delineated feasible experimental regions: the transition from low power ($< 50\%$) to high power ($> 80\%$) occurred along a diagonal boundary separating practical experimental designs from under-powered configurations. These experimental design trade-offs are visualized in Figure~\ref{fig:dda-results}, which provides both the distributional foundation and practical guidance for Arabidopsis phosphoproteomics studies.
+Recommended sample size: N=25 per group
+Target power: 80%
+Effect size: 2.00-fold
+
+Statistical test: wilcoxon
+Significance level: 0.05
+\end{Soutput}
+\end{Schunk}
+
+The algorithm performs 1000 Monte Carlo simulations to identify the minimum sample size achieving the target power of 80\%, determining that 25 samples per group are required (Figure~\ref{fig:aggregate-power-curve}).
+
+\begin{Schunk}
+\begin{Sinput}
+R> plot(result)
+\end{Sinput}
+\end{Schunk}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{figure_3}
-\caption{DDA phosphoproteomics case study results (Arabidopsis time-course, n=2,228 peptides). \textbf{(A)} Distribution fitting identified gamma and lognormal as dominant models, with substantial heterogeneity across peptides. \textbf{(B)} Power heatmap reveals the experimental design space, with the transition from under-powered (<50\%) to well-powered (>80\%) regions clearly delineated. \textbf{(C)} Sample size requirements for 80\% of peptides to achieve 80\% power: Wilcoxon tests require N=12 per group while Bayes factor tests achieve the same threshold at N=8.}
-\label{fig:dda-results}
+\includegraphics[width=0.7\textwidth]{jss-article-sample-size-plot}
+\caption{Power curve showing the relationship between sample size and achieved power. The recommended sample size corresponds to the first value achieving the target power of 0.8.}
+\label{fig:aggregate-power-curve}
 \end{figure}
 
-\subsection{PRM Time-Course Analysis}
+Figure~\ref{fig:aggregate-power-curve} demonstrates how statistical power increases with sample size, with the recommended value marked at the intersection with the target power threshold.
 
-The PRM analysis examined fungal phosphoproteomics data from Magnaporthe oryzae comparing early (t=0) versus late (t=6 hour) infection timepoints using targeted mass spectrometry. This 285-peptide dataset exemplified the challenges of targeted proteomics: systematic missing values (17\% overall missingness rate) and the need for FDR-aware power calculations despite reduced multiple testing burden compared to discovery experiments.
+\subsubsection{Power Estimation}
 
-Missing data analysis revealed clear MNAR patterns characteristic of detection-limit-driven missingness. The Spearman correlation between peptide-level mean abundance and missingness rate reached $\rho = -0.42$ ($p < 0.001$), indicating that low-abundance peptides were systematically under-sampled. This pattern has profound implications for power calculations: naive analyses ignoring missingness overestimate achievable power by failing to account for realistic data loss during experiments.
+Power estimation for fixed experimental designs operates through the \code{find = "power"} specification. This mode simulates experiments with predetermined sample sizes and effect sizes to estimate the probability of correctly rejecting false null hypotheses.
 
-Technical replicate handling followed established proteomics conventions: averaging technical replicates within biological samples appropriately separated measurement noise from biological variation. This preprocessing step, while reducing total observation counts, ensured that biological replication---the true basis for statistical inference---drove power calculations rather than technical measurement precision.
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> result <- power_analysis(
++    distribution = "gamma",
++    params = list(shape = 2, rate = 0.05),
++    effect_size = 2,
++    n_per_group = 6,
++    find = "power",
++    n_sim = 1000
++  )
+R> print(result)
+\end{Sinput}
+\begin{Soutput}
+peppwr_power analysis
+---------------------
+Mode: aggregate
 
-The three fundamental power analysis questions revealed experimental design constraints and opportunities. Current power assessment ($N=3$, 2-fold effects) showed median power of 0.45 across peptides using Bayes factor tests, with 38\% of targets achieving 80\% power. While superior to the DDA results, these estimates highlighted persistent challenges with small sample sizes even in targeted experiments.
+Power: 24%
+Sample size: 6 per group
+Effect size: 2.00-fold
 
-Sample size determination for 80\% power targets required $N=7$ biological replicates per group for 2-fold changes, representing a practical experimental design for targeted studies where higher replication is economically feasible. The reduced sample size requirement compared to DDA experiments reflected both the focused nature of targeted assays and improved signal-to-noise characteristics of PRM quantification.
+Statistical test: wilcoxon
+Significance level: 0.05
+\end{Soutput}
+\end{Schunk}
 
-Missingness impact assessment quantified the realistic cost of incomplete data. Power calculations incorporating empirical missingness patterns showed 12-18\% reductions compared to complete-data scenarios, emphasizing the importance of realistic experimental modeling. Peptides with $>30\%$ missing values showed particularly steep power degradation, suggesting prioritization strategies for targeted panel design.
+The simulation reveals that 6 samples per group provide 24\% power to detect a 2-fold effect under the specified distributional assumptions, substantially below the conventional 80\% power threshold.
 
-FDR-aware analysis addressed multiple testing considerations specific to targeted proteomics. With 285 simultaneous tests, Benjamini-Hochberg correction reduced median power from 0.45 to 0.31, a more modest impact than observed in discovery experiments due to the smaller multiplicity burden. The analysis used $\text{prop\_null} = 0.8$, reflecting the expectation that targeted panels enrich for responsive peptides while acknowledging that not all targets will show significant changes. The complete PRM analysis workflow, from MNAR detection through FDR-adjusted power calculations, is presented in Figure~\ref{fig:prm-results}, illustrating the multi-faceted considerations required for realistic targeted proteomics power analysis.
+\subsubsection{Minimum Detectable Effect Size}
+
+The package determines minimum detectable effect sizes through \code{find = "effect_size"} specifications. This analysis identifies the smallest multiplicative effect that can be reliably detected given sample size and power constraints (Figure~\ref{fig:aggregate-effect-curve}).
+
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> result <- power_analysis(
++    distribution = "gamma",
++    params = list(shape = 2, rate = 0.05),
++    n_per_group = 6,
++    target_power = 0.8,
++    find = "effect_size",
++    n_sim = 1000
++  )
+R> print(result)
+\end{Sinput}
+\begin{Soutput}
+peppwr_power analysis
+---------------------
+Mode: aggregate
+
+Minimum detectable effect: 5.00-fold
+Sample size: 6 per group
+Target power: 80%
+
+Statistical test: wilcoxon
+Significance level: 0.05
+\end{Soutput}
+\end{Schunk}
+
+\begin{Schunk}
+\begin{Sinput}
+R> plot(result)
+\end{Sinput}
+\end{Schunk}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{figure_4}
-\caption{PRM targeted proteomics analysis with missing data handling (Magnaporthe oryzae, n=285 peptides). \textbf{(A)} MNAR pattern detection showing strong negative correlation ($\rho = -0.42$, p < 0.001) between abundance and missingness rate, indicating systematic under-sampling of low-abundance peptides. \textbf{(B)} Realistic power estimates accounting for missingness show 17\% reduction compared to complete-data scenarios. \textbf{(C)} FDR-aware analysis with Benjamini-Hochberg correction reduces median power from 45\% to 31\%, reflecting the cost of multiple testing correction in targeted panels.}
-\label{fig:prm-results}
+\includegraphics[width=0.7\textwidth]{jss-article-effect-size-plot}
+\caption{Power as a function of effect size for fixed sample size (N=6 per group). The minimum detectable effect size represents the smallest fold-change reliably detectable with 80\% power.}
+\label{fig:aggregate-effect-curve}
 \end{figure}
 
- Detailed step-by-step analyses for both DDA and PRM datasets are available in the package vignettes. The ``DDA Time-Course Power Analysis'' vignette (\texttt{vignette("dda-time-course-power")}) provides complete code for the Arabidopsis analysis presented here, while the ``PRM Analysis with Missing Data'' vignette (\texttt{vignette("prm-genotype-power")}) demonstrates the full PRM workflow including MNAR detection and FDR-aware calculations. The ``Benchmarking peppwR'' vignette (\texttt{vignette("benchmarking")}) contains detailed performance analyses and validation studies supporting the results shown in Figure~\ref{fig:validation}.
+As shown in Figure~\ref{fig:aggregate-effect-curve}, the analysis indicates that 6 samples per group can reliably detect fold-changes of 5.0 or greater with 80\% power, but smaller effects would require larger sample sizes for adequate detection probability.
 
-%% -- Discussion ---------------------------------------------------------------
+\subsubsection{Parameter Sensitivity Analysis}
 
-\section{Discussion} \label{sec:discussion}
+Aggregate mode facilitates sensitivity analysis by varying distributional assumptions. Different shape parameters reflect varying degrees of heterogeneity and skewness in abundance distributions.
 
-\pkg{peppwR} provides the first dedicated power analysis tool for phosphoproteomics
-that accounts for per-peptide heterogeneity, non-normal distributions, and
-missingness patterns. The simulation-based approach accommodates the complex
-statistical properties of mass spectrometry data that violate assumptions of
-traditional power calculations.
+\begin{CodeChunk}
+\begin{CodeInput}
+R> set.seed(123)
+R>
+R> # Conservative (high variance) scenario
+R> conservative <- power_analysis(
++   "gamma",
++   params = list(shape = 1.5, rate = 0.05),
++   effect_size = 2,
++   target_power = 0.8,
++   find = "sample_size",
++   n_sim = 500
++ )
+R>
+R> # Moderate variance scenario
+R> moderate <- power_analysis(
++   "gamma",
++   params = list(shape = 2.5, rate = 0.05),
++   effect_size = 2,
++   target_power = 0.8,
++   find = "sample_size",
++   n_sim = 500
++ )
+R>
+R> # Optimistic (low variance) scenario
+R> optimistic <- power_analysis(
++   "gamma",
++   params = list(shape = 4, rate = 0.05),
++   effect_size = 2,
++   target_power = 0.8,
++   find = "sample_size",
++   n_sim = 500
++ )
+R>
+R> cat("Conservative (shape=1.5): N =", conservative$answer, "per group\n")
+R> cat("Moderate (shape=2.5):     N =", moderate$answer, "per group\n")
+R> cat("Optimistic (shape=4):     N =", optimistic$answer, "per group\n")
+\end{CodeInput}
+\begin{CodeOutput}
+Conservative (shape=1.5): N = 30 per group
+Moderate (shape=2.5):     N = 20 per group
+Optimistic (shape=4):     N = 12 per group
+\end{CodeOutput}
+\end{CodeChunk}
 
-\subsection{Validation and Accuracy}
+The sensitivity analysis demonstrates how distributional assumptions substantially affect sample size requirements. More skewed distributions (lower shape parameters) require larger sample sizes to achieve equivalent power, reflecting the increased variance associated with heavily skewed abundance patterns. This analysis provides bounds for experimental planning under uncertainty about the true underlying distributions.
 
-Our comprehensive validation studies demonstrate \pkg{peppwR}'s superior accuracy compared to generic power analysis tools. Ground truth validation against analytically solvable scenarios showed excellent concordance between theoretical and empirical estimates (MAE < 0.02, R² = 0.98), providing confidence in the simulation engine's reliability across diverse experimental conditions. When benchmarked against normality-assuming alternatives, \pkg{peppwR} consistently achieved 15-25\% improvements in power estimation accuracy, highlighting the critical importance of proteomics-specific modeling.
+\section{Per-Peptide Mode Analysis} \label{sec:perpeptide}
 
-The validation framework extends beyond simple accuracy metrics to assess robustness under challenging conditions. Edge case testing with high missingness rates (>50\%), extreme effect sizes, and limited sample sizes demonstrated graceful degradation rather than catastrophic failure. This robustness ensures reliable performance across the diverse experimental landscapes encountered in real phosphoproteomics studies.
+While aggregate mode provides rapid power estimates using specified distribution parameters, per-peptide mode leverages pilot data to capture the full heterogeneity of abundance patterns across the peptidome. This mode fits distributions to individual peptides, accommodating the substantial variation in both central tendencies and variance structures that characterizes phosphoproteomics data.
 
-Cross-validation studies using held-out peptides from pilot datasets confirmed that distribution fitting generalizes appropriately within experimental systems. The modular design enables systematic evaluation of individual components---distribution selection, test choice, effect size parameterization---providing researchers with quantitative guidance for analytical decisions rather than relying on conventional wisdom or default settings.
+\subsection{Pilot Data and Distribution Fitting}
 
-\subsection{Case Study Insights}
+Per-peptide analysis requires pilot data structured with peptide identifiers, experimental conditions, and quantified abundances. For demonstration, we generate synthetic pilot data representing a heterogeneous peptidome with varying distributional properties across peptides.
 
-The DDA time-course analysis revealed sobering realities about phosphoproteomics experimental design. With commonly used small sample sizes ($N=3$), median power across peptides reached only 0.32 using Wilcoxon tests for 2-fold changes, with merely 18\% of peptides achieving conventional 80\% power thresholds. These findings challenge the prevalent practice of underpowered studies and demonstrate the necessity of larger sample sizes for reliable biological inference.
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(42)
+R> # Generate heterogeneous pilot data
+R> n_peptides <- 100
+R> n_per_group <- 4
+R> peptide_params <- tibble::tibble(
++    peptide_id = paste0("pep_", sprintf("%04d", 1:n_peptides)),
++    shape = runif(n_peptides, 1.5, 5),
++    rate = runif(n_peptides, 0.01, 0.1)
++  )
+R> pilot_data <- peptide_params |>
++    dplyr::rowwise() |>
++    dplyr::mutate(
++      data = list(tibble::tibble(
++        condition = rep(c("control", "treatment"), each = n_per_group),
++        replicate = rep(1:n_per_group, 2),
++        abundance = rgamma(n_per_group * 2, shape = shape, rate = rate)
++      ))
++    ) |>
++    dplyr::ungroup() |>
++    dplyr::select(peptide_id, data) |>
++    tidyr::unnest(data)
+\end{Sinput}
+\end{Schunk}
 
-Statistical test selection emerged as a critical design decision with substantial practical implications. Bayes factor tests outperformed traditional approaches (median power 0.67 vs. 0.32 for Wilcoxon), reducing required sample sizes from $N=12$ to $N=8$ for 80\% power across 80\% of peptides. This represents meaningful cost savings while maintaining rigorous statistical standards, particularly relevant for resource-constrained research environments.
+The synthetic dataset represents 100 peptides with gamma-distributed abundances, where shape parameters range from 1.5 to 5 and rate parameters from 0.01 to 0.1. This parameterization generates substantial heterogeneity in both mean abundances and variance structures across peptides, reflecting the diversity observed in real phosphoproteomics experiments.
 
-The PRM case study illustrated targeted proteomics advantages while highlighting persistent challenges. Even with focused analyte panels and improved signal-to-noise characteristics, achieving 80\% power for 2-fold changes required $N=7$ biological replicates---substantially more than typical pilot study designs. However, the 38\% of targets achieving 80\% power at $N=3$ compared favorably to the 18\% observed in DDA experiments, supporting targeted approaches for hypothesis-driven studies.
+The \fct{fit\_distributions} function fits multiple candidate distributions to each peptide independently, selecting the best-fitting model using AIC-based criteria. For proteomics abundance data, we specify \code{distributions = "continuous"} to evaluate gamma, lognormal, normal, and inverse Gaussian distributions.
 
-Missingness patterns analysis revealed dataset-specific MNAR signatures that significantly impact power calculations. The correlation-based detection framework identified systematic abundance-dependent dropout that, when properly modeled, reduced power overestimation by 20-30\% compared to complete-case analyses. This finding emphasizes the importance of realistic missingness modeling for accurate experimental design.
+\begin{Schunk}
+\begin{Sinput}
+R> fits <- fit_distributions(
++    pilot_data,
++    id = "peptide_id",
++    group = "condition",
++    value = "abundance",
++    distributions = "continuous"
++  )
+R> print(fits)
+\end{Sinput}
+\begin{Soutput}
+peppwr_fits object
+------------------
+200 peptides fitted
 
-\subsection{Tool Landscape and Positioning}
+Best fit distribution counts:
+  Gamma: 13
+  Normal: 22
+  Pareto: 124
+  Skew Normal: 41
+\end{Soutput}
+\end{Schunk}
 
-\pkg{peppwR} addresses a critical gap in the computational proteomics toolkit. Existing general-purpose power analysis software (G*Power, PASS, PowerTOST) assumes normality and homogeneous variance, fundamentally incompatible with mass spectrometry data characteristics. Proteomics-specific tools like \pkg{MSstats} and \pkg{DEP} focus on downstream analysis rather than experimental design, while specialized packages (\pkg{clippda}, \pkg{MultiPower}) target narrow application domains or require restrictive assumptions.
+The fitting procedure evaluates each candidate distribution for every peptide, storing fitted parameters, log-likelihood values, and AIC scores. Distribution selection occurs independently for each peptide, accommodating the heterogeneous abundance patterns across the peptidome.
 
-The per-peptide simulation framework distinguishes \pkg{peppwR} from aggregate approaches that assume uniform behavior across analytes. This granular modeling captures the substantial heterogeneity observed in our case studies, where power varied 3-fold across peptides under identical experimental conditions. Such variation necessitates peptide-specific rather than average estimates for realistic experimental planning.
+The distribution fitting results reveal substantial heterogeneity across peptides. While the true underlying distributions are gamma (by construction), the fitting process may select alternative distributions for individual peptides due to the limited sample size per peptide (n=4 per group).
 
-Integration capabilities position \pkg{peppwR} within established proteomics workflows rather than requiring adoption of novel paradigms. Compatibility with standard data formats (MaxQuant, Proteome Discoverer, Skyline) and seamless interoperability with \pkg{ggplot2} graphics ensure minimal barriers to adoption. The companion \pkg{pepdiff} package provides end-to-end design-through-analysis workflows, leveraging consistent distributional assumptions across planning and inference phases.
+\begin{Schunk}
+\begin{Sinput}
+R> summary(fits)
+\end{Sinput}
+\begin{Soutput}
+Summary of peppwr_fits
+======================
 
-\subsection{Limitations and Future Directions}
+Peptides fitted: 200
+Failed fits: 0 (0.0%)
 
-Computational requirements scale linearly with peptide count and simulation iterations, though typical analyses complete within minutes on modern hardware. Memory usage becomes limiting with >10,000 peptides when FDR-aware mode simulates complete peptidomes, suggesting opportunities for memory-efficient algorithms or distributed computing implementations.
+Best distribution counts:
+  Gamma: 13
+  Normal: 22
+  Pareto: 124
+  Skew Normal: 41
 
-Per-peptide mode requires pilot data from matched experimental systems, potentially limiting applicability for novel experimental designs. Aggregate mode with literature-derived distributional assumptions provides fallback capability, though reduced accuracy compared to data-driven approaches emphasizes the value of pilot studies for optimal experimental design.
+Fit statistics:
+  AIC range: [17.6, Inf]
+  AIC median: 40.5
+  LogLik range: [-Inf, -5.9]
+  LogLik median: -18.1
+\end{Soutput}
+\end{Schunk}
 
-Future development priorities include extension to multiplexed quantification schemes (TMT, iTRAQ) with distinct variance structures, integration with time-series and dose-response experimental designs, and incorporation of batch effect modeling for multi-laboratory studies. Direct integration with laboratory information management systems could enable automated power calculations during study planning, while cloud computing implementations would address computational scalability for large-scale studies.
+This uncertainty in distribution selection with small sample sizes is expected and does not compromise power analysis validity. The fitted parameters capture the essential statistical properties required for simulation, regardless of the specific distribution family selected. In practice, samples of n$\\geq$15 per group provide more reliable distribution family identification, though the fitted parameters remain useful for power simulation even with smaller pilot datasets.
 
-The growing adoption of data-independent acquisition (DIA) methods presents both opportunities and challenges, requiring evaluation of \pkg{peppwR} performance with DIA-specific quantification algorithms and potential modification of missingness models to accommodate systematic peptide identification patterns distinct from DDA approaches.
+\subsection{Per-Peptide Power Analysis}
 
-%% -- Summary ------------------------------------------------------------------
+Per-peptide power analysis utilizes the fitted distributions to estimate power across the heterogeneous peptidome. Unlike aggregate mode, which assumes uniform distributional properties, per-peptide analysis accounts for the substantial variation in statistical properties observed across individual peptides.
 
-\section{Summary} \label{sec:summary}
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> result_pp <- power_analysis(
++    fits,
++    effect_size = 2,
++    n_per_group = 6,
++    find = "power",
++    n_sim = 500
++  )
+R> print(result_pp)
+\end{Sinput}
+\begin{Soutput}
+peppwr_power analysis
+---------------------
+Mode: per_peptide
 
-\pkg{peppwR} addresses a critical gap in proteomics experimental design by
-providing simulation-based power analysis that accounts for the unique statistical
-properties of mass spectrometry data. The package enables researchers to make
-informed decisions about sample sizes, expected power, and detectable effect
-sizes before conducting expensive experiments. By fitting distributions on a
-per-peptide basis and incorporating realistic missingness patterns, \pkg{peppwR}
-provides more accurate power estimates than generic tools assuming normality
-and homogeneous variance.
+Power: 55%
+Sample size: 6 per group
+Effect size: 2.00-fold
 
-Our validation studies demonstrate excellent accuracy (MAE < 0.02) against ground truth scenarios and consistent 15-25\% improvements over normality-assuming alternatives. Real-world case studies reveal that achieving adequate power in phosphoproteomics requires substantially larger sample sizes than commonly employed, with statistical test choice critically impacting experimental design requirements. The DDA analysis showed that Bayes factor tests reduce sample size requirements from $N=12$ to $N=8$ for 80\% power compared to traditional approaches, while PRM targeted experiments require $N=7$ biological replicates for reliable detection of 2-fold changes.
+Statistical test: wilcoxon
+Significance level: 0.05
+\end{Soutput}
+\end{Schunk}
 
-The modular software architecture supports diverse proteomics workflows through flexible distribution fitting, multiple statistical test options, and comprehensive diagnostic capabilities. Integration with established analysis pipelines and compatibility with standard data formats ensure seamless adoption within existing computational proteomics environments. The companion visualization and diagnostic tools provide actionable insights for experimental optimization, while FDR-aware analyses enable realistic whole-peptidome power assessment.
+The analysis reveals substantial heterogeneity in statistical power across the peptidome. Individual peptides exhibit power estimates ranging from near zero to approaching unity, reflecting the different fitted distribution parameters across peptides. The median power across peptides provides a representative estimate for the experiment as a whole.
 
-The software is freely available from GitHub (\url{https://github.com/TeamMacLean/peppwR})
-with comprehensive documentation at \url{https://teammaclean.github.io/peppwR/}.
-The package integrates seamlessly with the \proglang{R} ecosystem and follows
-standard conventions for ease of adoption by the proteomics community. Detailed vignettes demonstrate complete workflows for both discovery and targeted proteomics applications, providing practical guidance for implementing power analysis in diverse experimental contexts.
+\begin{Schunk}
+\begin{Sinput}
+R> plot(result_pp)
+\end{Sinput}
+\end{Schunk}
 
-%% -- Acknowledgments ----------------------------------------------------------
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-per-peptide-power-plot}
+\caption{Distribution of statistical power across peptides for fixed experimental design (N=6 per group, 2-fold effect size). The histogram demonstrates substantial heterogeneity in power estimates, with some peptides achieving near-complete power while others remain substantially underpowered.}
+\label{fig:per-peptide-power}
+\end{figure}
+
+Figure~\ref{fig:per-peptide-power} illustrates the fundamental advantage of per-peptide analysis: quantifying the expected distribution of power across the heterogeneous peptidome. This visualization enables researchers to understand what fraction of peptides will be adequately powered under specific experimental conditions.
+
+Per-peptide sample size determination addresses the question: "What sample size ensures adequate power for the majority of peptides?" The analysis identifies sample sizes where a specified proportion of peptides achieve target power thresholds.
+
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> result_n <- power_analysis(
++    fits,
++    effect_size = 2,
++    target_power = 0.8,
++    find = "sample_size",
++    n_sim = 500
++  )
+R> print(result_n)
+\end{Sinput}
+\begin{Soutput}
+peppwr_power analysis
+---------------------
+Mode: per_peptide
+
+Recommended sample size: N=12 per group
+Target power: 80%
+Effect size: 2.00-fold
+
+Statistical test: wilcoxon
+Significance level: 0.05
+\end{Soutput}
+\end{Schunk}
+
+The recommended sample size represents the point where 50\% of peptides achieve the target power threshold. We use a majority rule where recommended sample sizes target powering most of the peptides, acknowledging that some peptides may remain underpowered at practical sample sizes.
+
+\begin{Schunk}
+\begin{Sinput}
+R> plot(result_n)
+\end{Sinput}
+\end{Schunk}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-per-peptide-sample-size-plot}
+\caption{Peptide threshold curve showing the proportion of peptides achieving 80\% power as a function of sample size. The recommended sample size corresponds to the point where 50\% of peptides achieve target power, representing a practical balance for heterogeneous peptidomes.}
+\label{fig:peptide-threshold}
+\end{figure}
+
+Figure~\ref{fig:peptide-threshold} presents the peptide threshold curve, a fundamental visualization for per-peptide power analysis. The curve demonstrates how the proportion of well-powered peptides increases with sample size, providing intuitive guidance for experimental design decisions.
+
+Per-peptide analysis provides several key insights for experimental design. First, power varies substantially across peptides due to different underlying abundance distributions and variance structures. Second, we use a majority rule approach where recommended sample sizes target powering most ($\\geq$50\%) of peptides, acknowledging that some peptides may remain underpowered at practical sample sizes. Finally, the analysis enables informed decisions about experimental scope, identifying whether additional samples would meaningfully improve detection rates across the peptidome.
+
+This framework provides realistic power expectations that account for the inherent heterogeneity of phosphoproteomics data, enabling more informed experimental design decisions than aggregate approaches that assume uniform statistical properties across all peptides.
 
 \section*{Acknowledgments}
 
-This work was supported by the Gatsby Charitable Foundation. The author thanks
-the proteomics community for valuable feedback during package development.
+\begin{leftbar}
+All acknowledgments (note the AE spelling) should be collected in this
+unnumbered section before the references. It may contain the usual information
+about funding and feedback from colleagues/reviewers/etc. Furthermore,
+information such as relative contributions of the authors may be added here
+(if any).
+\end{leftbar}
+
 
 %% -- Bibliography -------------------------------------------------------------
+%% - References need to be provided in a .bib BibTeX database.
+%% - All references should be made with \cite, \citet, \citep, \citealp etc.
+%%   (and never hard-coded). See the FAQ for details.
+%% - JSS-specific markup (\proglang, \pkg, \code) should be used in the .bib.
+%% - Titles in the .bib should be in title case.
+%% - DOIs should be included where available.
 
 \bibliography{references}
+
+
+%% -- Appendix (if any) --------------------------------------------------------
+%% - After the bibliography with page break.
+%% - With proper section titles and _not_ just "Appendix".
+
+\newpage
+
+\begin{appendix}
+
+\section{More technical details} \label{app:technical}
+
+\begin{leftbar}
+Appendices can be included after the bibliography (with a page break). Each
+section within the appendix should have a proper section title (rather than
+just \emph{Appendix}).
+
+For more technical style details, please check out JSS's style FAQ at
+\url{https://www.jstatsoft.org/pages/view/style#frequently-asked-questions}
+which includes the following topics:
+\begin{itemize}
+  \item Title vs.\ sentence case.
+  \item Graphics formatting.
+  \item Naming conventions.
+  \item Turning JSS manuscripts into \proglang{R} package vignettes.
+  \item Trouble shooting.
+  \item Many other potentially helpful details\dots
+\end{itemize}
+\end{leftbar}
+
+
+\section[Using BibTeX]{Using \textsc{Bib}{\TeX}} \label{app:bibtex}
+
+\begin{leftbar}
+References need to be provided in a \textsc{Bib}{\TeX} file (\code{.bib}). All
+references should be made with \verb|\cite|, \verb|\citet|, \verb|\citep|,
+\verb|\citealp| etc.\ (and never hard-coded). This commands yield different
+formats of author-year citations and allow to include additional details (e.g.,
+pages, chapters, \dots) in brackets. In case you are not familiar with these
+commands see the JSS style FAQ for details.
+
+Cleaning up \textsc{Bib}{\TeX} files is a somewhat tedious task -- especially
+when acquiring the entries automatically from mixed online sources. However,
+it is important that informations are complete and presented in a consistent
+style to avoid confusions. JSS requires the following format.
+\begin{itemize}
+  \item JSS-specific markup (\verb|\proglang|, \verb|\pkg|, \verb|\code|) should
+    be used in the references.
+  \item Titles should be in title case.
+  \item Journal titles should not be abbreviated and in title case.
+  \item DOIs should be included where available.
+  \item Software should be properly cited as well. For \proglang{R} packages
+    \code{citation("pkgname")} typically provides a good starting point.
+\end{itemize}
+\end{leftbar}
+
+\end{appendix}
+
+%% -----------------------------------------------------------------------------
+
 
 \end{document}

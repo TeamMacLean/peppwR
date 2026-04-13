@@ -1,4 +1,4 @@
-\begin{thebibliography}{19}
+\begin{thebibliography}{16}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -7,12 +7,6 @@
   \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
   \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi
 \providecommand{\eprint}[2][]{\url{#2}}
-
-\bibitem[{Button \emph{et~al.}(2013)Button, Ioannidis, Mokrysz, Nosek, Flint, Robinson, and Munaf{\`o}}]{button2013power}
-Button KS, Ioannidis JP, Mokrysz C, Nosek BA, Flint J, Robinson ES, Munaf{\`o} MR (2013).
-\newblock \enquote{Power failure: why small sample size undermines the reliability of neuroscience.}
-\newblock \emph{Nature Reviews Neuroscience}, \textbf{14}(5), 365--376.
-\newblock \doi{10.1038/nrn3475}.
 
 \bibitem[{Chang \emph{et~al.}(2014)Chang, Picotti, Huttenhower, and Vitek}]{chang2012msstats}
 Chang CY, Picotti P, Huttenhower C, Vitek O (2014).
@@ -38,23 +32,11 @@ Faul F, Erdfelder E, Lang AG, Buchner A (2007).
 \newblock \emph{Behavior Research Methods}, \textbf{39}(2), 175--191.
 \newblock \doi{10.3758/bf03193146}.
 
-\bibitem[{Hart \emph{et~al.}(2013)Hart, Therneau, Zhang, Poland, and Kocher}]{hart2013calculating}
-Hart SN, Therneau TM, Zhang Y, Poland GA, Kocher JP (2013).
-\newblock \enquote{Calculating sample size estimates for RNA sequencing data.}
-\newblock \emph{Journal of Computational Biology}, \textbf{20}(12), 970--978.
-\newblock \doi{10.1089/cmb.2012.0283}.
-
 \bibitem[{Humphrey \emph{et~al.}(2015)Humphrey, Azimifar, and Mann}]{humphrey2015phosphoproteomics}
 Humphrey SJ, Azimifar SB, Mann M (2015).
 \newblock \enquote{High-throughput phosphoproteomics reveals in vivo insulin signaling dynamics.}
 \newblock \emph{Nature Biotechnology}, \textbf{33}(9), 990--995.
 \newblock \doi{10.1038/nbt.3327}.
-
-\bibitem[{Ioannidis(2005)}]{ioannidis2005power}
-Ioannidis JP (2005).
-\newblock \enquote{Why most published research findings are false.}
-\newblock \emph{PLoS Medicine}, \textbf{2}(8), e124.
-\newblock \doi{10.1371/journal.pmed.0020124}.
 
 \bibitem[{Karp \emph{et~al.}(2010)Karp, Huber, Sadowski, Charles, Hester, and Lilley}]{karp2010addressing}
 Karp NA, Huber W, Sadowski PG, Charles PD, Hester SV, Lilley KS (2010).

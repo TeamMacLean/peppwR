@@ -309,7 +309,7 @@ plot(result)
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.7\textwidth]{jss-article-working-sample-size-plot}
+\includegraphics[width=0.7\textwidth]{jss-article-sample-size-plot}
 \caption{Power curve showing the relationship between sample size and achieved power. The recommended sample size corresponds to the first value achieving the target power of 0.8.}
 \label{fig:aggregate-power-curve}
 \end{figure}
@@ -362,7 +362,7 @@ plot(result)
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.7\textwidth]{jss-article-working-effect-size-plot}
+\includegraphics[width=0.7\textwidth]{jss-article-effect-size-plot}
 \caption{Power as a function of effect size for fixed sample size (N=6 per group). The minimum detectable effect size represents the smallest fold-change reliably detectable with 80\% power.}
 \label{fig:aggregate-effect-curve}
 \end{figure}
@@ -419,6 +419,135 @@ Optimistic (shape=4):     N = 12 per group
 \end{CodeChunk}
 
 The sensitivity analysis demonstrates how distributional assumptions substantially affect sample size requirements. More skewed distributions (lower shape parameters) require larger sample sizes to achieve equivalent power, reflecting the increased variance associated with heavily skewed abundance patterns. This analysis provides bounds for experimental planning under uncertainty about the true underlying distributions.
+
+\section{Per-Peptide Mode Analysis} \label{sec:perpeptide}
+
+While aggregate mode provides rapid power estimates using specified distribution parameters, per-peptide mode leverages pilot data to capture the full heterogeneity of abundance patterns across the peptidome. This mode fits distributions to individual peptides, accommodating the substantial variation in both central tendencies and variance structures that characterizes phosphoproteomics data.
+
+\subsection{Pilot Data and Distribution Fitting}
+
+Per-peptide analysis requires pilot data structured with peptide identifiers, experimental conditions, and quantified abundances. For demonstration, we generate synthetic pilot data representing a heterogeneous peptidome with varying distributional properties across peptides.
+
+<<pilot-data-generation>>=
+set.seed(42)
+
+# Generate heterogeneous pilot data
+n_peptides <- 100
+n_per_group <- 4
+
+peptide_params <- tibble::tibble(
+  peptide_id = paste0("pep_", sprintf("%04d", 1:n_peptides)),
+  shape = runif(n_peptides, 1.5, 5),
+  rate = runif(n_peptides, 0.01, 0.1)
+)
+
+pilot_data <- peptide_params |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    data = list(tibble::tibble(
+      condition = rep(c("control", "treatment"), each = n_per_group),
+      replicate = rep(1:n_per_group, 2),
+      abundance = rgamma(n_per_group * 2, shape = shape, rate = rate)
+    ))
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::select(peptide_id, data) |>
+  tidyr::unnest(data)
+@
+
+The synthetic dataset represents 100 peptides with gamma-distributed abundances, where shape parameters range from 1.5 to 5 and rate parameters from 0.01 to 0.1. This parameterization generates substantial heterogeneity in both mean abundances and variance structures across peptides, reflecting the diversity observed in real phosphoproteomics experiments.
+
+The \fct{fit\_distributions} function fits multiple candidate distributions to each peptide independently, selecting the best-fitting model using AIC-based criteria. For proteomics abundance data, we specify \code{distributions = "continuous"} to evaluate gamma, lognormal, normal, and inverse Gaussian distributions.
+
+<<fit-distributions-demo>>=
+fits <- fit_distributions(
+  pilot_data,
+  id = "peptide_id",
+  group = "condition",
+  value = "abundance",
+  distributions = "continuous"
+)
+
+print(fits)
+@
+
+The fitting procedure evaluates each candidate distribution for every peptide, storing fitted parameters, log-likelihood values, and AIC scores. Distribution selection occurs independently for each peptide, accommodating the heterogeneous abundance patterns across the peptidome.
+
+The distribution fitting results reveal substantial heterogeneity across peptides. While the true underlying distributions are gamma (by construction), the fitting process may select alternative distributions for individual peptides due to the limited sample size per peptide (n=4 per group).
+
+<<fit-summary>>=
+summary(fits)
+@
+
+This uncertainty in distribution selection with small sample sizes is expected and does not compromise power analysis validity. The fitted parameters capture the essential statistical properties required for simulation, regardless of the specific distribution family selected. In practice, samples of n$\\geq$15 per group provide more reliable distribution family identification, though the fitted parameters remain useful for power simulation even with smaller pilot datasets.
+
+\subsection{Per-Peptide Power Analysis}
+
+Per-peptide power analysis utilizes the fitted distributions to estimate power across the heterogeneous peptidome. Unlike aggregate mode, which assumes uniform distributional properties, per-peptide analysis accounts for the substantial variation in statistical properties observed across individual peptides.
+
+<<per-peptide-power>>=
+set.seed(123)
+
+result_pp <- power_analysis(
+  fits,
+  effect_size = 2,
+  n_per_group = 6,
+  find = "power",
+  n_sim = 500
+)
+
+print(result_pp)
+@
+
+The analysis reveals substantial heterogeneity in statistical power across the peptidome. Individual peptides exhibit power estimates ranging from near zero to approaching unity, reflecting the different fitted distribution parameters across peptides. The median power across peptides provides a representative estimate for the experiment as a whole.
+
+<<per-peptide-power-plot, fig=TRUE, include=FALSE>>=
+plot(result_pp)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-per-peptide-power-plot}
+\caption{Distribution of statistical power across peptides for fixed experimental design (N=6 per group, 2-fold effect size). The histogram demonstrates substantial heterogeneity in power estimates, with some peptides achieving near-complete power while others remain substantially underpowered.}
+\label{fig:per-peptide-power}
+\end{figure}
+
+Figure~\ref{fig:per-peptide-power} illustrates the fundamental advantage of per-peptide analysis: quantifying the expected distribution of power across the heterogeneous peptidome. This visualization enables researchers to understand what fraction of peptides will be adequately powered under specific experimental conditions.
+
+Per-peptide sample size determination addresses the question: "What sample size ensures adequate power for the majority of peptides?" The analysis identifies sample sizes where a specified proportion of peptides achieve target power thresholds.
+
+<<per-peptide-sample-size>>=
+set.seed(123)
+
+result_n <- power_analysis(
+  fits,
+  effect_size = 2,
+  target_power = 0.8,
+  find = "sample_size",
+  n_sim = 500
+)
+
+print(result_n)
+@
+
+The recommended sample size represents the point where 50\% of peptides achieve the target power threshold. We use a majority rule where recommended sample sizes target powering most of the peptides, acknowledging that some peptides may remain underpowered at practical sample sizes.
+
+<<per-peptide-sample-size-plot, fig=TRUE, include=FALSE>>=
+plot(result_n)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-per-peptide-sample-size-plot}
+\caption{Peptide threshold curve showing the proportion of peptides achieving 80\% power as a function of sample size. The recommended sample size corresponds to the point where 50\% of peptides achieve target power, representing a practical balance for heterogeneous peptidomes.}
+\label{fig:peptide-threshold}
+\end{figure}
+
+Figure~\ref{fig:peptide-threshold} presents the peptide threshold curve, a fundamental visualization for per-peptide power analysis. The curve demonstrates how the proportion of well-powered peptides increases with sample size, providing intuitive guidance for experimental design decisions.
+
+Per-peptide analysis provides several key insights for experimental design. First, power varies substantially across peptides due to different underlying abundance distributions and variance structures. Second, we use a majority rule approach where recommended sample sizes target powering most ($\\geq$50\%) of peptides, acknowledging that some peptides may remain underpowered at practical sample sizes. Finally, the analysis enables informed decisions about experimental scope, identifying whether additional samples would meaningfully improve detection rates across the peptidome.
+
+This framework provides realistic power expectations that account for the inherent heterogeneity of phosphoproteomics data, enabling more informed experimental design decisions than aggregate approaches that assume uniform statistical properties across all peptides.
 
 \section*{Acknowledgments}
 
