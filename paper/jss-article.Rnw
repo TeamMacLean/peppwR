@@ -106,6 +106,7 @@ The absence of tools that combine per-peptide distribution modeling with realist
 \centering
 \caption{Comparison of power analysis tools for proteomics applications.}
 \label{tab:tool-comparison}
+\footnotesize
 \begin{tabular}{lcccccc}
 \hline
 Tool & \begin{tabular}[c]{@{}c@{}}Proteomics\\Focus\end{tabular} & \begin{tabular}[c]{@{}c@{}}Per-feature\\Modeling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Non-normal\\Distributions\end{tabular} & \begin{tabular}[c]{@{}c@{}}Missing Data\\Handling\end{tabular} & \begin{tabular}[c]{@{}c@{}}Multiple\\Testing\end{tabular} & \begin{tabular}[c]{@{}c@{}}Statistical\\Tests\end{tabular} \\
@@ -265,7 +266,13 @@ The \class{peppwr\_power} class stores power analysis results with associated si
 
 Method dispatch provides intuitive interfaces for common operations. The \code{print()} methods deliver concise summaries appropriate for interactive analysis, while \code{summary()} methods provide detailed statistical output including confidence intervals and fit diagnostics. The \code{plot()} methods generate diagnostic visualizations tailored to each class.
 
-The design separates core functionality into distinct components: distribution fitting (\fct{fit\_distributions}), power analysis (\fct{power\_analysis}), simulation engine (\fct{run\_power\_sim}), statistical tests (\fct{test\_wilcoxon}, \fct{test\_bootstrap\_t}, \fct{test\_bayes\_t}), and visualization (\fct{plot.peppwr\_fits}, \fct{plot.peppwr\_power}). This modular architecture enables flexible extension while maintaining clear separation of concerns.
+The design separates core functionality into distinct components as below
+\begin{itemize}
+\item Distribution fitting: \fct{fit\_distributions}
+\item Power analysis: \fct{power\_analysis}
+\item Statistical tests: \fct{test\_wilcoxon}, \fct{test\_bootstrap\_t}, \fct{test\_bayes\_t}
+\item Visualization: \fct{plot.peppwr\_fits}, \fct{plot.peppwr\_power}
+\end{itemize}
 
 %% -- Examples -----------------------------------------------------------------
 
@@ -623,7 +630,6 @@ if(!USE_CACHED_RESULTS || !exists("power_wilcox")) {
   power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
                                find = "power", test = "bootstrap_t", n_sim = 500)
 }
-@
 
 power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
                               find = "power", test = "bayes_t", n_sim = 500)
@@ -650,7 +656,7 @@ The achievable power at these sample sizes is low. Only the Bayes factor test re
 
 \subsubsection{DDA Power Assessment}
 
-Using the Bayes factor test, we can use \package{peppwR} to look at fundamental experimental design questions with the DDA dataset.
+Using the Bayes factor test, we can use \pkg{peppwR} to look at fundamental experimental design questions with the DDA dataset.
 
 <<dda-current-power>>=
 set.seed(123)
@@ -684,7 +690,7 @@ print(sample_size_dda)
 
 The analysis shows that achieving a typical target power of 80% for 50% of peptides at a 2-fold change level would require 15 biological replicates five time the size of that typically employed in discovery phosphoproteomics.
 
-The \package{peppwR} then can be used to get a good picture of how informative a given dataset type might and give researcher realistic assessments that can inform experimental design decisions and result interpretation.
+The \pkg{peppwR} then can be used to get a good picture of how informative a given dataset type might and give researcher realistic assessments that can inform experimental design decisions and result interpretation.
 
 \subsection{Targeted proteomics with missing data: PRM case study}
 
@@ -723,9 +729,9 @@ fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
 
 <<prm-missingness-analysis-execute, echo=FALSE>>=
 # Actually execute (with caching)
-if(USE_CACHED_RESULTS && file.exists("prm_computation_results.RData") && !exists("fits")) {
+if(FALSE && file.exists("prm_computation_results.RData") && !exists("fits")) {
   load("prm_computation_results.RData")
-} else if(!exists("fits")) {
+} else  {
   fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
 }
 @
@@ -775,7 +781,6 @@ if(!USE_CACHED_RESULTS || !exists("power_wilcox") || !exists("power_boot") || !e
   power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
                                 find = "power", test = "bayes_t", n_sim = 100)
 }
-@
 
 # Create comparison table
 comparison <- data.frame(
@@ -823,87 +828,24 @@ cat("Median power WITH missingness:   ",
     round(median(power_with_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
 @
 
-Including missingness in simulations typically reduces power estimates, but in this dataset the effect is minimal. This may be due to the low power already available in this experiment. \package{peppwR} provides useful tools for assesing the extent and effect of missingness in phosphoproteomics analysis.
+Including missingness in simulations typically reduces power estimates, but in this dataset the effect is minimal. This may be due to the low power already available in this experiment. \pkg{peppwR} provides useful tools for assessing the extent and effect of missingness in phosphoproteomics analysis.
 
 
 This case study demonstrates \pkg{peppwR}'s comprehensive approach to power analysis in the presence of missing data, providing realistic estimates that account for the complexities inherent in mass spectrometry data.
 
+\section{Concluding Remarks}
+
+\pkg{peppwR} aims to fill a current gap in experimental design tools for phosphoproteomics by providing simulation-based power analysis tailored to the unique statistical challenges of peptide-level quantification data. The package provides tools for common experimental scenarios, from simple aggregate comparisons to complex per-peptide analyses with missing data.
+                                                                                                                                                   The examples and case studies presented here demonstrate \pkg{peppwR}'s practical value for experimental planning. With it researchers can systematically evaluate whether their proposed sample sizes will provide adequate power for detecting biologically meaningful effects, avoiding both under-powered studies and unnecessary resource expenditure. The package's ability to incorporate realistic distributions with parameters sampled from real data, varied tests, and missing data patterns helps the power estimates reflect genuine experimental conditions rather than optimistic theoretical scenarios. \pkg{peppwR} will enable more informed decision-making and interpretation of proteomics experiments.
 
 \section*{Acknowledgments}
 
 \begin{leftbar}
-Thanks to Frank Menke and The Sainsbury Laboratory proteomics team for interesting discussions and comments.
+Thanks to Frank Menke and The Sainsbury Laboratory proteomics team and proteomics users for interesting discussions and comments during the development of the ideas that have gone into this package.
 \end{leftbar}
 
-
-%% -- Bibliography -------------------------------------------------------------
-%% - References need to be provided in a .bib BibTeX database.
-%% - All references should be made with \cite, \citet, \citep, \citealp etc.
-%%   (and never hard-coded). See the FAQ for details.
-%% - JSS-specific markup (\proglang, \pkg, \code) should be used in the .bib.
-%% - Titles in the .bib should be in title case.
-%% - DOIs should be included where available.
 
 \bibliography{references}
-
-
-%% -- Appendix (if any) --------------------------------------------------------
-%% - After the bibliography with page break.
-%% - With proper section titles and _not_ just "Appendix".
-
-\newpage
-
-\begin{appendix}
-
-\section{More technical details} \label{app:technical}
-
-\begin{leftbar}
-Appendices can be included after the bibliography (with a page break). Each
-section within the appendix should have a proper section title (rather than
-just \emph{Appendix}).
-
-For more technical style details, please check out JSS's style FAQ at
-\url{https://www.jstatsoft.org/pages/view/style#frequently-asked-questions}
-which includes the following topics:
-\begin{itemize}
-  \item Title vs.\ sentence case.
-  \item Graphics formatting.
-  \item Naming conventions.
-  \item Turning JSS manuscripts into \proglang{R} package vignettes.
-  \item Trouble shooting.
-  \item Many other potentially helpful details\dots
-\end{itemize}
-\end{leftbar}
-
-
-\section[Using BibTeX]{Using \textsc{Bib}{\TeX}} \label{app:bibtex}
-
-\begin{leftbar}
-References need to be provided in a \textsc{Bib}{\TeX} file (\code{.bib}). All
-references should be made with \verb|\cite|, \verb|\citet|, \verb|\citep|,
-\verb|\citealp| etc.\ (and never hard-coded). This commands yield different
-formats of author-year citations and allow to include additional details (e.g.,
-pages, chapters, \dots) in brackets. In case you are not familiar with these
-commands see the JSS style FAQ for details.
-
-Cleaning up \textsc{Bib}{\TeX} files is a somewhat tedious task -- especially
-when acquiring the entries automatically from mixed online sources. However,
-it is important that informations are complete and presented in a consistent
-style to avoid confusions. JSS requires the following format.
-\begin{itemize}
-  \item JSS-specific markup (\verb|\proglang|, \verb|\pkg|, \verb|\code|) should
-    be used in the references.
-  \item Titles should be in title case.
-  \item Journal titles should not be abbreviated and in title case.
-  \item DOIs should be included where available.
-  \item Software should be properly cited as well. For \proglang{R} packages
-    \code{citation("pkgname")} typically provides a good starting point.
-\end{itemize}
-\end{leftbar}
-
-\end{appendix}
-
-%% -----------------------------------------------------------------------------
 
 
 \end{document}
