@@ -1,0 +1,161 @@
+\subsection{Targeted proteomics with missing data: PRM case study}
+
+This case study analyzes a targeted parallel reaction monitoring (PRM) dataset to demonstrate \pkg{peppwR}'s handling of missing data patterns and their impact on power estimates. The dataset contains fungal phosphoproteomics data from \emph{Magnaporthe oryzae} comparing early (t=0) vs late (t=6) timepoints, with 3 biological replicates per condition and 2 technical replicates per biological replicate, measuring 285 phosphopeptides.
+
+\subsubsection{Data preparation and technical replicate averaging}
+
+<<prm-data-loading>>=
+# Load the PRM experiment data
+prm <- read.csv("../sample_data/prm_data.csv")
+
+# Check for missing values in raw data
+cat("Total observations:", nrow(prm), "\n")
+cat("Missing values:", sum(is.na(prm$total_area)), "\n")
+cat("Missing rate:", round(mean(is.na(prm$total_area)) * 100, 1), "%\n")
+
+# Filter to early (0) vs late (6) timepoints
+# Average technical replicates within each biological replicate
+pilot <- prm |>
+  filter(timepoint %in% c(0, 6)) |>
+  group_by(peptide_modified_sequence, genotype, timepoint, bio_rep) |>
+  summarise(abundance = mean(total_area, na.rm = TRUE), .groups = "drop") |>
+  transmute(
+    peptide_id = peptide_modified_sequence,
+    condition = paste0("t", timepoint),
+    abundance = abundance
+  )
+
+# Handle NaN values from averaging (when both tech reps are NA)
+pilot <- pilot |>
+  mutate(abundance = ifelse(is.nan(abundance), NA, abundance))
+
+cat("After averaging technical replicates:\n")
+cat("Unique peptides:", n_distinct(pilot$peptide_id), "\n")
+cat("Missing values:", sum(is.na(pilot$abundance)), "\n")
+cat("Missing rate:", round(mean(is.na(pilot$abundance)) * 100, 1), "%\n")
+@
+
+Technical replicates measure the same biological sample multiple times, capturing measurement variability rather than biological variability. For power analysis, biological replicates are the true unit of replication. We average technical replicates to obtain one value per biological replicate.
+
+\subsubsection{Missingness analysis and MNAR detection}
+
+<<prm-missingness-analysis>>=
+# Fit distributions - missingness is tracked automatically
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+
+# Display summary including missingness information
+print(fits)
+@
+
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{figure}[htbp]
+\begin{center}
+<<prm-missingness-plot, echo=FALSE, fig=TRUE>>=
+# Visualize missingness patterns
+plot_missingness(fits)
+@
+\end{center}
+\caption{Missingness patterns in the PRM dataset. Left panel shows the distribution of NA rates across peptides. Right panel shows the relationship between mean abundance and NA rate, with correlation coefficient indicating evidence for MNAR (Missing Not At Random) patterns.}
+\label{fig:prm-missingness}
+\end{figure}
+
+Missing Not At Random (MNAR) patterns occur when low-abundance peptides systematically fall below detection limits. \pkg{peppwR} detects MNAR by correlating mean abundance with NA rate across peptides. A negative correlation (r < -0.1) suggests that low-abundance peptides have more missing values, characteristic of detection-limit-driven missingness.
+
+\subsubsection{Statistical test comparison at small sample sizes}
+
+With only 3 biological replicates per condition, the choice of statistical test dramatically affects power estimates:
+
+<<prm-test-comparison>>=
+# Compare three statistical tests at N=3 with 2-fold effect
+power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "wilcoxon", n_sim = 100)
+
+power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                             find = "power", test = "bootstrap_t", n_sim = 100)
+
+power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                              find = "power", test = "bayes_t", n_sim = 100)
+
+# Create comparison table
+comparison <- data.frame(
+  Test = c("Wilcoxon rank-sum", "Bootstrap-t", "Bayes factor"),
+  Median_Power = c(
+    median(power_wilcox$simulations$peptide_power, na.rm = TRUE),
+    median(power_boot$simulations$peptide_power, na.rm = TRUE),
+    median(power_bayes$simulations$peptide_power, na.rm = TRUE)
+  ),
+  Pct_Above_50 = c(
+    mean(power_wilcox$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.5, na.rm = TRUE) * 100
+  ),
+  Pct_Above_80 = c(
+    mean(power_wilcox$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.8, na.rm = TRUE) * 100
+  )
+)
+
+print(comparison)
+@
+
+The Wilcoxon rank-sum test is conservative at small sample sizes, while the Bayes factor test provides more informative power estimates. For subsequent analyses, we use the Bayes factor test given its superior performance at N=3.
+
+\subsubsection{Impact of missingness on power estimates}
+
+Accounting for missing data patterns affects power calculations:
+
+<<prm-missingness-impact>>=
+# Power without accounting for missingness (optimistic)
+power_no_miss <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "bayes_t",
+                                include_missingness = FALSE, n_sim = 100)
+
+# Power accounting for missingness (realistic)
+power_with_miss <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                  find = "power", test = "bayes_t",
+                                  include_missingness = TRUE, n_sim = 100)
+
+cat("Median power WITHOUT missingness:",
+    round(median(power_no_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
+cat("Median power WITH missingness:   ",
+    round(median(power_with_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
+@
+
+Including missingness in simulations typically reduces power estimates, reflecting the realistic cost of missing data on the experiment's ability to detect effects. This demonstrates the importance of accounting for missing data patterns when planning experiments.
+
+\subsubsection{FDR-aware power analysis}
+
+With 285 peptides tested simultaneously, multiple testing correction becomes important. FDR (False Discovery Rate) control using the Benjamini-Hochberg method adjusts p-values to control the expected proportion of false discoveries:
+
+<<prm-fdr-analysis>>=
+# Standard power with Wilcoxon (nominal alpha = 0.05)
+power_nominal <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "wilcoxon",
+                               apply_fdr = FALSE, n_sim = 100)
+
+# FDR-aware power (BH correction)
+# prop_null = 0.8 assumes 80% of peptides have no true effect
+power_fdr <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                           find = "power", test = "wilcoxon",
+                           apply_fdr = TRUE, prop_null = 0.8,
+                           fdr_threshold = 0.05, n_sim = 100)
+
+# Extract power values
+nominal_power <- power_nominal$simulations$peptide_power
+fdr_power <- power_fdr$simulations$peptide_power
+
+cat("Nominal power (no FDR correction):\n")
+cat("  Median power:", round(median(nominal_power, na.rm = TRUE), 3), "\n")
+cat("  % peptides > 80% power:",
+    round(mean(nominal_power > 0.8, na.rm = TRUE) * 100, 1), "%\n")
+
+cat("\nFDR-aware power (BH correction, 80% true nulls):\n")
+cat("  Median power:", round(median(fdr_power, na.rm = TRUE), 3), "\n")
+cat("  % peptides > 80% power:",
+    round(mean(fdr_power > 0.8, na.rm = TRUE) * 100, 1), "%\n")
+@
+
+FDR correction reduces power because adjusted p-values require stronger evidence to reach significance. The magnitude depends on the number of tests and the assumed proportion of true null hypotheses (\code{prop\_null}). For targeted proteomics panels, the FDR impact is more modest than for discovery experiments with thousands of tests.
+
+This case study demonstrates \pkg{peppwR}'s comprehensive approach to power analysis in the presence of missing data, providing realistic estimates that account for the complexities inherent in mass spectrometry data.

@@ -1,0 +1,122 @@
+\subsection{DDA Phosphoproteomics Time-Course Analysis}
+
+This analysis examines Arabidopsis phosphoproteomics data from a time-course experiment comparing early (t=0) and late (t=600) developmental timepoints. The dataset represents typical challenges encountered in discovery phosphoproteomics: substantial peptide numbers, limited biological replication, and heterogeneous abundance patterns across the peptidome.
+
+\subsubsection{Experimental Design and Data Characteristics}
+
+The DDA experiment quantified 2,228 phosphopeptides across two timepoints with 3 biological replicates per condition. This sample size, while common in phosphoproteomics due to experimental costs, presents significant statistical challenges for power analysis.
+
+<<load-dda-data>>=
+library(peppwR)
+library(dplyr)
+library(ggplot2)
+
+# Load the DDA experiment data
+dda <- read.csv("../sample_data/dda_data.csv")
+
+# Filter to early vs late timepoints and format for peppwR
+pilot <- dda |>
+  filter(timepoints %in% c(0, 600)) |>
+  transmute(
+    peptide_id = new_annotation,
+    condition = paste0("t", timepoints),
+    abundance = timepoints_values
+  )
+
+# Dataset summary
+cat("Unique peptides:", n_distinct(pilot$peptide_id), "\n")
+cat("Observations per condition:\n")
+pilot |> count(condition)
+@
+
+The abundance values span multiple orders of magnitude, characteristic of mass spectrometry quantification. With only 6 total observations per peptide (3 per condition), this dataset exemplifies the statistical challenges commonly encountered in phosphoproteomics experiments.
+
+\subsubsection{Distribution Fitting Under Small Sample Constraints}
+
+Distribution fitting proceeds despite limited sample sizes, with important caveats regarding reliability of parametric model selection.
+
+<<dda-distribution-fitting>>=
+# Fit distributions to each peptide
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+
+print(fits)
+@
+
+\textbf{Important limitation:} With only 6 observations per peptide, distribution selection is inherently unreliable. The fitting procedure may favour distributions like Pareto or Skew Normal over the gamma and lognormal distributions typically expected for mass spectrometry data. This represents an artefact of small sample size rather than evidence for the true underlying distribution family. Nevertheless, the fitted parameters capture essential statistical properties required for simulation-based power analysis.
+
+\subsubsection{Statistical Test Selection for Small Samples}
+
+The choice of statistical test dramatically affects power estimates with small sample sizes. We compare three approaches available in \pkg{peppwR}:
+
+<<dda-test-comparison>>=
+set.seed(123)
+
+# Compare three statistical tests at N=3
+power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "wilcoxon", n_sim = 500)
+
+power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                             find = "power", test = "bootstrap_t", n_sim = 500)
+
+power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                              find = "power", test = "bayes_t", n_sim = 500)
+
+# Create comparison summary
+comparison <- tibble(
+  Test = c("Wilcoxon rank-sum", "Bootstrap-t", "Bayes factor"),
+  `Median Power` = c(
+    median(power_wilcox$simulations$peptide_power, na.rm = TRUE),
+    median(power_boot$simulations$peptide_power, na.rm = TRUE),
+    median(power_bayes$simulations$peptide_power, na.rm = TRUE)
+  ),
+  `Peptides >80% Power` = c(
+    mean(power_wilcox$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.8, na.rm = TRUE) * 100
+  )
+)
+
+print(comparison)
+@
+
+The Bayes factor test demonstrates superior power characteristics for small sample sizes, consistent with its ability to incorporate prior information and provide more nuanced evidence assessment than traditional null hypothesis testing approaches.
+
+\subsubsection{Realistic Power Assessment}
+
+Using the optimal test (Bayes factor), we address three fundamental experimental design questions with the current dataset:
+
+<<dda-current-power>>=
+set.seed(123)
+
+# Question 1: Current power with N=3
+power_current <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "bayes_t", n_sim = 500)
+print(power_current)
+@
+
+<<dda-power-plot, fig=TRUE, include=FALSE, width=6, height=4>>=
+plot(power_current)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-dda-power-plot}
+\caption{Distribution of statistical power across 2,228 phosphopeptides with N=3 per group (Bayes factor test, 2-fold effect size). The histogram reveals substantial heterogeneity in power estimates, with most peptides achieving modest power levels.}
+\label{fig:dda-power}
+\end{figure}
+
+Figure~\ref{fig:dda-power} demonstrates the harsh reality of small sample phosphoproteomics: despite analysing over 2,000 peptides, most achieve insufficient power to reliably detect 2-fold changes. This analysis provides quantitative evidence for the need for increased replication in discovery experiments.
+
+<<dda-sample-size>>=
+set.seed(123)
+
+# Question 2: Required sample size for adequate power
+sample_size_dda <- power_analysis(fits, effect_size = 2, target_power = 0.8,
+                                  find = "sample_size", test = "bayes_t", n_sim = 500)
+print(sample_size_dda)
+@
+
+The analysis reveals that achieving adequate power (80% for 50% of peptides) to detect 2-fold changes would require substantially larger sample sizes than typically employed in discovery phosphoproteomics, highlighting the tension between experimental costs and statistical rigour.
+
+This case study exemplifies the value of honest power analysis: rather than providing false confidence, \pkg{peppwR} delivers realistic assessments that can inform experimental design decisions and result interpretation. The low power estimates reflect genuine statistical limitations imposed by small sample sizes, not deficiencies in the analysis approach.
+

@@ -17,10 +17,13 @@
 %% need no \usepackage{Sweave}
 \SweaveOpts{engine=R, eps=FALSE, keep.source = TRUE}
 <<preliminaries, echo=FALSE, results=hide>>=
-options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE, digits = 7)
 library("peppwR")
 library("dplyr")
 library("ggplot2")
+
+# Cache control: set to TRUE to use fast cached results
+USE_CACHED_RESULTS <- TRUE
 @
 
 
@@ -295,7 +298,7 @@ result <- power_analysis(
   effect_size = 2,
   target_power = 0.8,
   find = "sample_size",
-  n_sim = 1000
+  n_sim = 5000
 )
 
 print(result)
@@ -329,7 +332,7 @@ result <- power_analysis(
   effect_size = 2,
   n_per_group = 6,
   find = "power",
-  n_sim = 1000
+  n_sim = 5000
 )
 
 print(result)
@@ -350,7 +353,7 @@ result <- power_analysis(
   n_per_group = 6,
   target_power = 0.8,
   find = "effect_size",
-  n_sim = 1000
+  n_sim = 5000
 )
 
 print(result)
@@ -422,14 +425,16 @@ The sensitivity analysis demonstrates how distributional assumptions substantial
 
 \section{Per-Peptide Mode Analysis} \label{sec:perpeptide}
 
-While aggregate mode provides rapid power estimates using specified distribution parameters, per-peptide mode leverages pilot data to capture the full heterogeneity of abundance patterns across the peptidome. This mode fits distributions to individual peptides, accommodating the substantial variation in both central tendencies and variance structures that characterizes phosphoproteomics data.
+When pilot data is available from similar experiments, per-peptide mode provides more realistic power estimates by accounting for the heterogeneity across the peptidome. Unlike aggregate mode, which assumes all peptides follow identical distributions, per-peptide mode fits distributions to each peptide individually and reports power statistics across the entire population.
 
-\subsection{Pilot Data and Distribution Fitting}
+\subsection{Distribution Fitting}
 
-Per-peptide analysis requires pilot data structured with peptide identifiers, experimental conditions, and quantified abundances. For demonstration, we generate synthetic pilot data representing a heterogeneous peptidome with varying distributional properties across peptides.
+The first step in per-peptide analysis is fitting probability distributions to pilot data using \code{fit\_distributions()}. This function fits multiple candidate distributions to each peptide and selects the best model based on AIC.
 
-<<pilot-data-generation>>=
-set.seed(42)
+We demonstrate this workflow using simulated pilot data representing 100 peptides with heterogeneous abundance distributions:
+
+<<generate-pilot-data>>=
+set.seed(123)
 
 # Generate heterogeneous pilot data
 n_peptides <- 100
@@ -455,11 +460,11 @@ pilot_data <- peptide_params |>
   tidyr::unnest(data)
 @
 
-The synthetic dataset represents 100 peptides with gamma-distributed abundances, where shape parameters range from 1.5 to 5 and rate parameters from 0.01 to 0.1. This parameterization generates substantial heterogeneity in both mean abundances and variance structures across peptides, reflecting the diversity observed in real phosphoproteomics experiments.
+The pilot dataset contains 100 peptides, each with 4 replicates per condition (8 observations total), simulated from gamma distributions with varying shape and rate parameters to represent realistic peptide heterogeneity.
 
-The \fct{fit\_distributions} function fits multiple candidate distributions to each peptide independently, selecting the best-fitting model using AIC-based criteria. For proteomics abundance data, we specify \code{distributions = "continuous"} to evaluate gamma, lognormal, normal, and inverse Gaussian distributions.
+Distribution fitting is performed using \code{fit\_distributions()}:
 
-<<fit-distributions-demo>>=
+<<fit-distributions>>=
 fits <- fit_distributions(
   pilot_data,
   id = "peptide_id",
@@ -471,19 +476,15 @@ fits <- fit_distributions(
 print(fits)
 @
 
-The fitting procedure evaluates each candidate distribution for every peptide, storing fitted parameters, log-likelihood values, and AIC scores. Distribution selection occurs independently for each peptide, accommodating the heterogeneous abundance patterns across the peptidome.
+The function fits gamma, lognormal, normal, and inverse Gaussian distributions to each peptide and selects the best-fitting model. The output summarizes the distribution of best-fit models across peptides and reports any fit failures.
 
-The distribution fitting results reveal substantial heterogeneity across peptides. While the true underlying distributions are gamma (by construction), the fitting process may select alternative distributions for individual peptides due to the limited sample size per peptide (n=4 per group).
+\subsection{Power Analysis}
 
-<<fit-summary>>=
-summary(fits)
-@
+With distribution fits in hand, we can perform power analysis to determine the proportion of peptides achieving target power at different sample sizes.
 
-This uncertainty in distribution selection with small sample sizes is expected and does not compromise power analysis validity. The fitted parameters capture the essential statistical properties required for simulation, regardless of the specific distribution family selected. In practice, samples of n$\\geq$15 per group provide more reliable distribution family identification, though the fitted parameters remain useful for power simulation even with smaller pilot datasets.
+\subsubsection{Computing Power}
 
-\subsection{Per-Peptide Power Analysis}
-
-Per-peptide power analysis utilizes the fitted distributions to estimate power across the heterogeneous peptidome. Unlike aggregate mode, which assumes uniform distributional properties, per-peptide analysis accounts for the substantial variation in statistical properties observed across individual peptides.
+For a fixed sample size of N=6 per group:
 
 <<per-peptide-power>>=
 set.seed(123)
@@ -499,22 +500,22 @@ result_pp <- power_analysis(
 print(result_pp)
 @
 
-The analysis reveals substantial heterogeneity in statistical power across the peptidome. Individual peptides exhibit power estimates ranging from near zero to approaching unity, reflecting the different fitted distribution parameters across peptides. The median power across peptides provides a representative estimate for the experiment as a whole.
-
-<<per-peptide-power-plot, fig=TRUE, include=FALSE>>=
+<<per-peptide-power-plot, fig=TRUE, include=FALSE, width=6, height=4>>=
 plot(result_pp)
 @
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.7\textwidth]{jss-article-per-peptide-power-plot}
-\caption{Distribution of statistical power across peptides for fixed experimental design (N=6 per group, 2-fold effect size). The histogram demonstrates substantial heterogeneity in power estimates, with some peptides achieving near-complete power while others remain substantially underpowered.}
+\caption{Distribution of statistical power across 100 peptides for fixed experimental design (N=6 per group, 2-fold effect size). The histogram demonstrates substantial heterogeneity in power estimates, with 73\% of peptides achieving at least 80\% power while others remain underpowered.}
 \label{fig:per-peptide-power}
 \end{figure}
 
-Figure~\ref{fig:per-peptide-power} illustrates the fundamental advantage of per-peptide analysis: quantifying the expected distribution of power across the heterogeneous peptidome. This visualization enables researchers to understand what fraction of peptides will be adequately powered under specific experimental conditions.
+The result shows that 73\% of peptides achieve at least 80\% power to detect a 2-fold change with N=6 per group (Figure~\ref{fig:per-peptide-power}). The histogram reveals substantial heterogeneity: while some peptides achieve near-perfect power, others remain underpowered even at this sample size.
 
-Per-peptide sample size determination addresses the question: "What sample size ensures adequate power for the majority of peptides?" The analysis identifies sample sizes where a specified proportion of peptides achieve target power thresholds.
+\subsubsection{Sample Size Determination}
+
+To find the sample size needed for adequate power across the peptidome:
 
 <<per-peptide-sample-size>>=
 set.seed(123)
@@ -530,33 +531,308 @@ result_n <- power_analysis(
 print(result_n)
 @
 
-The recommended sample size represents the point where 50\% of peptides achieve the target power threshold. We use a majority rule where recommended sample sizes target powering most of the peptides, acknowledging that some peptides may remain underpowered at practical sample sizes.
-
-<<per-peptide-sample-size-plot, fig=TRUE, include=FALSE>>=
+<<per-peptide-sample-size-plot, fig=TRUE, include=FALSE, width=6, height=4>>=
 plot(result_n)
 @
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.7\textwidth]{jss-article-per-peptide-sample-size-plot}
-\caption{Peptide threshold curve showing the proportion of peptides achieving 80\% power as a function of sample size. The recommended sample size corresponds to the point where 50\% of peptides achieve target power, representing a practical balance for heterogeneous peptidomes.}
-\label{fig:peptide-threshold}
+\caption{Peptide threshold curve showing the proportion of peptides achieving 80\% power as a function of sample size. The analysis recommends N=6 per group to achieve target power for the majority (50th percentile) of peptides.}
+\label{fig:per-peptide-sample-size}
 \end{figure}
 
-Figure~\ref{fig:peptide-threshold} presents the peptide threshold curve, a fundamental visualization for per-peptide power analysis. The curve demonstrates how the proportion of well-powered peptides increases with sample size, providing intuitive guidance for experimental design decisions.
+The analysis recommends N=6 per group to achieve 80\% power for the majority (50th percentile) of peptides. Figure~\ref{fig:per-peptide-sample-size} shows the ``peptide threshold curve'' indicating what proportion of peptides achieve target power at each sample size. Researchers can use this curve to decide their acceptable trade-off between sample size and peptide coverage.
 
-Per-peptide analysis provides several key insights for experimental design. First, power varies substantially across peptides due to different underlying abundance distributions and variance structures. Second, we use a majority rule approach where recommended sample sizes target powering most ($\\geq$50\%) of peptides, acknowledging that some peptides may remain underpowered at practical sample sizes. Finally, the analysis enables informed decisions about experimental scope, identifying whether additional samples would meaningfully improve detection rates across the peptidome.
+The key advantage of per-peptide analysis is providing realistic expectations about experimental outcomes. Rather than assuming all peptides behave identically, it acknowledges the biological reality of peptide heterogeneity and helps researchers plan accordingly.
 
-This framework provides realistic power expectations that account for the inherent heterogeneity of phosphoproteomics data, enabling more informed experimental design decisions than aggregate approaches that assume uniform statistical properties across all peptides.
+\section{Case Studies} \label{sec:case-studies}
+
+The following case studies demonstrate \pkg{peppwR} applied to real phosphoproteomics datasets, showcasing the package's ability to handle authentic experimental constraints and provide realistic power estimates for experimental design decisions.
+
+\subsection{DDA Phosphoproteomics Time-Course Analysis}
+
+This analysis examines Arabidopsis phosphoproteomics data from a time-course experiment comparing early (t=0) and late (t=600) developmental timepoints. The dataset represents typical challenges encountered in discovery phosphoproteomics large peptide numbers, limited biological replication, and heterogeneous abundance patterns across the peptidome. The DDA experiment quantified 2,228 phosphopeptides across two timepoints with 3 biological replicates per condition. This sample size is common in phosphoproteomics.
+
+<<load-dda-data>>=
+library(peppwR)
+library(dplyr)
+library(ggplot2)
+
+# Load the DDA experiment data
+dda <- read.csv("../sample_data/dda_data.csv")
+
+# Filter to early vs late timepoints and format for peppwR
+pilot <- dda |>
+  filter(timepoints %in% c(0, 600)) |>
+  transmute(
+    peptide_id = new_annotation,
+    condition = paste0("t", timepoints),
+    abundance = timepoints_values
+  )
+
+# Dataset summary
+cat("Unique peptides:", n_distinct(pilot$peptide_id), "\n")
+cat("Observations per condition:\n")
+pilot |> count(condition)
+@
+
+We perform distribution fitting first.
+
+<<dda-distribution-fitting-display, eval=FALSE>>=
+# Fit distributions to each peptide
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+@
+
+<<dda-distribution-fitting-execute, echo=FALSE>>=
+# Actually execute (with caching)
+if(USE_CACHED_RESULTS && file.exists("dda_computation_results.RData") && !exists("fits")) {
+  load("dda_computation_results.RData")
+} else if(!exists("fits")) {
+  fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+}
+@
+
+<<dda-distribution-fitting-output>>=
+print(fits)
+@
+
+With only 6 observations per peptide, distribution selection is unreliable. The fitting procedure favours distributions like Pareto or Skew Normal over the gamma and lognormal distributions typically expected for mass spectrometry data. This represents an artefact of small sample size rather than evidence for the true underlying distribution family. We see this effect when generating small samples from known distributions, too.
+
+\subsubsection{Statistical Test Selection for Small Samples}
+
+The choice of statistical test can affect power estimates with small sample sizes. We compare three approaches available in \pkg{peppwR}:
+
+<<dda-test-comparison-display, eval=FALSE>>=
+set.seed(123)
+
+# Compare three statistical tests at N=3
+power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "wilcoxon", n_sim = 500)
+
+power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                             find = "power", test = "bootstrap_t", n_sim = 500)
+@
+
+<<dda-test-comparison-execute, echo=FALSE>>=
+# Actually execute (with caching)
+set.seed(123)
+if(!USE_CACHED_RESULTS || !exists("power_wilcox")) {
+  power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                 find = "power", test = "wilcoxon", n_sim = 500)
+  power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "bootstrap_t", n_sim = 500)
+}
+@
+
+power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                              find = "power", test = "bayes_t", n_sim = 500)
+
+# Create comparison summary
+comparison <- tibble(
+  Test = c("Wilcoxon rank-sum", "Bootstrap-t", "Bayes factor"),
+  `Median Power` = c(
+    median(power_wilcox$simulations$peptide_power, na.rm = TRUE),
+    median(power_boot$simulations$peptide_power, na.rm = TRUE),
+    median(power_bayes$simulations$peptide_power, na.rm = TRUE)
+  ),
+  `Peptides >80% Power` = c(
+    mean(power_wilcox$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.8, na.rm = TRUE) * 100
+  )
+)
+
+print(comparison)
+@
+
+The achievable power at these sample sizes is low. Only the Bayes factor test really demonstrates any ability to find anything at the usually expected power level of 80\%
+
+\subsubsection{DDA Power Assessment}
+
+Using the Bayes factor test, we can use \package{peppwR} to look at fundamental experimental design questions with the DDA dataset.
+
+<<dda-current-power>>=
+set.seed(123)
+
+power_current <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "bayes_t", n_sim = 500)
+print(power_current)
+@
+
+<<dda-power-plot, fig=TRUE, include=FALSE, width=6, height=4>>=
+plot(power_current)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{jss-article-dda-power-plot}
+\caption{Distribution of statistical power across 2,228 phosphopeptides with N=3 per group using a Bayes factor test at 2-fold effect size).}
+\label{fig:dda-power}
+\end{figure}
+
+Figure~\ref{fig:dda-power} demonstrates the harsh reality of small sample phosphoproteomics: despite analysing over 2,000 peptides, most achieve insufficient power to reliably detect 2-fold changes. This analysis provides quantitative evidence for the need for increased replication in discovery experiments.
+
+<<dda-sample-size>>=
+set.seed(123)
+
+# Question 2: Required sample size for adequate power
+sample_size_dda <- power_analysis(fits, effect_size = 2, target_power = 0.8,
+                                  find = "sample_size", test = "bayes_t", n_sim = 500)
+print(sample_size_dda)
+@
+
+The analysis shows that achieving a typical target power of 80% for 50% of peptides at a 2-fold change level would require 15 biological replicates five time the size of that typically employed in discovery phosphoproteomics.
+
+The \package{peppwR} then can be used to get a good picture of how informative a given dataset type might and give researcher realistic assessments that can inform experimental design decisions and result interpretation.
+
+\subsection{Targeted proteomics with missing data: PRM case study}
+
+Here we analyze a targeted parallel reaction monitoring (PRM) dataset to demonstrate \pkg{peppwR}'s handling of missing data patterns and their potential impact on power estimates. The dataset contains fungal phosphoproteomics data from the rice disease \emph{Magnaporthe oryzae} comparing early (t=0) vs late (t=6) timepoints, with 3 biological replicates per condition and 2 technical replicates per biological replicate, measuring 285 phosphopeptides. We average technical replicates to obtain one value per biological replicate.
+
+\subsubsection{Missingness analysis and MNAR detection}
+
+The distribution fitting process tracks missingness in the data for us, providing a count and estimate of a missing not at random pattern related to abundance.
+
+
+<<prm-data-loading>>=
+# Load the PRM experiment data
+prm <- read.csv("../sample_data/prm_data.csv")
+
+# Filter to early (0) vs late (6) timepoints
+# Average technical replicates within each biological replicate
+pilot <- prm |>
+  filter(timepoint %in% c(0, 6)) |>
+  group_by(peptide_modified_sequence, genotype, timepoint, bio_rep) |>
+  summarise(abundance = mean(total_area, na.rm = TRUE), .groups = "drop") |>
+  transmute(
+    peptide_id = peptide_modified_sequence,
+    condition = paste0("t", timepoint),
+    abundance = abundance
+  )
+
+# Handle NaN values from averaging (when both tech reps are NA)
+pilot <- pilot |>
+  mutate(abundance = ifelse(is.nan(abundance), NA, abundance))
+@
+
+<<prm-missingness-analysis-display, eval=FALSE>>=
+# Fit distributions - missingness is tracked automatically
+fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+@
+
+<<prm-missingness-analysis-execute, echo=FALSE>>=
+# Actually execute (with caching)
+if(USE_CACHED_RESULTS && file.exists("prm_computation_results.RData") && !exists("fits")) {
+  load("prm_computation_results.RData")
+} else if(!exists("fits")) {
+  fits <- fit_distributions(pilot, "peptide_id", "condition", "abundance")
+}
+@
+
+<<prm-missingness-analysis-output>>=
+# Display summary including missingness information
+print(fits)
+@
+
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{figure}[htbp]
+\begin{center}
+<<jss-article-prm-missingness-plot, echo=FALSE, fig=TRUE>>=
+# Visualize missingness patterns
+plot_missingness(fits)
+@
+\end{center}
+\caption{Missingness patterns in the PRM dataset. Upper panel shows the distribution of NA rates across peptides. Lower panel shows the relationship between mean abundance and NA rate, with correlation coefficient indicating evidence for MNAR (Missing Not At Random) patterns.}
+\label{fig:prm-missingness}
+\end{figure}
+
+Missing Not At Random (MNAR) patterns occur when low-abundance peptides systematically fall below detection limits. \pkg{peppwR} detects MNAR by correlating mean abundance with NA rate across peptides. The negative correlation in Figure~\ref{fig:prm-missingness} suggests that low-abundance peptides have more missing values, characteristic of detection-limit-driven missingness.
+
+\subsubsection{Statistical test comparison at small sample sizes}
+
+Again we assess the effect of test on power. Again the Bayes factor test seems to have greatest power.
+
+<<prm-test-comparison-display, eval=FALSE>>=
+# Compare three statistical tests at N=3 with 2-fold effect
+power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "wilcoxon", n_sim = 100)
+
+power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                             find = "power", test = "bootstrap_t", n_sim = 100)
+
+power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                              find = "power", test = "bayes_t", n_sim = 100)
+@
+
+<<prm-test-comparison-execute, echo=FALSE>>=
+# Actually execute (with caching)
+if(!USE_CACHED_RESULTS || !exists("power_wilcox") || !exists("power_boot") || !exists("power_bayes")) {
+  power_wilcox <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                 find = "power", test = "wilcoxon", n_sim = 100)
+  power_boot <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                               find = "power", test = "bootstrap_t", n_sim = 100)
+  power_bayes <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "bayes_t", n_sim = 100)
+}
+@
+
+# Create comparison table
+comparison <- data.frame(
+  Test = c("Wilcoxon rank-sum", "Bootstrap-t", "Bayes factor"),
+  Median_Power = c(
+    median(power_wilcox$simulations$peptide_power, na.rm = TRUE),
+    median(power_boot$simulations$peptide_power, na.rm = TRUE),
+    median(power_bayes$simulations$peptide_power, na.rm = TRUE)
+  ),
+  Pct_Above_50 = c(
+    mean(power_wilcox$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.5, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.5, na.rm = TRUE) * 100
+  ),
+  Pct_Above_80 = c(
+    mean(power_wilcox$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_boot$simulations$peptide_power > 0.8, na.rm = TRUE) * 100,
+    mean(power_bayes$simulations$peptide_power > 0.8, na.rm = TRUE) * 100
+  )
+)
+
+print(comparison)
+@
+
+The Wilcoxon rank-sum test is conservative at small sample sizes, while the Bayes factor test results in higher power estimates. None are particularly impressive for the given sample size. For the subsequent assessment of the effect of missingness, we use the Bayes factor test again.
+
+\subsubsection{Impact of missingness on power estimates}
+
+Accounting for missing data patterns affects power calculations:
+
+<<prm-missingness-impact>>=
+# Power without accounting for missingness (optimistic)
+power_no_miss <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                find = "power", test = "bayes_t",
+                                include_missingness = FALSE, n_sim = 100)
+
+# Power accounting for missingness (realistic)
+power_with_miss <- power_analysis(fits, effect_size = 2, n_per_group = 3,
+                                  find = "power", test = "bayes_t",
+                                  include_missingness = TRUE, n_sim = 100)
+
+cat("Median power WITHOUT missingness:",
+    round(median(power_no_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
+cat("Median power WITH missingness:   ",
+    round(median(power_with_miss$simulations$peptide_power, na.rm = TRUE), 3), "\n")
+@
+
+Including missingness in simulations typically reduces power estimates, but in this dataset the effect is minimal. This may be due to the low power already available in this experiment. \package{peppwR} provides useful tools for assesing the extent and effect of missingness in phosphoproteomics analysis.
+
+
+This case study demonstrates \pkg{peppwR}'s comprehensive approach to power analysis in the presence of missing data, providing realistic estimates that account for the complexities inherent in mass spectrometry data.
+
 
 \section*{Acknowledgments}
 
 \begin{leftbar}
-All acknowledgments (note the AE spelling) should be collected in this
-unnumbered section before the references. It may contain the usual information
-about funding and feedback from colleagues/reviewers/etc. Furthermore,
-information such as relative contributions of the authors may be added here
-(if any).
+Thanks to Frank Menke and The Sainsbury Laboratory proteomics team for interesting discussions and comments.
 \end{leftbar}
 
 
