@@ -110,10 +110,10 @@ knitr::kable(
 
 | Peptides | Time (s) | Memory (MB) | Time/peptide (ms) |
 |---------:|---------:|------------:|------------------:|
-|      100 |     3.46 |      101.31 |             34.58 |
-|      500 |    17.46 |        9.77 |             34.91 |
-|     1000 |    35.21 |       19.53 |             35.21 |
-|     2000 |    69.26 |       39.05 |             34.63 |
+|      100 |     3.21 |      101.31 |             32.11 |
+|      500 |    15.69 |        9.77 |             31.38 |
+|     1000 |    31.21 |       19.53 |             31.21 |
+|     2000 |    62.42 |       39.05 |             31.21 |
 
 Distribution fitting scaling
 
@@ -177,9 +177,9 @@ knitr::kable(
 
 | n_sim | Time (s) |
 |------:|---------:|
-|   500 |    0.051 |
-|  1000 |    0.101 |
-|  2000 |    0.199 |
+|   500 |    0.041 |
+|  1000 |    0.082 |
+|  2000 |    0.162 |
 
 Aggregate mode timing by n_sim
 
@@ -298,9 +298,9 @@ knitr::kable(
 
 | Peptides | Time (s) | Time/peptide (ms) |
 |---------:|---------:|------------------:|
-|      100 |     3.80 |             37.99 |
-|      500 |    19.02 |             38.04 |
-|     1000 |    33.78 |             33.78 |
+|      100 |     3.35 |             33.50 |
+|      500 |    14.32 |             28.64 |
+|     1000 |    27.12 |             27.12 |
 
 Per-peptide mode scaling by peptide count (n_sim=500)
 
@@ -335,9 +335,9 @@ knitr::kable(
 
 | n_sim | Time (s) |
 |------:|---------:|
-|   250 |     9.57 |
-|   500 |    18.06 |
-|  1000 |    36.45 |
+|   250 |     7.52 |
+|   500 |    14.82 |
+|  1000 |    29.24 |
 
 Per-peptide mode scaling by n_sim (500 peptides)
 
@@ -431,10 +431,10 @@ knitr::kable(
 
 | Test        | Time (s) | Relative Speed |
 |:------------|---------:|---------------:|
-| wilcoxon    |     0.06 |           2.57 |
-| bootstrap_t |    16.64 |         772.25 |
+| wilcoxon    |     0.04 |           2.33 |
+| bootstrap_t |    16.27 |         957.31 |
 | bayes_t     |     0.02 |           1.00 |
-| rankprod    |     8.75 |         406.00 |
+| rankprod    |     8.41 |         495.14 |
 
 Statistical test speed comparison (n_sim=500)
 
@@ -506,8 +506,8 @@ knitr::kable(
 
 | Mode                | Time (s) |
 |:--------------------|---------:|
-| Without missingness |     5.60 |
-| With missingness    |     5.92 |
+| Without missingness |     4.63 |
+| With missingness    |     4.57 |
 
 Missingness-aware simulation overhead
 
@@ -548,8 +548,8 @@ knitr::kable(
 
 | Mode                 | Time (s) |
 |:---------------------|---------:|
-| Per-peptide (no FDR) |     3.69 |
-| FDR-adjusted         |     4.29 |
+| Per-peptide (no FDR) |     2.90 |
+| FDR-adjusted         |     3.42 |
 
 FDR mode vs per-peptide mode timing
 
@@ -588,9 +588,9 @@ knitr::kable(
 
 | Peptides | Time (s) |
 |---------:|---------:|
-|      100 |     0.44 |
-|      500 |     2.19 |
-|     1000 |     3.98 |
+|      100 |     0.38 |
+|      500 |     1.80 |
+|     1000 |     3.21 |
 
 FDR mode scaling by peptide count (n_sim=50)
 
@@ -622,9 +622,9 @@ knitr::kable(
 
 | Plot Type          | Time (s) |
 |:-------------------|---------:|
-| Density overlay    |    0.063 |
-| QQ plots           |    0.048 |
-| Param distribution |    0.799 |
+| Density overlay    |    0.060 |
+| QQ plots           |    0.037 |
+| Param distribution |    0.696 |
 
 Diagnostic plot generation times
 
@@ -654,7 +654,7 @@ knitr::kable(
 
 | Plot Type                          | Time (s) |
 |:-----------------------------------|---------:|
-| Power heatmap (5x5 grid, n_sim=50) |     0.18 |
+| Power heatmap (5x5 grid, n_sim=50) |     0.15 |
 
 Power heatmap generation time
 
@@ -668,7 +668,7 @@ for exploratory work.
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -692,23 +692,23 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>  [1] sass_0.4.10         generics_0.1.4      tidyr_1.3.2        
 #>  [4] renv_0.12.2         fGarch_4052.93      lattice_0.22-9     
-#>  [7] digest_0.6.39       magrittr_2.0.4      RColorBrewer_1.1-3 
+#>  [7] digest_0.6.39       magrittr_2.0.5      RColorBrewer_1.1-3 
 #> [10] evaluate_1.0.5      grid_4.5.3          fastmap_1.2.0      
-#> [13] jsonlite_2.0.0      Matrix_1.7-4        purrr_1.2.1        
+#> [13] jsonlite_2.0.0      Matrix_1.7-4        purrr_1.2.2        
 #> [16] scales_1.4.0        gbutils_0.5.1       codetools_0.2-20   
 #> [19] textshaping_1.0.5   jquerylib_0.1.4     Rdpack_2.6.6       
-#> [22] cli_3.6.5           timeSeries_4052.112 rlang_1.1.7        
+#> [22] cli_3.6.6           timeSeries_4052.112 rlang_1.2.0        
 #> [25] rbibutils_2.4.1     intervals_0.15.5    withr_3.0.2        
 #> [28] cachem_1.1.0        yaml_2.3.12         cvar_0.6           
-#> [31] tools_4.5.3         dplyr_1.2.0         ggplot2_4.0.2      
-#> [34] profmem_0.7.0       assertthat_0.2.1    vctrs_0.7.1        
-#> [37] R6_2.6.1            lifecycle_1.0.5     fs_1.6.7           
-#> [40] univariateML_1.5.0  ragg_1.5.1          pkgconfig_2.0.3    
+#> [31] tools_4.5.3         dplyr_1.2.1         ggplot2_4.0.2      
+#> [34] profmem_0.7.0       assertthat_0.2.1    vctrs_0.7.3        
+#> [37] R6_2.6.1            lifecycle_1.0.5     fs_2.0.1           
+#> [40] univariateML_1.5.0  ragg_1.5.2          pkgconfig_2.0.3    
 #> [43] desc_1.4.3          gtable_0.3.6        pkgdown_2.2.0      
 #> [46] pillar_1.11.1       bslib_0.10.0        glue_1.8.0         
-#> [49] systemfonts_1.3.2   xfun_0.56           tibble_3.3.1       
+#> [49] systemfonts_1.3.2   xfun_0.57           tibble_3.3.1       
 #> [52] tidyselect_1.2.1    knitr_1.51          farver_2.1.2       
 #> [55] spatial_7.3-18      htmltools_0.5.9     fBasics_4052.98    
-#> [58] labeling_0.4.3      rmarkdown_2.30      timeDate_4052.112  
-#> [61] compiler_4.5.3      S7_0.2.1
+#> [58] labeling_0.4.3      rmarkdown_2.31      timeDate_4052.112  
+#> [61] compiler_4.5.3      S7_0.2.1-1
 ```

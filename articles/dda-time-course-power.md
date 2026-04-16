@@ -612,7 +612,7 @@ sessionInfo()
 
     ## R version 4.5.3 (2026-03-11)
     ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.3 LTS
+    ## Running under: Ubuntu 24.04.4 LTS
     ## 
     ## Matrix products: default
     ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -631,26 +631,26 @@ sessionInfo()
     ## [1] stats     graphics  grDevices datasets  utils     methods   base     
     ## 
     ## other attached packages:
-    ## [1] tibble_3.3.1  ggplot2_4.0.2 dplyr_1.2.0   peppwR_0.1.0 
+    ## [1] tibble_3.3.1  ggplot2_4.0.2 dplyr_1.2.1   peppwR_0.1.0 
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] utf8_1.2.6          sass_0.4.10         generics_0.1.4     
     ##  [4] tidyr_1.3.2         renv_0.12.2         lattice_0.22-9     
-    ##  [7] fGarch_4052.93      digest_0.6.39       magrittr_2.0.4     
+    ##  [7] fGarch_4052.93      digest_0.6.39       magrittr_2.0.5     
     ## [10] evaluate_1.0.5      grid_4.5.3          RColorBrewer_1.1-3 
     ## [13] fastmap_1.2.0       Matrix_1.7-4        jsonlite_2.0.0     
-    ## [16] purrr_1.2.1         scales_1.4.0        gbutils_0.5.1      
+    ## [16] purrr_1.2.2         scales_1.4.0        gbutils_0.5.1      
     ## [19] textshaping_1.0.5   jquerylib_0.1.4     Rdpack_2.6.6       
-    ## [22] cli_3.6.5           timeSeries_4052.112 rlang_1.1.7        
+    ## [22] cli_3.6.6           timeSeries_4052.112 rlang_1.2.0        
     ## [25] rbibutils_2.4.1     intervals_0.15.5    withr_3.0.2        
     ## [28] cachem_1.1.0        yaml_2.3.12         cvar_0.6           
-    ## [31] tools_4.5.3         assertthat_0.2.1    vctrs_0.7.1        
-    ## [34] R6_2.6.1            lifecycle_1.0.5     fs_1.6.7           
-    ## [37] univariateML_1.5.0  ragg_1.5.1          pkgconfig_2.0.3    
+    ## [31] tools_4.5.3         assertthat_0.2.1    vctrs_0.7.3        
+    ## [34] R6_2.6.1            lifecycle_1.0.5     fs_2.0.1           
+    ## [37] univariateML_1.5.0  ragg_1.5.2          pkgconfig_2.0.3    
     ## [40] desc_1.4.3          pkgdown_2.2.0       pillar_1.11.1      
     ## [43] bslib_0.10.0        gtable_0.3.6        glue_1.8.0         
-    ## [46] systemfonts_1.3.2   xfun_0.56           tidyselect_1.2.1   
+    ## [46] systemfonts_1.3.2   xfun_0.57           tidyselect_1.2.1   
     ## [49] knitr_1.51          farver_2.1.2        spatial_7.3-18     
-    ## [52] htmltools_0.5.9     fBasics_4052.98     rmarkdown_2.30     
+    ## [52] htmltools_0.5.9     fBasics_4052.98     rmarkdown_2.31     
     ## [55] labeling_0.4.3      timeDate_4052.112   compiler_4.5.3     
-    ## [58] S7_0.2.1
+    ## [58] S7_0.2.1-1
