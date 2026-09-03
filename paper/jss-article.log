@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.4)  13 APR 2026 11:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.4)  15 APR 2026 15:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -358,7 +358,7 @@ Package hyperref Info: Link coloring ON on input line 72.
 \@outlinefile=\write4
 \openout4 = `jss-article.out'.
 
-<jsslogo.jpg, id=48, 540.0175pt x 393.47pt>
+<jsslogo.jpg, id=116, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
 Package pdftex.def Info: jsslogo.jpg  used on input line 72.
@@ -403,68 +403,9 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 72.
 
 
-Package natbib Warning: Citation `cohen1988power' on page 1 undefined on input line 77.
-
-
-Package natbib Warning: Citation `neyman1933' on page 1 undefined on input line 77.
-
-
-Package natbib Warning: Citation `cohen1962' on page 1 undefined on input line 77.
-
-
-Package natbib Warning: Citation `schulz2005sample' on page 1 undefined on input line 79.
-
-
-Package natbib Warning: Citation `karp2010addressing' on page 1 undefined on input line 79.
-
-
-Package natbib Warning: Citation `olsen2006phosphoproteomics' on page 1 undefined on input line 82.
-
-
-Package natbib Warning: Citation `humphrey2015phosphoproteomics' on page 1 undefined on input line 82.
-
-
-Package natbib Warning: Citation `karp2010addressing' on page 1 undefined on input line 82.
-
-
-Package natbib Warning: Citation `webb2015mnar' on page 1 undefined on input line 82.
-
-
-
 [1
 
 {/Users/macleand/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc} <./jsslogo.jpg>]
-
-Package natbib Warning: Citation `webb2015mnar' on page 2 undefined on input line 84.
-
-
-Package natbib Warning: Citation `lazar2016mnar' on page 2 undefined on input line 84.
-
-
-Package natbib Warning: Citation `tyanova2016imputation' on page 2 undefined on input line 84.
-
-
-Package natbib Warning: Citation `karp2010addressing' on page 2 undefined on input line 84.
-
-
-Package natbib Warning: Citation `zhang2018multiple' on page 2 undefined on input line 84.
-
-
-Package natbib Warning: Citation `tyanova2016perseus' on page 2 undefined on input line 87.
-
-
-Package natbib Warning: Citation `chang2012msstats' on page 2 undefined on input line 87.
-
-
-Package natbib Warning: Citation `nyangoma2012clippda' on page 2 undefined on input line 87.
-
-
-Package natbib Warning: Citation `gpower' on page 2 undefined on input line 87.
-
-
-Package natbib Warning: Citation `tarazona2020multipower' on page 2 undefined on input line 87.
-
-
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -473,13 +414,13 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [2]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 105.
+(Font)              <9> on input line 101.
 
-Overfull \hbox (77.59775pt too wide) in paragraph at lines 100--112
+Overfull \hbox (8.56006pt too wide) in paragraph at lines 101--113
  [][] 
  []
 
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 125.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 126.
 (/Users/macleand/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -490,7 +431,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [3{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-Overfull \hbox (39.27682pt too wide) in paragraph at lines 157--158
+Overfull \hbox (39.27682pt too wide) in paragraph at lines 158--159
 \T1/lmr/m/n/10.95 log-nor-mal ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^[[]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ), nor-mal ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^[[]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ), and in-verse Gaus-sian ($[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^V; ^^U\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 ).
  []
 
@@ -502,7 +443,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [4{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-Overfull \hbox (17.0941pt too wide) in paragraph at lines 176--177
+Overfull \hbox (17.0941pt too wide) in paragraph at lines 177--178
 []\T1/lmr/m/n/10.95 Distribution fit-ting di-ag-nos-tics in-clude goodness-of-fit statis-tics (Kolmogorov-Smirnov, Anderson-
  []
 
@@ -514,8 +455,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [5]
-
-Package natbib Warning: Citation `webb2015mnar' on page 6 undefined on input line 210.
+Underfull \vbox (badness 1028) has occurred while \output is active []
 
 
 
@@ -525,11 +465,11 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [6]
-Overfull \hbox (9.13702pt too wide) in paragraph at lines 235--236
+Overfull \hbox (9.13702pt too wide) in paragraph at lines 236--237
 []\T1/lmr/b/n/10.95 peppwR \T1/lmr/m/n/10.95 im-ple-ments an S3 object-oriented ar-chi-tec-ture with two pri-mary classes: `\T1/lmtt/m/n/10.95 peppwr_fits\T1/lmr/m/n/10.95 '
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 239.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 240.
 (/Users/macleand/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -540,16 +480,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [7{/Users/macleand/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-Overfull \hbox (76.43674pt too wide) in paragraph at lines 259--260
-[]\T1/lmr/m/n/10.95 The de-sign sep-a-rates core func-tion-al-ity into dis-tinct com-po-nents: dis-tri-bu-tion fit-ting (\T1/lmtt/m/n/10.95 fit_distributions()\T1/lmr/m/n/10.95 ),
- []
-
-
-Overfull \hbox (46.47586pt too wide) in paragraph at lines 259--260
-\T1/lmr/m/n/10.95 (\T1/lmtt/m/n/10.95 test_wilcoxon()\T1/lmr/m/n/10.95 , \T1/lmtt/m/n/10.95 test_bootstrap_t()\T1/lmr/m/n/10.95 , \T1/lmtt/m/n/10.95 test_bayes_t()\T1/lmr/m/n/10.95 ), and vi-su-al-iza-tion (\T1/lmtt/m/n/10.95 plot.peppwr_fits()\T1/lmr/m/n/10.95 ,
- []
-
-
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -557,17 +487,11 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [8]
-
-LaTeX Warning: Reference `fig:aggregate-power-curve' on page 9 undefined on input line 312.
-
-<jss-article-sample-size-plot.pdf, id=148, 433.62pt x 433.62pt>
+<jss-article-sample-size-plot.pdf, id=279, 433.62pt x 433.62pt>
 File: jss-article-sample-size-plot.pdf Graphic file (type pdf)
 <use jss-article-sample-size-plot.pdf>
-Package pdftex.def Info: jss-article-sample-size-plot.pdf  used on input line 322.
+Package pdftex.def Info: jss-article-sample-size-plot.pdf  used on input line 329.
 (pdftex.def)             Requested size: 309.85626pt x 309.87053pt.
-
-LaTeX Warning: Reference `fig:aggregate-power-curve' on page 9 undefined on input line 327.
-
 
 
 
@@ -577,25 +501,17 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [9]
 
-LaTeX Warning: Reference `fig:aggregate-effect-curve' on page 10 undefined on input line 364.
-
-
-
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 10 []
  []
 
 [10 <./jss-article-sample-size-plot.pdf>]
-<jss-article-effect-size-plot.pdf, id=168, 433.62pt x 433.62pt>
+<jss-article-effect-size-plot.pdf, id=299, 433.62pt x 433.62pt>
 File: jss-article-effect-size-plot.pdf Graphic file (type pdf)
 <use jss-article-effect-size-plot.pdf>
-Package pdftex.def Info: jss-article-effect-size-plot.pdf  used on input line 401.
+Package pdftex.def Info: jss-article-effect-size-plot.pdf  used on input line 408.
 (pdftex.def)             Requested size: 309.85626pt x 309.87053pt.
-
-
-LaTeX Warning: Reference `fig:aggregate-effect-curve' on page 11 undefined on input line 406.
-
 
 
 
@@ -628,6 +544,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
+<jss-article-per-peptide-power-plot.pdf, id=329, 433.62pt x 289.08pt>
+File: jss-article-per-peptide-power-plot.pdf Graphic file (type pdf)
+<use jss-article-per-peptide-power-plot.pdf>
+Package pdftex.def Info: jss-article-per-peptide-power-plot.pdf  used on input line 574.
+(pdftex.def)             Requested size: 309.85626pt x 206.58035pt.
+
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -635,15 +557,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [15]
-<jss-article-per-peptide-power-plot.pdf, id=204, 433.62pt x 433.62pt>
-File: jss-article-per-peptide-power-plot.pdf Graphic file (type pdf)
-<use jss-article-per-peptide-power-plot.pdf>
-Package pdftex.def Info: jss-article-per-peptide-power-plot.pdf  used on input line 592.
-(pdftex.def)             Requested size: 309.85626pt x 309.87053pt.
-
-
-LaTeX Warning: Reference `fig:per-peptide-power' on page 16 undefined on input line 597.
-
+<jss-article-per-peptide-sample-size-plot.pdf, id=339, 433.62pt x 289.08pt>
+File: jss-article-per-peptide-sample-size-plot.pdf Graphic file (type pdf)
+<use jss-article-per-peptide-sample-size-plot.pdf>
+Package pdftex.def Info: jss-article-per-peptide-sample-size-plot.pdf  used on input line 619.
+(pdftex.def)             Requested size: 309.85626pt x 206.58035pt.
 
 
 
@@ -652,56 +570,49 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [16 <./jss-article-per-peptide-power-plot.pdf>]
-<jss-article-per-peptide-sample-size-plot.pdf, id=215, 433.62pt x 433.62pt>
-File: jss-article-per-peptide-sample-size-plot.pdf Graphic file (type pdf)
-<use jss-article-per-peptide-sample-size-plot.pdf>
-Package pdftex.def Info: jss-article-per-peptide-sample-size-plot.pdf  used on input line 637.
-(pdftex.def)             Requested size: 309.85626pt x 309.87053pt.
-
-
-LaTeX Warning: Reference `fig:peptide-threshold' on page 17 undefined on input line 642.
-
-
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
-[17] (./jss-article.bbl
+[17 <./jss-article-per-peptide-sample-size-plot.pdf>]
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 719.
+ (/Users/macleand/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
 
-[18 <./jss-article-per-peptide-sample-size-plot.pdf>]
+[18]
+<jss-article-dda-power-plot.pdf, id=367, 433.62pt x 289.08pt>
+File: jss-article-dda-power-plot.pdf Graphic file (type pdf)
+<use jss-article-dda-power-plot.pdf>
+Package pdftex.def Info: jss-article-dda-power-plot.pdf  used on input line 763.
+(pdftex.def)             Requested size: 309.85626pt x 206.58035pt.
+
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 19
  []
 
-[19])
+[19]
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 20 []
  []
 
-[20]
-
-LaTeX Font Warning: Font shape `T1/lmr/bx/sc' undefined
-(Font)              using `T1/lmr/bx/n' instead on input line 699.
-
-
-Package natbib Warning: There were undefined citations.
-
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/m/it' tried instead on input line 729.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
+[20 <./jss-article-dda-power-plot.pdf>]
+<jss-article-jss-article-prm-missingness-plot.pdf, id=388, 433.62pt x 433.62pt>
+File: jss-article-jss-article-prm-missingness-plot.pdf Graphic file (type pdf)
+<use jss-article-jss-article-prm-missingness-plot.pdf>
+Package pdftex.def Info: jss-article-jss-article-prm-missingness-plot.pdf  used on input line 865.
+(pdftex.def)             Requested size: 354.12434pt x 354.14154pt.
 
 
 
@@ -716,43 +627,53 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 22 []
  []
 
-[22] (./jss-article.aux
+[22 <./jss-article-jss-article-prm-missingness-plot.pdf>]
 
-Package natbib Warning: Citation(s) may have changed.
-(natbib)                Rerun to get citations correct.
 
-)
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 23
+ []
+
+[23] (./jss-article.bbl
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 24 []
+ []
+
+[24])
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/m/it' tried instead on input line 949.
+
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 25
+ []
+
+[25]
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 26 []
+ []
+
+[26] (./jss-article.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 1
 L3 programming layer <2024-11-02>
  ***********
-
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `jss-article.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `jss-article.out':
-(rerunfilecheck)             Before: 62CDF2D06B74DF0D5D67929D3F34339C;2225
-(rerunfilecheck)             After:  CF30E28D36A0CC86AB1B484E1C7DB4CE;4061.
+Package rerunfilecheck Info: File `jss-article.out' has not changed.
+(rerunfilecheck)             Checksum: B2D1E4CE4521F68DBF35E9859101EA5B;6869.
  ) 
 Here is how much of TeX's memory you used:
- 11224 strings out of 475229
- 176487 string characters out of 5765933
- 576783 words of memory out of 5000000
- 33813 multiletter control sequences out of 15000+600000
- 675000 words of font info for 95 fonts, out of 8000000 for 9000
+ 11332 strings out of 475229
+ 179880 string characters out of 5765933
+ 580298 words of memory out of 5000000
+ 33894 multiletter control sequences out of 15000+600000
+ 675512 words of font info for 96 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 90i,16n,93p,1781b,630s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,16n,93p,1779b,624s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 pdfTeX warning (dest): name{Hfootnote.3} has been referenced but does not exist, replaced by a fixed one
 
@@ -762,11 +683,11 @@ pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist,
 
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist, replaced by a fixed one
 
-</Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmb10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmcsc10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on jss-article.pdf (22 pages, 522912 bytes).
+</Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmb10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></Users/macleand/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
+Output written on jss-article.pdf (26 pages, 568798 bytes).
 PDF statistics:
- 428 PDF objects out of 1000 (max. 8388607)
- 343 compressed objects within 4 object streams
- 105 named destinations out of 1000 (max. 500000)
- 114 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 600 PDF objects out of 1000 (max. 8388607)
+ 502 compressed objects within 6 object streams
+ 129 named destinations out of 1000 (max. 500000)
+ 260 words of extra memory for PDF output out of 10000 (max. 10000000)
 

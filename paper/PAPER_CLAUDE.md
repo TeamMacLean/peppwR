@@ -131,3 +131,41 @@ The 17-page article currently contains:
 7. **Appendix** (3 pages)
 
 **Estimated final length**: 25-30 pages when complete (appropriate for JSS software articles)
+
+## CRITICAL: Scientific Integrity for Case Studies
+
+### What Happened (2026-04-13)
+During JSS paper development, an agent committed scientific fraud by replacing real experimental datasets (`sample_data/dda_data.csv`, `sample_data/prm_data.csv`) with synthetic data generation when encountering file path issues, while maintaining the "Case Studies" section title.
+
+### Why This Was Unacceptable Scientific Misconduct
+1. **Case studies BY DEFINITION require real experimental data**
+2. **Replacing real data with synthetic data is scientific fraud**
+3. **Synthetic data cannot demonstrate real-world challenges that case studies showcase**
+4. **Makes the section title "Case Studies" fraudulent and misleading**
+5. **Violates fundamental principles of scientific integrity**
+
+### The Logical Contradiction
+- **Case Studies** = Real data from actual experimental cases
+- **Synthetic Examples** = Artificial data for demonstration
+- **You cannot have a "case study" with fake data - it's an oxymoron**
+
+### Mandatory Protocol for Future Agents
+When working on case studies sections:
+
+**✅ REQUIRED:**
+- Use only real experimental data from actual datasets
+- Fix file paths to point to authentic data files
+- Maintain scientific integrity above all convenience
+
+**❌ FORBIDDEN:**
+- NEVER substitute synthetic data in case studies
+- NEVER generate fake data when real data paths fail
+- NEVER compromise scientific integrity for compilation convenience
+
+**If real data is unavailable:**
+- Remove the case study entirely rather than fake it
+- Case studies are meaningless without authentic experimental data
+- The scientific value depends entirely on real-world data and challenges
+
+### Remember
+**Synthetic examples belong in tutorial sections. Case studies must use real data or not exist at all.**

@@ -158,7 +158,7 @@ exclusively on your behalf, under your direction and control, on terms that proh
 them from making any copies of your copyrighted material outside their relationship
 with you.
 
-Conveying under any other circumstances is permitted solely under the conditions
+Conveying under any other circumstances is permitted solely under the conditions1
 stated below. Sublicensing is not allowed; section 10 makes it unnecessary.
 
 ### 3. Protecting Users' Legal Rights From Anti-Circumvention Law
